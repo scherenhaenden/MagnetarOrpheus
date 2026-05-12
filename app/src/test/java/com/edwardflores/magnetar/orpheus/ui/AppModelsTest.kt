@@ -74,4 +74,14 @@ class AppModelsTest {
         assertEquals("Syllabic", NoteNamingSystem.SYLLABIC.displayName)
         assertEquals("German", NoteNamingSystem.GERMAN.displayName)
     }
+
+    @Test
+    fun `app and note language models expose localized metadata`() {
+        val finnish = appStrings(AppLanguage.FINNISH)
+
+        assertEquals("Asetukset", finnish.settings)
+        assertEquals("Nuottien kieli", finnish.noteLanguage)
+        assertEquals(NoteNamingSystem.SYLLABIC, NoteLanguage.SPANISH.toNamingSystem())
+        assertEquals(NoteNamingSystem.GERMAN, NoteLanguage.GERMAN.toNamingSystem())
+    }
 }

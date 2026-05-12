@@ -13,13 +13,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import com.edwardflores.magnetar.orpheus.ui.AppLanguage
 import com.edwardflores.magnetar.orpheus.ui.AppDestination
+import com.edwardflores.magnetar.orpheus.ui.NoteLanguage
 import com.edwardflores.magnetar.orpheus.ui.TunerViewModel
+import com.edwardflores.magnetar.orpheus.ui.toNamingSystem
 import com.edwardflores.magnetar.orpheus.ui.notebuilder.NoteBuilderScreen
 import com.edwardflores.magnetar.orpheus.ui.notebuilder.NoteBuilderViewModel
 import com.edwardflores.magnetar.orpheus.ui.screen.TunerScreen
@@ -51,6 +55,15 @@ class MainActivity : ComponentActivity() {
                 val uiState by viewModel.uiState.collectAsState()
                 val noteBuilderUiState by noteBuilderViewModel.uiState.collectAsState()
                 var currentDestination by rememberSaveable { mutableStateOf(AppDestination.TUNER) }
+                var appLanguageCode by rememberSaveable { mutableStateOf(AppLanguage.ENGLISH.code) }
+                val appLanguage = AppLanguage.entries.firstOrNull { it.code == appLanguageCode } ?: AppLanguage.ENGLISH
+                var noteLanguageCode by rememberSaveable { mutableStateOf(NoteLanguage.ENGLISH.code) }
+                val noteLanguage = NoteLanguage.entries.firstOrNull { it.code == noteLanguageCode } ?: NoteLanguage.ENGLISH
+
+                LaunchedEffect(noteLanguage) {
+                    viewModel.updateNamingSystem(noteLanguage.toNamingSystem())
+                    noteBuilderViewModel.updateNoteLanguage(noteLanguage)
+                }
 
                 fun navigateTo(destination: AppDestination) {
                     if (currentDestination == AppDestination.NOTE_BUILDER &&
@@ -67,8 +80,16 @@ class MainActivity : ComponentActivity() {
                             uiState = uiState,
                             hasPermission = hasAudioPermission,
                             versionName = BuildConfig.VERSION_NAME,
+                            appLanguage = appLanguage,
+                            noteLanguage = noteLanguage,
                             currentDestination = currentDestination,
                             onNavigate = ::navigateTo,
+                            onAppLanguageChange = { appLanguageCode = it.code },
+                            onNoteLanguageChange = {
+                                noteLanguageCode = it.code
+                                viewModel.updateNamingSystem(it.toNamingSystem())
+                                noteBuilderViewModel.updateNoteLanguage(it)
+                            },
                             onCalibrationChange = { viewModel.updateCalibration(it) },
                             onNamingSystemChange = { viewModel.updateNamingSystem(it) },
                             onPresetSelected = { viewModel.applyPreset(it) },
@@ -83,8 +104,16 @@ class MainActivity : ComponentActivity() {
                             onPlaySelection = noteBuilderViewModel::playSelection,
                             onStopPlayback = noteBuilderViewModel::stopPlayback,
                             onClearSelection = noteBuilderViewModel::clearSelection,
+                            appLanguage = appLanguage,
+                            noteLanguage = noteLanguage,
                             currentDestination = currentDestination,
                             onNavigate = ::navigateTo,
+                            onAppLanguageChange = { appLanguageCode = it.code },
+                            onNoteLanguageChange = {
+                                noteLanguageCode = it.code
+                                viewModel.updateNamingSystem(it.toNamingSystem())
+                                noteBuilderViewModel.updateNoteLanguage(it)
+                            },
                             modifier = Modifier.padding(innerPadding)
                         )
                     }

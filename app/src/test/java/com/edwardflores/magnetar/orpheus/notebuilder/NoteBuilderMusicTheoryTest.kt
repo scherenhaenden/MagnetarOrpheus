@@ -1,5 +1,6 @@
 package com.edwardflores.magnetar.orpheus.notebuilder
 
+import com.edwardflores.magnetar.orpheus.ui.NoteLanguage
 import com.edwardflores.magnetar.orpheus.ui.notebuilder.NoteSelection
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -120,6 +121,50 @@ class NoteBuilderMusicTheoryTest {
 
         assertEquals("No note set selected", analysis.title)
         assertEquals("None", analysis.quality)
+    }
+
+    @Test
+    fun `analyzeSelection localizes note names and theory text in spanish`() {
+        val analysis = NoteBuilderMusicTheory.analyzeSelection(
+            listOf(
+                NoteSelection("A", 3),
+                NoteSelection("C", 4),
+                NoteSelection("E", 4)
+            ),
+            NoteLanguage.SPANISH
+        )
+
+        assertEquals("Lam", analysis.title)
+        assertEquals("Menor", analysis.quality)
+        assertTrue(analysis.subtitle.contains("La3, Do4, Mi4"))
+        assertTrue(analysis.subtitle.contains("Notas"))
+    }
+
+    @Test
+    fun `analyzeSelection localizes german spellings`() {
+        val analysis = NoteBuilderMusicTheory.analyzeSelection(
+            listOf(NoteSelection("B", 4)),
+            NoteLanguage.GERMAN
+        )
+
+        assertEquals("H4", analysis.title)
+        assertEquals("Einzelton", analysis.quality)
+        assertTrue(analysis.subtitle.contains("H4"))
+        assertTrue(analysis.subtitle.contains("Halbtöne"))
+    }
+
+    @Test
+    fun `analyzeSelection identifies intervals before falling back to custom`() {
+        val analysis = NoteBuilderMusicTheory.analyzeSelection(
+            listOf(
+                NoteSelection("C", 4),
+                NoteSelection("G", 4)
+            )
+        )
+
+        assertEquals("Perfect Fifth", analysis.title)
+        assertEquals("Perfect Fifth", analysis.quality)
+        assertTrue(analysis.subtitle.contains("C4, G4"))
     }
 
     @Test

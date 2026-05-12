@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.edwardflores.magnetar.orpheus.ui.NoteLanguage
 
 class NoteBuilderViewModel(
     private val playbackEngine: NotePlaybackEngine = NotePlaybackEngine(),
@@ -32,6 +33,19 @@ class NoteBuilderViewModel(
         _uiState.update { it.copy(holdEnabled = !it.holdEnabled) }
     }
 
+    fun updateNoteLanguage(noteLanguage: NoteLanguage) {
+        val current = _uiState.value
+        val analysis = NoteBuilderMusicTheory.analyzeSelection(current.selectedNotes, noteLanguage)
+        _uiState.update {
+            it.copy(
+                noteLanguage = noteLanguage,
+                detectedPrimaryName = analysis.title,
+                detectedSecondaryName = analysis.subtitle,
+                quality = analysis.quality
+            )
+        }
+    }
+
     fun toggleNote(note: NoteSelection) {
         val current = _uiState.value
         val updatedNotes = if (current.selectedNotes.contains(note)) {
@@ -42,7 +56,7 @@ class NoteBuilderViewModel(
                 .sortedWith(compareBy<NoteSelection> { it.octave }.thenBy { CHROMATIC_NOTES.indexOf(it.pitchClass) })
         }
 
-        val analysis = NoteBuilderMusicTheory.analyzeSelection(updatedNotes)
+        val analysis = NoteBuilderMusicTheory.analyzeSelection(updatedNotes, current.noteLanguage)
         _uiState.update {
             it.copy(
                 selectedNotes = updatedNotes,
@@ -128,9 +142,11 @@ private fun defaultNoteBuilderState(): NoteBuilderUiState {
         NoteSelection("G", 4),
         NoteSelection("B", 4)
     )
-    val analysis = NoteBuilderMusicTheory.analyzeSelection(selectedNotes)
+    val noteLanguage = NoteLanguage.ENGLISH
+    val analysis = NoteBuilderMusicTheory.analyzeSelection(selectedNotes, noteLanguage)
     return NoteBuilderUiState(
         inputMode = NoteBuilderInputMode.KEYBOARD,
+        noteLanguage = noteLanguage,
         selectedNotes = selectedNotes,
         detectedPrimaryName = analysis.title,
         detectedSecondaryName = analysis.subtitle,
@@ -139,9 +155,11 @@ private fun defaultNoteBuilderState(): NoteBuilderUiState {
 }
 
 private fun emptyNoteBuilderState(): NoteBuilderUiState {
-    val analysis = NoteBuilderMusicTheory.analyzeSelection(emptyList())
+    val noteLanguage = NoteLanguage.ENGLISH
+    val analysis = NoteBuilderMusicTheory.analyzeSelection(emptyList(), noteLanguage)
     return NoteBuilderUiState(
         inputMode = NoteBuilderInputMode.KEYBOARD,
+        noteLanguage = noteLanguage,
         selectedNotes = emptyList(),
         detectedPrimaryName = analysis.title,
         detectedSecondaryName = analysis.subtitle,

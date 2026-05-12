@@ -103,6 +103,11 @@ tasks:
     title: GitHub Release Build Pipeline
     owner: Codex
     state: in_review
+  task-014:
+    milestone: ms-05
+    title: App and Note Language Settings
+    owner: Codex
+    state: in_progress
 
 risks:
   - id: R1

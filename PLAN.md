@@ -29,11 +29,12 @@ This plan captures the milestones, tasks, and progress for the MagnetarOrpheus A
 | `task-011` | `ms-04` | Version Visibility and UI i18n Cleanup | Codex | 2 | `done` | Surface build version in-app and move validation messaging to resources. |
 | `task-012` | `ms-05` | Note Builder Workspace Integration | Codex | 5 | `in_review` | Document and wire separate Tuner and Note Builder destinations, premium UI restoration, responsive Note Builder layouts, tablet layout stabilization, theory naming, and playback scaffolding. |
 | `task-013` | `ms-04` | GitHub Release Build Pipeline | Codex | 2 | `in_review` | Add a standalone workflow that builds on merges to `builds`, packages the APK into a versioned zip, and publishes it to GitHub Releases for later download. |
+| `task-014` | `ms-05` | App and Note Language Settings | Codex | 5 | `in_progress` | Add a settings surface for app language and note language, extend second-feature note naming beyond English defaults, and keep the rest of the app stable. |
 
 ## Effort Summary
-*   **Total effort:** 47 pts
+*   **Total effort:** 52 pts
 *   **Completed:** 27 pts
-*   **In progress:** 0 pts
+*   **In progress:** 5 pts
 *   **In review:** 7 pts
 *   **Remaining:** 13 pts
 

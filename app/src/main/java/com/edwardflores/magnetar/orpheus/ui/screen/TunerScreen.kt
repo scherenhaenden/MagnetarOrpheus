@@ -31,7 +31,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.edwardflores.magnetar.orpheus.R
+import com.edwardflores.magnetar.orpheus.ui.AppLanguage
 import com.edwardflores.magnetar.orpheus.ui.AppDestination
+import com.edwardflores.magnetar.orpheus.ui.NoteLanguage
 import com.edwardflores.magnetar.orpheus.ui.NoteNamingSystem
 import com.edwardflores.magnetar.orpheus.ui.TunerUiState
 import com.edwardflores.magnetar.orpheus.ui.components.AppHeader
@@ -49,8 +51,12 @@ fun TunerScreen(
     uiState: TunerUiState,
     hasPermission: Boolean,
     versionName: String,
+    appLanguage: AppLanguage,
+    noteLanguage: NoteLanguage,
     currentDestination: AppDestination,
     onNavigate: (AppDestination) -> Unit,
+    onAppLanguageChange: (AppLanguage) -> Unit,
+    onNoteLanguageChange: (NoteLanguage) -> Unit,
     onCalibrationChange: (Double) -> Unit,
     onNamingSystemChange: (NoteNamingSystem) -> Unit,
     onPresetSelected: (Int) -> Unit,
@@ -81,8 +87,12 @@ fun TunerScreen(
                             .fillMaxWidth()
                             .padding(top = 6.dp, bottom = 4.dp),
                         showProfile = true,
+                        appLanguage = appLanguage,
+                        noteLanguage = noteLanguage,
                         currentDestination = currentDestination,
-                        onNavigate = onNavigate
+                        onNavigate = onNavigate,
+                        onAppLanguageChange = onAppLanguageChange,
+                        onNoteLanguageChange = onNoteLanguageChange
                     )
                     TabletLayout(
                         uiState = uiState,
@@ -108,8 +118,12 @@ fun TunerScreen(
                             .fillMaxWidth()
                             .padding(top = 6.dp, bottom = 4.dp),
                         showProfile = false,
+                        appLanguage = appLanguage,
+                        noteLanguage = noteLanguage,
                         currentDestination = currentDestination,
-                        onNavigate = onNavigate
+                        onNavigate = onNavigate,
+                        onAppLanguageChange = onAppLanguageChange,
+                        onNoteLanguageChange = onNoteLanguageChange
                     )
                     PhoneLayout(
                         uiState = uiState,

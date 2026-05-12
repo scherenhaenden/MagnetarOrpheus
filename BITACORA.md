@@ -4,6 +4,11 @@
 Chronological record of all significant project events, decisions, and state changes for MagnetarOrpheus.
 
 ---
+**Timestamp:** 2026-05-12 23:10 UTC
+**Author:** Codex
+**Entry:** Started `task-014` (`in_progress`) to add a safe settings surface for `app language` and `note language`. Immediate focus is on shared settings UI in the existing header, app-language options (`en`, `es`, `de`, `it`, `pt`, `nl`, `fi`), and second-feature note-language support without destabilizing the tuner workflow.
+
+---
 **Timestamp:** 2026-05-12 22:45 UTC
 **Author:** Codex
 **Entry:** Expanded `.github/workflows/release-builds.yml` so GitHub Releases now receives all three distribution assets from the `builds` branch pipeline: the versioned `.apk`, its `.apk.sha256` checksum, and the bundled `.zip`. The release source archives remain provided automatically by GitHub for the generated tag.

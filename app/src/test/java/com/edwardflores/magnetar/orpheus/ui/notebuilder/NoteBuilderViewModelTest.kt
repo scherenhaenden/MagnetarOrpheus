@@ -2,6 +2,7 @@ package com.edwardflores.magnetar.orpheus.ui.notebuilder
 
 import android.util.Log
 import com.edwardflores.magnetar.orpheus.notebuilder.audio.NotePlaybackEngine
+import com.edwardflores.magnetar.orpheus.ui.NoteLanguage
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -68,6 +69,17 @@ class NoteBuilderViewModelTest {
 
         viewModel.toggleHold()
         assertFalse(viewModel.uiState.value.holdEnabled)
+    }
+
+    @Test
+    fun `updateNoteLanguage reanalyzes current selection`() {
+        viewModel.updateNoteLanguage(NoteLanguage.SPANISH)
+
+        val state = viewModel.uiState.value
+        assertEquals(NoteLanguage.SPANISH, state.noteLanguage)
+        assertEquals("Domaj7", state.detectedPrimaryName)
+        assertEquals("Mayor", state.quality)
+        assertTrue(state.detectedSecondaryName.contains("Do4"))
     }
 
     @Test

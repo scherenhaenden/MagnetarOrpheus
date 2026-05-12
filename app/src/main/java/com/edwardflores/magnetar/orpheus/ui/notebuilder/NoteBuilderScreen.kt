@@ -59,7 +59,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.edwardflores.magnetar.orpheus.ui.AppLanguage
 import com.edwardflores.magnetar.orpheus.ui.AppDestination
+import com.edwardflores.magnetar.orpheus.ui.NoteLanguage
+import com.edwardflores.magnetar.orpheus.ui.appStrings
 import com.edwardflores.magnetar.orpheus.ui.components.AppHeader
 import com.edwardflores.magnetar.orpheus.notebuilder.NoteBuilderMusicTheory
 import com.edwardflores.magnetar.orpheus.ui.theme.MagnetarOrpheusTheme
@@ -82,6 +85,7 @@ data class NoteBuilderUiState(
     val detectedPrimaryName: String = "No note set selected",
     val detectedSecondaryName: String = "Select notes from the keyboard or grid",
     val quality: String = "Unknown",
+    val noteLanguage: NoteLanguage = NoteLanguage.ENGLISH,
     val holdEnabled: Boolean = false,
     val sequence: List<String> = listOf("Cmaj7", "Am7", "Dm7", "G7", "Cmaj7"),
     val isPlaying: Boolean = false,
@@ -118,13 +122,16 @@ private val KeyboardRange = listOf(
 @Composable
 fun NoteBuilderDemoScreen(
     modifier: Modifier = Modifier,
+    appLanguage: AppLanguage = AppLanguage.ENGLISH,
     currentDestination: AppDestination = AppDestination.NOTE_BUILDER,
     onNavigate: (AppDestination) -> Unit = {}
 ) {
+    val strings = appStrings(appLanguage)
     var state by remember {
         mutableStateOf(
             NoteBuilderUiState(
                 inputMode = NoteBuilderInputMode.KEYBOARD,
+                noteLanguage = NoteLanguage.ENGLISH,
                 selectedNotes = listOf(
                     NoteSelection("C", 4),
                     NoteSelection("E", 4),
@@ -148,18 +155,19 @@ fun NoteBuilderDemoScreen(
             } else {
                 (state.selectedNotes + note).sortedWith(compareBy<NoteSelection> { it.octave }.thenBy { ChromaticNotes.indexOf(it.pitchClass) })
             }
-            state = state.copy(
+        state = state.copy(
                 selectedNotes = updated,
+                noteLanguage = state.noteLanguage,
                 detectedPrimaryName = when (updated.map { it.displayName }) {
                     listOf("C4", "E4", "G4") -> "C Major Triad"
                     listOf("C4", "E4", "G4", "B4") -> "Cmaj7"
-                    emptyList<String>() -> "No note set selected"
+                    emptyList<String>() -> strings.noNotesSelected
                     else -> "Unknown Note Set"
                 },
                 detectedSecondaryName = when (updated.map { it.displayName }) {
                     listOf("C4", "E4", "G4") -> "Notes: C4, E4, G4  •  Intervals: 1, 3, 5"
                     listOf("C4", "E4", "G4", "B4") -> "Notes: C4, E4, G4, B4  •  Intervals: 1, 3, 5, 7"
-                    emptyList<String>() -> "Select notes from the keyboard or grid"
+                    emptyList<String>() -> strings.selectNotesPrompt
                     else -> "Theory naming placeholder for future analysis"
                 },
                 quality = when (updated.map { it.displayName }) {
@@ -175,6 +183,7 @@ fun NoteBuilderDemoScreen(
             val analysis = NoteBuilderMusicTheory.analyzeSelection(emptyList())
             state = state.copy(
                 selectedNotes = emptyList(),
+                noteLanguage = state.noteLanguage,
                 detectedPrimaryName = analysis.title,
                 detectedSecondaryName = analysis.subtitle,
                 quality = analysis.quality,
@@ -182,8 +191,12 @@ fun NoteBuilderDemoScreen(
                 playbackError = null
             )
         },
+        appLanguage = appLanguage,
+        noteLanguage = state.noteLanguage,
         currentDestination = currentDestination,
         onNavigate = onNavigate,
+        onAppLanguageChange = {},
+        onNoteLanguageChange = { state = state.copy(noteLanguage = it) },
         modifier = modifier
     )
 }
@@ -197,8 +210,12 @@ fun NoteBuilderScreen(
     onPlaySelection: () -> Unit,
     onStopPlayback: () -> Unit,
     onClearSelection: () -> Unit,
+    appLanguage: AppLanguage,
+    noteLanguage: NoteLanguage,
     currentDestination: AppDestination = AppDestination.NOTE_BUILDER,
     onNavigate: (AppDestination) -> Unit = {},
+    onAppLanguageChange: (AppLanguage) -> Unit,
+    onNoteLanguageChange: (NoteLanguage) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -215,8 +232,12 @@ fun NoteBuilderScreen(
                     onPlaySelection = onPlaySelection,
                     onStopPlayback = onStopPlayback,
                     onClearSelection = onClearSelection,
+                    appLanguage = appLanguage,
+                    noteLanguage = noteLanguage,
                     currentDestination = currentDestination,
-                    onNavigate = onNavigate
+                    onNavigate = onNavigate,
+                    onAppLanguageChange = onAppLanguageChange,
+                    onNoteLanguageChange = onNoteLanguageChange
                 )
             } else {
                 NoteBuilderTabletScreen(
@@ -227,8 +248,12 @@ fun NoteBuilderScreen(
                     onPlaySelection = onPlaySelection,
                     onStopPlayback = onStopPlayback,
                     onClearSelection = onClearSelection,
+                    appLanguage = appLanguage,
+                    noteLanguage = noteLanguage,
                     currentDestination = currentDestination,
-                    onNavigate = onNavigate
+                    onNavigate = onNavigate,
+                    onAppLanguageChange = onAppLanguageChange,
+                    onNoteLanguageChange = onNoteLanguageChange
                 )
             }
         }
@@ -244,9 +269,14 @@ private fun NoteBuilderPhoneScreen(
     onPlaySelection: () -> Unit,
     onStopPlayback: () -> Unit,
     onClearSelection: () -> Unit,
+    appLanguage: AppLanguage,
+    noteLanguage: NoteLanguage,
     currentDestination: AppDestination,
-    onNavigate: (AppDestination) -> Unit
+    onNavigate: (AppDestination) -> Unit,
+    onAppLanguageChange: (AppLanguage) -> Unit,
+    onNoteLanguageChange: (NoteLanguage) -> Unit
 ) {
+    val strings = appStrings(appLanguage)
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(20.dp),
@@ -255,25 +285,32 @@ private fun NoteBuilderPhoneScreen(
         item {
             AppHeader(
                 showProfile = false,
+                appLanguage = appLanguage,
+                noteLanguage = noteLanguage,
                 currentDestination = currentDestination,
-                onNavigate = onNavigate
+                onNavigate = onNavigate,
+                onAppLanguageChange = onAppLanguageChange,
+                onNoteLanguageChange = onNoteLanguageChange
             )
         }
-        item { FeatureLabel(text = "NOTE BUILDER") }
+        item { FeatureLabel(text = strings.noteBuilderFeatureLabel) }
         item {
             InputModeSelector(
                 selectedMode = state.inputMode,
-                onInputModeChange = onInputModeChange
+                onInputModeChange = onInputModeChange,
+                appLanguage = appLanguage
             )
         }
         item {
             when (state.inputMode) {
                 NoteBuilderInputMode.KEYBOARD -> PhoneKeyboardCard(
                     selectedNotes = state.selectedNotes,
+                    noteLanguage = noteLanguage,
                     onToggleNote = onToggleNote
                 )
                 NoteBuilderInputMode.GRID -> PhoneGridCard(
                     selectedNotes = state.selectedNotes,
+                    noteLanguage = noteLanguage,
                     onToggleNote = onToggleNote
                 )
             }
@@ -281,6 +318,8 @@ private fun NoteBuilderPhoneScreen(
         item {
             SelectedNotesAndControlsCard(
                 state = state,
+                appLanguage = appLanguage,
+                noteLanguage = noteLanguage,
                 onToggleHold = onToggleHold,
                 onPlaySelection = onPlaySelection,
                 onStopPlayback = onStopPlayback,
@@ -289,6 +328,7 @@ private fun NoteBuilderPhoneScreen(
         }
         item {
             AboutSelectionCard(
+                appLanguage = appLanguage,
                 title = state.detectedPrimaryName,
                 subtitle = state.detectedSecondaryName,
                 quality = state.quality
@@ -306,8 +346,12 @@ private fun NoteBuilderTabletScreen(
     onPlaySelection: () -> Unit,
     onStopPlayback: () -> Unit,
     onClearSelection: () -> Unit,
+    appLanguage: AppLanguage,
+    noteLanguage: NoteLanguage,
     currentDestination: AppDestination,
-    onNavigate: (AppDestination) -> Unit
+    onNavigate: (AppDestination) -> Unit,
+    onAppLanguageChange: (AppLanguage) -> Unit,
+    onNoteLanguageChange: (NoteLanguage) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -317,8 +361,12 @@ private fun NoteBuilderTabletScreen(
     ) {
         AppHeader(
             showProfile = true,
+            appLanguage = appLanguage,
+            noteLanguage = noteLanguage,
             currentDestination = currentDestination,
-            onNavigate = onNavigate
+            onNavigate = onNavigate,
+            onAppLanguageChange = onAppLanguageChange,
+            onNoteLanguageChange = onNoteLanguageChange
         )
         Row(
             modifier = Modifier
@@ -337,10 +385,13 @@ private fun NoteBuilderTabletScreen(
             ) {
                 PianoKeyboardWorkspaceCard(
                     selectedNotes = state.selectedNotes,
+                    noteLanguage = noteLanguage,
                     onToggleNote = onToggleNote
                 )
                 SelectedNotesAndControlsCard(
                     state = state,
+                    appLanguage = appLanguage,
+                    noteLanguage = noteLanguage,
                     onToggleHold = onToggleHold,
                     onPlaySelection = onPlaySelection,
                     onStopPlayback = onStopPlayback,
@@ -353,10 +404,14 @@ private fun NoteBuilderTabletScreen(
                     .fillMaxHeight(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                SelectedChordSummaryCard(state = state)
+                SelectedChordSummaryCard(
+                    state = state,
+                    noteLanguage = noteLanguage
+                )
                 WorkspaceGridCard(
                     modifier = Modifier.weight(1f),
                     selectedNotes = state.selectedNotes,
+                    noteLanguage = noteLanguage,
                     onToggleNote = onToggleNote
                 )
             }
@@ -372,7 +427,11 @@ private fun NoteBuilderTabletScreen(
                 HarmonizationPlaceholderCard()
             }
         }
-        PlaybackSettingsBar(selectedMode = state.inputMode, onInputModeChange = onInputModeChange)
+        PlaybackSettingsBar(
+            selectedMode = state.inputMode,
+            onInputModeChange = onInputModeChange,
+            appLanguage = appLanguage
+        )
     }
 }
 
@@ -390,8 +449,10 @@ private fun FeatureLabel(text: String) {
 private fun InputModeSelector(
     selectedMode: NoteBuilderInputMode,
     onInputModeChange: (NoteBuilderInputMode) -> Unit,
+    appLanguage: AppLanguage,
     modifier: Modifier = Modifier
 ) {
+    val strings = appStrings(appLanguage)
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(24.dp),
@@ -405,14 +466,14 @@ private fun InputModeSelector(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ModeChip(
-                text = "Keyboard",
+                text = strings.keyboard,
                 icon = { Icon(Icons.Default.GraphicEq, contentDescription = null) },
                 selected = selectedMode == NoteBuilderInputMode.KEYBOARD,
                 onClick = { onInputModeChange(NoteBuilderInputMode.KEYBOARD) },
                 modifier = Modifier.weight(1f)
             )
             ModeChip(
-                text = "Grid",
+                text = strings.grid,
                 icon = { Icon(Icons.Default.GridView, contentDescription = null) },
                 selected = selectedMode == NoteBuilderInputMode.GRID,
                 onClick = { onInputModeChange(NoteBuilderInputMode.GRID) },
@@ -453,6 +514,7 @@ private fun ModeChip(
 @Composable
 private fun PhoneKeyboardCard(
     selectedNotes: List<NoteSelection>,
+    noteLanguage: NoteLanguage,
     onToggleNote: (NoteSelection) -> Unit
 ) {
     MagnetarCard {
@@ -461,6 +523,7 @@ private fun PhoneKeyboardCard(
         PianoKeyboard(
             notes = KeyboardRange,
             selectedNotes = selectedNotes,
+            noteLanguage = noteLanguage,
             onToggleNote = onToggleNote,
             height = 180.dp
         )
@@ -470,6 +533,7 @@ private fun PhoneKeyboardCard(
 @Composable
 private fun PianoKeyboardWorkspaceCard(
     selectedNotes: List<NoteSelection>,
+    noteLanguage: NoteLanguage,
     onToggleNote: (NoteSelection) -> Unit
 ) {
     MagnetarCard {
@@ -503,6 +567,7 @@ private fun PianoKeyboardWorkspaceCard(
         PianoKeyboard(
             notes = KeyboardRange,
             selectedNotes = selectedNotes,
+            noteLanguage = noteLanguage,
             onToggleNote = onToggleNote,
             height = 360.dp
         )
@@ -513,6 +578,7 @@ private fun PianoKeyboardWorkspaceCard(
 private fun PianoKeyboard(
     notes: List<NoteSelection>,
     selectedNotes: List<NoteSelection>,
+    noteLanguage: NoteLanguage,
     onToggleNote: (NoteSelection) -> Unit,
     height: androidx.compose.ui.unit.Dp
 ) {
@@ -551,7 +617,7 @@ private fun PianoKeyboard(
                         .background(brush)
                         .border(1.dp, NoteBuilderPalette.Border, RoundedCornerShape(14.dp))
                 ) {
-                    val whiteName = note.displayName
+                    val whiteName = note.localizedDisplayName(noteLanguage)
                     OutlinedButton(
                         onClick = { onToggleNote(note) },
                         modifier = Modifier.fillMaxSize(),
@@ -599,7 +665,7 @@ private fun PianoKeyboard(
                         ),
                         border = BorderStroke(1.dp, if (selected) NoteBuilderPalette.Primary else NoteBuilderPalette.Border)
                     ) {
-                        Text(note.pitchClass, style = MaterialTheme.typography.labelSmall)
+                        Text(note.localizedPitchClass(noteLanguage), style = MaterialTheme.typography.labelSmall)
                     }
                 }
             }
@@ -610,6 +676,7 @@ private fun PianoKeyboard(
 @Composable
 private fun PhoneGridCard(
     selectedNotes: List<NoteSelection>,
+    noteLanguage: NoteLanguage,
     onToggleNote: (NoteSelection) -> Unit
 ) {
     MagnetarCard {
@@ -626,6 +693,7 @@ private fun PhoneGridCard(
             (3..7).forEach { octave ->
                 OctaveRow(
                     octave = octave,
+                    noteLanguage = noteLanguage,
                     selectedNotes = selectedNotes,
                     onToggleNote = onToggleNote
                 )
@@ -638,6 +706,7 @@ private fun PhoneGridCard(
 private fun WorkspaceGridCard(
     modifier: Modifier = Modifier,
     selectedNotes: List<NoteSelection>,
+    noteLanguage: NoteLanguage,
     onToggleNote: (NoteSelection) -> Unit
 ) {
     MagnetarCard(modifier = modifier.fillMaxWidth()) {
@@ -662,6 +731,7 @@ private fun WorkspaceGridCard(
             items((0..5).toList()) { octave ->
                 OctaveRow(
                     octave = octave,
+                    noteLanguage = noteLanguage,
                     selectedNotes = selectedNotes,
                     onToggleNote = onToggleNote
                 )
@@ -674,6 +744,7 @@ private fun WorkspaceGridCard(
 private fun OctaveRow(
     octave: Int,
     selectedNotes: List<NoteSelection>,
+    noteLanguage: NoteLanguage,
     onToggleNote: (NoteSelection) -> Unit
 ) {
     Row(
@@ -682,7 +753,7 @@ private fun OctaveRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "C$octave",
+            text = "${NoteBuilderMusicTheory.formatPitchClass("C", noteLanguage)}$octave",
             color = NoteBuilderPalette.TextSecondary,
             modifier = Modifier.width(28.dp),
             style = MaterialTheme.typography.bodyMedium
@@ -703,7 +774,7 @@ private fun OctaveRow(
                 ),
                 border = BorderStroke(1.dp, if (selected) NoteBuilderPalette.Primary else NoteBuilderPalette.Border)
             ) {
-                Text(text = pitch, style = MaterialTheme.typography.labelMedium)
+                Text(text = note.localizedPitchClass(noteLanguage), style = MaterialTheme.typography.labelMedium)
             }
         }
     }
@@ -712,21 +783,24 @@ private fun OctaveRow(
 @Composable
 private fun SelectedNotesAndControlsCard(
     state: NoteBuilderUiState,
+    appLanguage: AppLanguage,
+    noteLanguage: NoteLanguage,
     onToggleHold: () -> Unit,
     onPlaySelection: () -> Unit,
     onStopPlayback: () -> Unit,
     onClearSelection: () -> Unit
 ) {
+    val strings = appStrings(appLanguage)
     MagnetarCard {
         Text(
-            text = if (state.selectedNotes.isEmpty()) "NO NOTES SELECTED" else "SELECTED NOTES",
+            text = if (state.selectedNotes.isEmpty()) strings.noNotesSelected else strings.selectedNotes,
             color = NoteBuilderPalette.TextMuted,
             style = MaterialTheme.typography.labelLarge
         )
         Spacer(modifier = Modifier.height(12.dp))
         if (state.selectedNotes.isEmpty()) {
             Text(
-                text = "Select notes from the keyboard or grid",
+                text = strings.selectNotesPrompt,
                 color = NoteBuilderPalette.TextSecondary,
                 style = MaterialTheme.typography.bodyMedium
             )
@@ -739,7 +813,7 @@ private fun SelectedNotesAndControlsCard(
                         border = BorderStroke(1.dp, NoteBuilderPalette.Primary)
                     ) {
                         Text(
-                            text = note.displayName,
+                            text = note.localizedDisplayName(noteLanguage),
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                             color = NoteBuilderPalette.Primary,
                             style = MaterialTheme.typography.titleMedium,
@@ -774,7 +848,7 @@ private fun SelectedNotesAndControlsCard(
             ) {
                 Icon(Icons.Default.PlayArrow, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(if (state.isPlaying) "Replay" else "Play")
+                Text(if (state.isPlaying) strings.replay else strings.play)
             }
             OutlinedButton(
                 onClick = onStopPlayback,
@@ -786,7 +860,7 @@ private fun SelectedNotesAndControlsCard(
             ) {
                 Icon(Icons.Default.Stop, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Stop")
+                Text(strings.stop)
             }
         }
         Spacer(modifier = Modifier.height(10.dp))
@@ -801,7 +875,7 @@ private fun SelectedNotesAndControlsCard(
             ) {
                 Icon(Icons.Default.DeleteOutline, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Clear")
+                Text(strings.clear)
             }
             OutlinedButton(
                 onClick = onToggleHold,
@@ -815,7 +889,7 @@ private fun SelectedNotesAndControlsCard(
             ) {
                 Icon(Icons.Default.PauseCircleOutline, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Hold")
+                Text(strings.hold)
             }
         }
     }
@@ -823,10 +897,12 @@ private fun SelectedNotesAndControlsCard(
 
 @Composable
 private fun AboutSelectionCard(
+    appLanguage: AppLanguage,
     title: String,
     subtitle: String,
     quality: String
 ) {
+    val strings = appStrings(appLanguage)
     MagnetarCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -848,14 +924,14 @@ private fun AboutSelectionCard(
                 }
             }
             Column(modifier = Modifier.weight(1f)) {
-                Text("ABOUT THIS SELECTION", color = NoteBuilderPalette.TextMuted, style = MaterialTheme.typography.labelMedium)
+                Text(strings.aboutThisSelection, color = NoteBuilderPalette.TextMuted, style = MaterialTheme.typography.labelMedium)
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(title, color = NoteBuilderPalette.TextPrimary, style = MaterialTheme.typography.headlineSmall)
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(subtitle, color = NoteBuilderPalette.TextSecondary, style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    "Quality: $quality",
+                    "${strings.quality}: $quality",
                     color = if (quality == "Unknown") NoteBuilderPalette.Warning else NoteBuilderPalette.Primary,
                     style = MaterialTheme.typography.labelLarge
                 )
@@ -865,7 +941,10 @@ private fun AboutSelectionCard(
 }
 
 @Composable
-private fun SelectedChordSummaryCard(state: NoteBuilderUiState) {
+private fun SelectedChordSummaryCard(
+    state: NoteBuilderUiState,
+    noteLanguage: NoteLanguage
+) {
     MagnetarCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -883,7 +962,7 @@ private fun SelectedChordSummaryCard(state: NoteBuilderUiState) {
                             border = BorderStroke(1.dp, NoteBuilderPalette.Primary.copy(alpha = 0.7f))
                         ) {
                             Text(
-                                text = note.displayName,
+                                text = note.localizedDisplayName(noteLanguage),
                                 modifier = Modifier.padding(horizontal = 18.dp, vertical = 22.dp),
                                 color = NoteBuilderPalette.Primary,
                                 style = MaterialTheme.typography.headlineMedium,
@@ -1049,7 +1128,8 @@ private fun HarmonizationPlaceholderCard() {
 @Composable
 private fun PlaybackSettingsBar(
     selectedMode: NoteBuilderInputMode,
-    onInputModeChange: (NoteBuilderInputMode) -> Unit
+    onInputModeChange: (NoteBuilderInputMode) -> Unit,
+    appLanguage: AppLanguage
 ) {
     MagnetarCard(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -1072,6 +1152,7 @@ private fun PlaybackSettingsBar(
             InputModeSelector(
                 selectedMode = selectedMode,
                 onInputModeChange = onInputModeChange,
+                appLanguage = appLanguage,
                 modifier = Modifier.width(280.dp)
             )
         }
@@ -1105,6 +1186,12 @@ private fun MagnetarCard(
         )
     }
 }
+
+private fun NoteSelection.localizedDisplayName(noteLanguage: NoteLanguage): String =
+    NoteBuilderMusicTheory.formatNote(this, noteLanguage)
+
+private fun NoteSelection.localizedPitchClass(noteLanguage: NoteLanguage): String =
+    NoteBuilderMusicTheory.formatPitchClass(pitchClass, noteLanguage)
 
 @Preview(showBackground = true, backgroundColor = 0xFF05080A, widthDp = 412, heightDp = 915)
 @Composable
