@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     jacoco
 }
@@ -61,7 +60,7 @@ val jacocoTestReport by tasks.registering(JacocoReport::class) {
         "**/AudioCaptureProvider*", "**/ComposableSingletons*"
     )
     val debugTree = files(
-        tasks.named("compileDebugKotlin", org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).map { it.destinationDirectory }
+        tasks.named("compileDebugKotlin", org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).flatMap { it.destinationDirectory }
     ).asFileTree.matching {
         exclude(fileFilter)
     }

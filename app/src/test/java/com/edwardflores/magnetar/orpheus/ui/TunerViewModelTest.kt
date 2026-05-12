@@ -1,10 +1,12 @@
 package com.edwardflores.magnetar.orpheus.ui
 
+import android.util.Log
 import com.edwardflores.magnetar.orpheus.audio.AudioCaptureProvider
 import com.edwardflores.magnetar.orpheus.audio.PitchDetector
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,6 +34,8 @@ class TunerViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
+        mockkStatic(Log::class)
+        every { Log.w(any(), any<String>()) } returns 0
         viewModel = TunerViewModel(audioCaptureProvider, pitchDetector)
     }
 
@@ -119,10 +123,10 @@ class TunerViewModelTest {
     }
 
     @Test
-    fun `processFrequency with zero or negative frequency does nothing`() = runTest {
+    fun `processFrequency with zero, negative, or non-finite frequency does nothing`() = runTest {
         val buffer = floatArrayOf(0f)
-        every { audioCaptureProvider.startCapture() } returns flowOf(buffer, buffer)
-        every { pitchDetector.estimatePitch(buffer) } returnsMany listOf(0.0, -10.0)
+        every { audioCaptureProvider.startCapture() } returns flowOf(buffer, buffer, buffer, buffer)
+        every { pitchDetector.estimatePitch(buffer) } returnsMany listOf(0.0, -10.0, Double.NaN, Double.POSITIVE_INFINITY)
 
         viewModel.startTuning()
         advanceUntilIdle()
