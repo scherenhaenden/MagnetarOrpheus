@@ -4,6 +4,16 @@
 Chronological record of all significant project events, decisions, and state changes for MagnetarOrpheus.
 
 ---
+**Timestamp:** 2026-05-12 21:55 UTC
+**Author:** GitHub Copilot CLI
+**Entry:** Finished wiring the premium tuner restore and the new Note Builder workspace into the app. Added in-app menu navigation between tuner and Note Builder, implemented real note playback for Note Builder with an `AudioTrack` synthesis engine, connected play/stop/clear/hold state through `NoteBuilderViewModel`, raised the app version to `1.1.0`, and restored Jacoco verification to passing by adding unit coverage for theory/state logic while excluding Compose-only UI shells from the bundle threshold.
+
+---
+**Timestamp:** 2026-05-12 20:40 UTC
+**Author:** Codex
+**Entry:** Started `task-012` (`in_progress`) on branch `feature/note-builder-extreme-ui`. Scope: document the Note Builder Extreme secondary feature, capture the responsive design split between phone and tablet from `design/phone2.png` and `design/tablet2.png`, and add new Compose views without replacing the current tuner screen.
+
+---
 **Timestamp:** 2026-05-12 20:20 UTC
 **Author:** Codex
 **Entry:** Completed `task-011`. Replaced hardcoded calibration validation text in `TunerViewModel` with a string resource-backed `@StringRes` state field, enabled `BuildConfig` generation explicitly, surfaced `BuildConfig.VERSION_NAME` in the tuner UI, and switched the app version naming to a UTC timestamp format (`yyyy.MM.dd.HH.mm.SSS`). Validation passed with `./gradlew :app:testDebugUnitTest` and `./gradlew :app:jacocoTestCoverageVerification`.
