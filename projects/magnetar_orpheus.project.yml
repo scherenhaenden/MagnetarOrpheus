@@ -15,19 +15,19 @@ milestones:
   ms-01:
     name: Project Setup & Canon
     target_date: "2026-05-12"
-    state: in_progress
+    state: done
   ms-02:
     name: Audio Foundation
     target_date: "2026-05-20"
-    state: planned
+    state: done
   ms-03:
     name: Core Tuner UI
     target_date: "2026-05-30"
-    state: planned
+    state: done
   ms-04:
     name: MVP Release
     target_date: "2026-06-15"
-    state: planned
+    state: in_progress
 
 tasks:
   task-001:
@@ -43,18 +43,23 @@ tasks:
   task-003:
     milestone: ms-02
     title: AudioRecord Integration
-    owner: TBD
-    state: planned
+    owner: Gemini
+    state: done
   task-004:
     milestone: ms-02
     title: Pitch Detection Algorithm
-    owner: TBD
-    state: planned
+    owner: Gemini
+    state: done
   task-005:
     milestone: ms-03
     title: Compose Tuner UI
-    owner: TBD
-    state: planned
+    owner: Gemini
+    state: done
+  task-006:
+    milestone: ms-04
+    title: Calibration & Stability
+    owner: Gemini
+    state: in_progress
 
 risks:
   - id: R1

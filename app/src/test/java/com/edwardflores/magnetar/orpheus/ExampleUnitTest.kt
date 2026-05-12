@@ -1,4 +1,4 @@
-package com.eflores.magnetar.orpheus
+package com.edwardflores.magnetar.orpheus
 
 import org.junit.Test
 

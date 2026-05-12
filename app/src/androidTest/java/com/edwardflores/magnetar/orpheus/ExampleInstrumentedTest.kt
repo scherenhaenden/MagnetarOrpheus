@@ -1,4 +1,4 @@
-package com.eflores.magnetar.orpheus
+package com.edwardflores.magnetar.orpheus
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.eflores.magnetar.orpheus", appContext.packageName)
+        assertEquals("com.edwardflores.magnetar.orpheus", appContext.packageName)
     }
 }

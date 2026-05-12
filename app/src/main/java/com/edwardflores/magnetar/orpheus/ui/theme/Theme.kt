@@ -1,4 +1,4 @@
-package com.eflores.magnetar.orpheus.ui.theme
+package com.edwardflores.magnetar.orpheus.ui.theme
 
 import android.app.Activity
 import android.os.Build
