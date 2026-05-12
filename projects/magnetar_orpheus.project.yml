@@ -1,0 +1,65 @@
+metadata:
+  name: MagnetarOrpheus
+  namespace: com.edwardflores.magnetar.orpheus
+  description: Professional native Android chromatic tuner with low-latency DSP.
+  start_date: "2026-05-12"
+  default_branch: master
+
+stakeholders:
+  - name: Edward Flores
+    role: Owner / Lead Engineer
+  - name: Gemini CLI
+    role: Project Assistant / AI Collaborator
+
+milestones:
+  ms-01:
+    name: Project Setup & Canon
+    target_date: "2026-05-12"
+    state: in_progress
+  ms-02:
+    name: Audio Foundation
+    target_date: "2026-05-20"
+    state: planned
+  ms-03:
+    name: Core Tuner UI
+    target_date: "2026-05-30"
+    state: planned
+  ms-04:
+    name: MVP Release
+    target_date: "2026-06-15"
+    state: planned
+
+tasks:
+  task-001:
+    milestone: ms-01
+    title: Initialize Canonical Files
+    owner: Gemini
+    state: done
+  task-002:
+    milestone: ms-01
+    title: Project YAML Setup
+    owner: Gemini
+    state: done
+  task-003:
+    milestone: ms-02
+    title: AudioRecord Integration
+    owner: TBD
+    state: planned
+  task-004:
+    milestone: ms-02
+    title: Pitch Detection Algorithm
+    owner: TBD
+    state: planned
+  task-005:
+    milestone: ms-03
+    title: Compose Tuner UI
+    owner: TBD
+    state: planned
+
+risks:
+  - id: R1
+    description: High audio latency on specific devices.
+    mitigation: Use AudioRecord and NDK if necessary.
+  - id: R2
+    description: Pitch instability in noisy environments.
+    mitigation: Implement DSP filters and noise gates.
