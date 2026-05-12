@@ -40,6 +40,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Button
+import androidx.compose.ui.res.stringResource
+import com.edwardflores.magnetar.orpheus.BuildConfig
+import com.edwardflores.magnetar.orpheus.ui.NoteNamingSystem
 import com.edwardflores.magnetar.orpheus.ui.TunerUiState
 import com.edwardflores.magnetar.orpheus.ui.TunerViewModel
 import com.edwardflores.magnetar.orpheus.ui.theme.MagnetarOrpheusTheme
@@ -73,6 +77,7 @@ class MainActivity : ComponentActivity() {
                         uiState = uiState,
                         hasPermission = hasAudioPermission,
                         onCalibrationChange = { viewModel.updateCalibration(it) },
+                        onNamingSystemChange = { viewModel.updateNamingSystem(it) },
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -101,6 +106,7 @@ fun TunerScreen(
     uiState: TunerUiState,
     hasPermission: Boolean,
     onCalibrationChange: (Double) -> Unit,
+    onNamingSystemChange: (NoteNamingSystem) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -134,7 +140,23 @@ fun TunerScreen(
                     style = MaterialTheme.typography.bodyLarge
                 )
 
-                Spacer(modifier = Modifier.height(48.dp))
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Naming System Selection
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    NoteNamingSystem.entries.forEach { system ->
+                        Button(
+                            onClick = { onNamingSystemChange(system) },
+                            enabled = uiState.namingSystem != system
+                        ) {
+                            Text(system.name.lowercase().replaceFirstChar { it.uppercase() })
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
 
                 // Calibration Controls
                 Row(
@@ -152,6 +174,22 @@ fun TunerScreen(
                         Icon(Icons.Default.Add, contentDescription = "Increase Calibration")
                     }
                 }
+
+                uiState.calibrationErrorResId?.let { errorResId ->
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(errorResId),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = stringResource(R.string.version_label, BuildConfig.VERSION_NAME),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                )
             } else {
                 Text(text = "Microphone Access Denied", color = MaterialTheme.colorScheme.error)
                 Text(text = "Please grant permission to use the tuner.")

@@ -25,10 +25,12 @@ This plan captures the milestones, tasks, and progress for the MagnetarOrpheus A
 | `task-007` | `ms-05` | Instrument Data Layer | TBD | 3 | `planned` | Define tuning frequencies for profiles. |
 | `task-008` | `ms-05` | Profile Selection UI | TBD | 4 | `planned` | Dropdown/Menu for switching instruments. |
 | `task-009` | `ms-06` | Waveform Canvas | TBD | 6 | `planned` | Real-time PCM data visualization. |
+| `task-010` | `ms-04` | PR 11 Review Remediation | Codex | 2 | `done` | Align Java baseline, close pending review threads, and validate stale comments. |
+| `task-011` | `ms-04` | Version Visibility and UI i18n Cleanup | Codex | 2 | `done` | Surface build version in-app and move validation messaging to resources. |
 
 ## Effort Summary
-*   **Total effort:** 36 pts
-*   **Completed:** 23 pts
+*   **Total effort:** 40 pts
+*   **Completed:** 27 pts
 *   **In progress:** 0 pts
 *   **Remaining:** 13 pts
 
