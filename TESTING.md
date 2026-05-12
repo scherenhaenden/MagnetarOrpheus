@@ -23,10 +23,11 @@ The repository now includes a separate workflow, `.github/workflows/release-buil
 
 Expected behavior:
 
-1.  Trigger the workflow from GitHub Actions using `workflow_dispatch`.
+1.  Merge or push into the `builds` branch.
 2.  The workflow builds the debug APK with JDK 21.
-3.  The workflow creates a prerelease in GitHub Releases.
-4.  The release includes the APK and a SHA-256 checksum file for later download.
+3.  The workflow renames the package using the app `versionName`.
+4.  The workflow creates a zip containing the APK and its SHA-256 checksum.
+5.  The workflow publishes a prerelease in GitHub Releases containing that versioned zip.
 
 ## Current Coverage Focus
 The current branch state emphasizes:

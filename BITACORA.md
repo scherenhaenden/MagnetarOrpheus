@@ -4,6 +4,11 @@
 Chronological record of all significant project events, decisions, and state changes for MagnetarOrpheus.
 
 ---
+**Timestamp:** 2026-05-12 22:35 UTC
+**Author:** Codex
+**Entry:** Adjusted the standalone release-build workflow to match repository distribution preferences. `.github/workflows/release-builds.yml` now triggers on pushes/merges to the `builds` branch, packages the generated debug APK plus checksum into a versioned zip derived from `versionName`, and uploads that zip to GitHub Releases.
+
+---
 **Timestamp:** 2026-05-12 22:25 UTC
 **Author:** Codex
 **Entry:** Added `task-013` as `in_review` and created a standalone GitHub Actions workflow, `.github/workflows/release-builds.yml`, for manual APK publication to GitHub Releases. The workflow resolves `versionName`, builds the debug APK with JDK 21, generates a SHA-256 checksum, and publishes a prerelease tagged with the current version and run number for later download.
