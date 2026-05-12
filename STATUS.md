@@ -26,6 +26,7 @@
 *   The app now distinguishes `Tuner` and `Note Builder` as separate in-app destinations.
 *   The Note Builder workspace includes responsive phone/tablet layouts, note theory naming, selection state, playback wiring, and tablet-specific layout stabilization for large-screen Compose measurement.
 *   Current version target in `app/build.gradle.kts` is `2026.05.12.1554`.
+*   A standalone manual GitHub Actions pipeline can publish the current APK to GitHub Releases.
 
 ## Verification State
 *   Automated branch-local verification has been extended with Note Builder theory and ViewModel coverage.

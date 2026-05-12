@@ -1,0 +1,77 @@
+name: Publish Release Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_channel:
+        description: "Release channel label"
+        required: true
+        default: "manual"
+        type: choice
+        options:
+          - manual
+          - qa
+          - internal
+
+permissions:
+  contents: write
+
+jobs:
+  publish-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Resolve build metadata
+        id: metadata
+        run: |
+          VERSION_NAME=$(sed -n 's/.*versionName = "\(.*\)"/\1/p' app/build.gradle.kts | head -n1)
+          if [ -z "$VERSION_NAME" ]; then
+            echo "Unable to resolve versionName from app/build.gradle.kts" >&2
+            exit 1
+          fi
+          TAG_NAME="build-v${VERSION_NAME}-${GITHUB_RUN_NUMBER}"
+          RELEASE_NAME="MagnetarOrpheus ${VERSION_NAME} (${INPUT_RELEASE_CHANNEL})"
+          echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+          echo "release_name=$RELEASE_NAME" >> "$GITHUB_OUTPUT"
+        env:
+          INPUT_RELEASE_CHANNEL: ${{ inputs.release_channel }}
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug
+
+      - name: Generate checksums
+        run: |
+          cd app/build/outputs/apk/debug
+          sha256sum app-debug.apk > app-debug.apk.sha256
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.metadata.outputs.tag_name }}
+          name: ${{ steps.metadata.outputs.release_name }}
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: true
+          prerelease: true
+          body: |
+            Automated MagnetarOrpheus build publication.
+
+            - Version: `${{ steps.metadata.outputs.version_name }}`
+            - Channel: `${{ inputs.release_channel }}`
+            - Commit: `${{ github.sha }}`
+            - Workflow run: `${{ github.run_number }}`
+          files: |
+            app/build/outputs/apk/debug/app-debug.apk
+            app/build/outputs/apk/debug/app-debug.apk.sha256

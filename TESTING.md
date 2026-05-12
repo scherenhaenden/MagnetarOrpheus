@@ -18,6 +18,16 @@ Use these commands from the repository root:
 2.  `./gradlew :app:jacocoTestCoverageVerification`
 3.  `./gradlew :app:compileDebugKotlin`
 
+## Build Distribution
+The repository now includes a separate workflow, `.github/workflows/release-builds.yml`, for manual build publication.
+
+Expected behavior:
+
+1.  Trigger the workflow from GitHub Actions using `workflow_dispatch`.
+2.  The workflow builds the debug APK with JDK 21.
+3.  The workflow creates a prerelease in GitHub Releases.
+4.  The release includes the APK and a SHA-256 checksum file for later download.
+
 ## Current Coverage Focus
 The current branch state emphasizes:
 

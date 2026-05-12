@@ -4,6 +4,11 @@
 Chronological record of all significant project events, decisions, and state changes for MagnetarOrpheus.
 
 ---
+**Timestamp:** 2026-05-12 22:25 UTC
+**Author:** Codex
+**Entry:** Added `task-013` as `in_review` and created a standalone GitHub Actions workflow, `.github/workflows/release-builds.yml`, for manual APK publication to GitHub Releases. The workflow resolves `versionName`, builds the debug APK with JDK 21, generates a SHA-256 checksum, and publishes a prerelease tagged with the current version and run number for later download.
+
+---
 **Timestamp:** 2026-05-12T16:15:08.347+02:00
 **Author:** GitHub Copilot CLI
 **Entry:** Synced project documentation after the large-screen Compose fix. Updated current-state docs to reflect version `2026.05.12.1554`, and recorded that the tuner and Note Builder tablet layouts now use bounded scroll/measurement regions to avoid the previous tablet-only layout failure.

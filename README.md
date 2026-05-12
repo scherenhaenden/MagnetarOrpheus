@@ -44,6 +44,7 @@ The current branch state extends the original tuner MVP in several ways:
 *   In-app navigation now separates **Tuner** and **Note Builder** as two different destinations.
 *   The Note Builder branch state includes responsive phone/tablet layouts, note-selection state, music-theory naming, playback wiring, and tablet-safe bounded scroll regions.
 *   The Android app version target has been raised to `2026.05.12.1554`.
+*   A standalone GitHub Actions workflow now exists for manually publishing downloadable APK builds to GitHub Releases.
 
 ## YAML Project Schema
 The source of truth for machine-readable project metadata is located at `projects/magnetar_orpheus.project.yml`. It contains stakeholders, milestones, and the task registry.

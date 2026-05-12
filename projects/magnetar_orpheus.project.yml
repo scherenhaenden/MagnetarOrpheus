@@ -98,6 +98,11 @@ tasks:
     title: Note Builder Workspace Integration
     owner: Codex
     state: in_review
+  task-013:
+    milestone: ms-04
+    title: GitHub Release Build Pipeline
+    owner: Codex
+    state: in_review
 
 risks:
   - id: R1
