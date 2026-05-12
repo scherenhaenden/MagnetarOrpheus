@@ -27,11 +27,13 @@ This plan captures the milestones, tasks, and progress for the MagnetarOrpheus A
 | `task-009` | `ms-06` | Waveform Canvas | TBD | 6 | `planned` | Real-time PCM data visualization. |
 | `task-010` | `ms-04` | PR 11 Review Remediation | Codex | 2 | `done` | Align Java baseline, close pending review threads, and validate stale comments. |
 | `task-011` | `ms-04` | Version Visibility and UI i18n Cleanup | Codex | 2 | `done` | Surface build version in-app and move validation messaging to resources. |
+| `task-012` | `ms-05` | Note Builder Workspace Integration | Codex | 5 | `in_review` | Document and wire separate Tuner and Note Builder destinations, premium UI restoration, responsive Note Builder layouts, tablet layout stabilization, theory naming, and playback scaffolding. |
 
 ## Effort Summary
-*   **Total effort:** 40 pts
+*   **Total effort:** 45 pts
 *   **Completed:** 27 pts
 *   **In progress:** 0 pts
+*   **In review:** 5 pts
 *   **Remaining:** 13 pts
 
 ## State Definitions

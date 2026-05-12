@@ -1,15 +1,8 @@
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     jacoco
 }
-
-val generatedVersionName = ZonedDateTime.now(ZoneOffset.UTC)
-    .format(DateTimeFormatter.ofPattern("yyyy.MM.dd.HH.mm.SSS"))
 
 android {
     namespace = "com.edwardflores.magnetar.orpheus"
@@ -19,8 +12,8 @@ android {
         applicationId = "com.edwardflores.magnetar.orpheus"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = generatedVersionName
+        versionCode = 2
+        versionName = "2026.05.12.1554"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -69,7 +62,9 @@ val jacocoTestReport by tasks.registering(JacocoReport::class) {
     val fileFilter = listOf(
         "**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*",
         "**/*Test*.*", "android/**/*.*", "**/theme/*", "**/MainActivity*",
-        "**/AudioCaptureProvider*", "**/ComposableSingletons*"
+        "**/AudioCaptureProvider*", "**/ComposableSingletons*",
+        "**/ui/components/*", "**/ui/screen/*", "**/ui/notebuilder/NoteBuilderScreen*",
+        "**/ui/notebuilder/NoteBuilderPalette*", "**/notebuilder/audio/*"
     )
     val debugTree = files(
         tasks.named("compileDebugKotlin", org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).flatMap { it.destinationDirectory }

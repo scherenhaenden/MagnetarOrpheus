@@ -1,7 +1,12 @@
 # Canonical Project Model of MagnetarOrpheus
 
 ## Purpose
-MagnetarOrpheus is a professionally engineered native Android application focused on real-time musical instrument tuning. It captures live microphone input and performs low-latency digital signal processing (DSP) to provide highly responsive visual tuning feedback. This project exists to provide musicians with a precise, stable, and professional-grade chromatic tuner, starting with guitar optimization.
+MagnetarOrpheus is a professionally engineered native Android application focused on real-time musician tooling. It currently contains two distinct feature surfaces inside the same product:
+
+1.  A **chromatic tuner** for live pitch detection, calibration, and tuning feedback.
+2.  A **Note Builder workspace** for selecting, auditioning, and inspecting notes, intervals, and chords.
+
+The tuner remains the primary real-time analysis surface. The Note Builder is a secondary workspace that shares the same Magnetar design language but does not replace the tuner.
 
 This project strictly follows the **Magnetar Canonical Project Model** for documentation, planning, and governance to ensure high maintainability, architectural integrity, and professional engineering standards.
 
@@ -17,6 +22,7 @@ This project strictly follows the **Magnetar Canonical Project Model** for docum
 | :--- | :--- |
 | `PLAN.md` | Project tasks, milestones, and effort tracking. |
 | `BITACORA.md` | Chronological logbook of all significant events and decisions. |
+| `NOTE_BUILDER_EXTREME_UI.md` | Premium Note Builder workspace specification and responsive design rules. |
 | `REQUIREMENTS.md` | Detailed functional and non-functional specifications. |
 | `ARCHITECTURE.md` | System structure, DSP layers, and module definitions. |
 | `RULES.md` | Naming conventions, workflow standards, and canonical rules. |
@@ -30,6 +36,14 @@ This project strictly follows the **Magnetar Canonical Project Model** for docum
 We track progress through a structured lifecycle:
 `planned` → `ready` → `in_progress` → `in_review` → `done`.
 Every state transition and major milestone achievement is recorded in `BITACORA.md`.
+
+## Current Branch Snapshot
+The current branch state extends the original tuner MVP in several ways:
+
+*   Premium dark-mode tuner visuals have been restored and decomposed into reusable UI components.
+*   In-app navigation now separates **Tuner** and **Note Builder** as two different destinations.
+*   The Note Builder branch state includes responsive phone/tablet layouts, note-selection state, music-theory naming, playback wiring, and tablet-safe bounded scroll regions.
+*   The Android app version target has been raised to `2026.05.12.1554`.
 
 ## YAML Project Schema
 The source of truth for machine-readable project metadata is located at `projects/magnetar_orpheus.project.yml`. It contains stakeholders, milestones, and the task registry.

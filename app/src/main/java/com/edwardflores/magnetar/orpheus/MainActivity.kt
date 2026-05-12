@@ -8,49 +8,27 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Button
-import androidx.compose.ui.res.stringResource
-import com.edwardflores.magnetar.orpheus.BuildConfig
-import com.edwardflores.magnetar.orpheus.ui.NoteNamingSystem
-import com.edwardflores.magnetar.orpheus.ui.TunerUiState
+import com.edwardflores.magnetar.orpheus.ui.AppDestination
 import com.edwardflores.magnetar.orpheus.ui.TunerViewModel
+import com.edwardflores.magnetar.orpheus.ui.notebuilder.NoteBuilderScreen
+import com.edwardflores.magnetar.orpheus.ui.notebuilder.NoteBuilderViewModel
+import com.edwardflores.magnetar.orpheus.ui.screen.TunerScreen
 import com.edwardflores.magnetar.orpheus.ui.theme.MagnetarOrpheusTheme
 
 class MainActivity : ComponentActivity() {
 
     private val viewModel: TunerViewModel by viewModels()
+    private val noteBuilderViewModel: NoteBuilderViewModel by viewModels()
     private var hasAudioPermission by mutableStateOf(false)
 
     private val requestPermissionLauncher = registerForActivityResult(
@@ -64,22 +42,52 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         checkAudioPermission()
-        
+
         enableEdgeToEdge()
         setContent {
             MagnetarOrpheusTheme {
                 val uiState by viewModel.uiState.collectAsState()
-                
+                val noteBuilderUiState by noteBuilderViewModel.uiState.collectAsState()
+                var currentDestination by rememberSaveable { mutableStateOf(AppDestination.TUNER) }
+
+                fun navigateTo(destination: AppDestination) {
+                    if (currentDestination == AppDestination.NOTE_BUILDER &&
+                        destination != AppDestination.NOTE_BUILDER
+                    ) {
+                        noteBuilderViewModel.stopPlayback()
+                    }
+                    currentDestination = destination
+                }
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    TunerScreen(
-                        uiState = uiState,
-                        hasPermission = hasAudioPermission,
-                        onCalibrationChange = { viewModel.updateCalibration(it) },
-                        onNamingSystemChange = { viewModel.updateNamingSystem(it) },
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    when (currentDestination) {
+                        AppDestination.TUNER -> TunerScreen(
+                            uiState = uiState,
+                            hasPermission = hasAudioPermission,
+                            versionName = BuildConfig.VERSION_NAME,
+                            currentDestination = currentDestination,
+                            onNavigate = ::navigateTo,
+                            onCalibrationChange = { viewModel.updateCalibration(it) },
+                            onNamingSystemChange = { viewModel.updateNamingSystem(it) },
+                            onPresetSelected = { viewModel.applyPreset(it) },
+                            modifier = Modifier.padding(innerPadding)
+                        )
+
+                        AppDestination.NOTE_BUILDER -> NoteBuilderScreen(
+                            state = noteBuilderUiState,
+                            onInputModeChange = noteBuilderViewModel::updateInputMode,
+                            onToggleHold = noteBuilderViewModel::toggleHold,
+                            onToggleNote = noteBuilderViewModel::toggleNote,
+                            onPlaySelection = noteBuilderViewModel::playSelection,
+                            onStopPlayback = noteBuilderViewModel::stopPlayback,
+                            onClearSelection = noteBuilderViewModel::clearSelection,
+                            currentDestination = currentDestination,
+                            onNavigate = ::navigateTo,
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                    }
                 }
             }
         }
@@ -94,149 +102,10 @@ class MainActivity : ComponentActivity() {
                 hasAudioPermission = true
                 viewModel.startTuning()
             }
+
             else -> {
                 requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
             }
-        }
-    }
-}
-
-@Composable
-fun TunerScreen(
-    uiState: TunerUiState,
-    hasPermission: Boolean,
-    onCalibrationChange: (Double) -> Unit,
-    onNamingSystemChange: (NoteNamingSystem) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(16.dp)
-        ) {
-            if (hasPermission) {
-                Text(
-                    text = uiState.noteName,
-                    style = MaterialTheme.typography.displayLarge,
-                    color = if (uiState.isTuned) Color.Green else MaterialTheme.colorScheme.onBackground
-                )
-                Text(
-                    text = String.format("%.2f Hz", uiState.frequency),
-                    style = MaterialTheme.typography.headlineSmall
-                )
-                
-                Spacer(modifier = Modifier.height(32.dp))
-                
-                TunerIndicator(cents = uiState.cents)
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Text(
-                    text = if (uiState.cents > 0) "+${uiState.cents} cents" else "${uiState.cents} cents",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Naming System Selection
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    NoteNamingSystem.entries.forEach { system ->
-                        Button(
-                            onClick = { onNamingSystemChange(system) },
-                            enabled = uiState.namingSystem != system
-                        ) {
-                            Text(system.name.lowercase().replaceFirstChar { it.uppercase() })
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Calibration Controls
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    IconButton(onClick = { onCalibrationChange(uiState.referenceA4 - 1) }) {
-                        Icon(Icons.Default.Remove, contentDescription = "Decrease Calibration")
-                    }
-                    Text(
-                        text = "A4 = ${uiState.referenceA4.toInt()} Hz",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    IconButton(onClick = { onCalibrationChange(uiState.referenceA4 + 1) }) {
-                        Icon(Icons.Default.Add, contentDescription = "Increase Calibration")
-                    }
-                }
-
-                uiState.calibrationErrorResId?.let { errorResId ->
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = stringResource(errorResId),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-                Text(
-                    text = stringResource(R.string.version_label, BuildConfig.VERSION_NAME),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-                )
-            } else {
-                Text(text = "Microphone Access Denied", color = MaterialTheme.colorScheme.error)
-                Text(text = "Please grant permission to use the tuner.")
-            }
-        }
-    }
-}
-
-@Composable
-fun TunerIndicator(cents: Int) {
-    val animatedCents by animateFloatAsState(targetValue = cents.toFloat(), label = "cents")
-    
-    Canvas(modifier = Modifier.size(300.dp, 100.dp)) {
-        val width = size.width
-        val height = size.height
-        val center = Offset(width / 2, height)
-        
-        // Draw scale
-        drawLine(
-            color = Color.Gray,
-            start = Offset(0f, height),
-            end = Offset(width, height),
-            strokeWidth = 2f
-        )
-        
-        // Draw ticks
-        for (i in -50..50 step 10) {
-            val x = width / 2 + (i / 50f) * (width / 2)
-            val tickHeight = if (i == 0) 30f else 15f
-            drawLine(
-                color = Color.Gray,
-                start = Offset(x, height),
-                end = Offset(x, height - tickHeight),
-                strokeWidth = 2f
-            )
-        }
-        
-        // Draw needle
-        val rotationAngle = (animatedCents / 50f) * 45f // Max 45 degrees
-        rotate(degrees = rotationAngle, pivot = center) {
-            drawLine(
-                color = if (cents in -5..5) Color.Green else Color.Red,
-                start = center,
-                end = Offset(width / 2, 0f),
-                strokeWidth = 4f,
-                cap = StrokeCap.Round
-            )
         }
     }
 }

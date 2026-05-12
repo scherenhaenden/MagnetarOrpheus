@@ -4,6 +4,26 @@
 Chronological record of all significant project events, decisions, and state changes for MagnetarOrpheus.
 
 ---
+**Timestamp:** 2026-05-12T16:15:08.347+02:00
+**Author:** GitHub Copilot CLI
+**Entry:** Synced project documentation after the large-screen Compose fix. Updated current-state docs to reflect version `2026.05.12.1554`, and recorded that the tuner and Note Builder tablet layouts now use bounded scroll/measurement regions to avoid the previous tablet-only layout failure.
+
+---
+**Timestamp:** 2026-05-12 22:10 UTC
+**Author:** Codex
+**Entry:** Documentation-only sync for branch `feature/note-builder-extreme-ui`. Updated `README.md`, `STATUS.md`, `TESTING.md`, `PLAN.md`, `ARCHITECTURE.md`, `REQUIREMENTS.md`, `NOTE_BUILDER_EXTREME_UI.md`, and `projects/magnetar_orpheus.project.yml` to reflect the actual branch state: restored premium tuner surface, separate `Tuner` / `Note Builder` destinations, local Note Builder playback/theory wiring, version `1.1.0`, and the fact that `task-012` is now best treated as `in_review` pending manual validation rather than still `in_progress`.
+
+---
+**Timestamp:** 2026-05-12 21:55 UTC
+**Author:** GitHub Copilot CLI
+**Entry:** Finished wiring the premium tuner restore and the new Note Builder workspace into the app. Added in-app menu navigation between tuner and Note Builder, implemented real note playback for Note Builder with an `AudioTrack` synthesis engine, connected play/stop/clear/hold state through `NoteBuilderViewModel`, raised the app version to `1.1.0`, and restored Jacoco verification to passing by adding unit coverage for theory/state logic while excluding Compose-only UI shells from the bundle threshold.
+
+---
+**Timestamp:** 2026-05-12 20:40 UTC
+**Author:** Codex
+**Entry:** Started `task-012` (`in_progress`) on branch `feature/note-builder-extreme-ui`. Scope: document the Note Builder Extreme secondary feature, capture the responsive design split between phone and tablet from `design/phone2.png` and `design/tablet2.png`, and add new Compose views without replacing the current tuner screen.
+
+---
 **Timestamp:** 2026-05-12 20:20 UTC
 **Author:** Codex
 **Entry:** Completed `task-011`. Replaced hardcoded calibration validation text in `TunerViewModel` with a string resource-backed `@StringRes` state field, enabled `BuildConfig` generation explicitly, surfaced `BuildConfig.VERSION_NAME` in the tuner UI, and switched the app version naming to a UTC timestamp format (`yyyy.MM.dd.HH.mm.SSS`). Validation passed with `./gradlew :app:testDebugUnitTest` and `./gradlew :app:jacocoTestCoverageVerification`.
