@@ -60,12 +60,16 @@ class TunerViewModel(
         }
     }
 
+    private var lastProcessedFrequency: Double? = null
+
     fun updateCalibration(ref: Double) {
         _uiState.value = _uiState.value.copy(referenceA4 = ref)
+        lastProcessedFrequency?.let { processFrequency(it) }
     }
 
     fun updateNamingSystem(system: NoteNamingSystem) {
         _uiState.value = _uiState.value.copy(namingSystem = system)
+        lastProcessedFrequency?.let { processFrequency(it) }
     }
 
     private fun updateStabilityFilter(freq: Double): Double {
@@ -77,6 +81,7 @@ class TunerViewModel(
     }
 
     private fun processFrequency(frequency: Double) {
+        lastProcessedFrequency = frequency
         val refA4 = _uiState.value.referenceA4
         // Calculate note based on reference A4
         val n = 12 * log2(frequency / refA4) + 69
