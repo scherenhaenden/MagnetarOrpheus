@@ -4,6 +4,11 @@
 Chronological record of all significant project events, decisions, and state changes for MagnetarOrpheus.
 
 ---
+**Timestamp:** 2026-05-12 22:10 UTC
+**Author:** Codex
+**Entry:** Documentation-only sync for branch `feature/note-builder-extreme-ui`. Updated `README.md`, `STATUS.md`, `TESTING.md`, `PLAN.md`, `ARCHITECTURE.md`, `REQUIREMENTS.md`, `NOTE_BUILDER_EXTREME_UI.md`, and `projects/magnetar_orpheus.project.yml` to reflect the actual branch state: restored premium tuner surface, separate `Tuner` / `Note Builder` destinations, local Note Builder playback/theory wiring, version `1.1.0`, and the fact that `task-012` is now best treated as `in_review` pending manual validation rather than still `in_progress`.
+
+---
 **Timestamp:** 2026-05-12 21:55 UTC
 **Author:** GitHub Copilot CLI
 **Entry:** Finished wiring the premium tuner restore and the new Note Builder workspace into the app. Added in-app menu navigation between tuner and Note Builder, implemented real note playback for Note Builder with an `AudioTrack` synthesis engine, connected play/stop/clear/hold state through `NoteBuilderViewModel`, raised the app version to `1.1.0`, and restored Jacoco verification to passing by adding unit coverage for theory/state logic while excluding Compose-only UI shells from the bundle threshold.
