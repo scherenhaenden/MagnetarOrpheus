@@ -31,11 +31,11 @@ milestones:
   ms-05:
     name: Instrument Profiles
     target_date: "2026-06-30"
-    state: planned
+    state: in_progress
   ms-06:
     name: Visual Analysis
     target_date: "2026-07-15"
-    state: planned
+    state: in_progress
 
 tasks:
   task-001:
@@ -71,8 +71,8 @@ tasks:
   task-007:
     milestone: ms-05
     title: Instrument Data Layer
-    owner: TBD
-    state: planned
+    owner: Gemini
+    state: done
   task-008:
     milestone: ms-05
     title: Profile Selection UI
@@ -83,6 +83,11 @@ tasks:
     title: Waveform Canvas
     owner: TBD
     state: planned
+  task-010:
+    milestone: ms-06
+    title: Premium Adaptive Tuner UI Refresh
+    owner: GitHub Copilot CLI
+    state: in_review
 
 risks:
   - id: R1

@@ -22,15 +22,17 @@ This plan captures the milestones, tasks, and progress for the MagnetarOrpheus A
 | `task-004` | `ms-02` | Pitch Detection Algorithm | Gemini | 8 | `done` | Implementation of YIN or Autocorrelation. |
 | `task-005` | `ms-03` | Compose Tuner UI | Gemini | 5 | `done` | Visual indicator and note display. |
 | `task-006` | `ms-04` | Calibration & Stability | Gemini | 3 | `done` | A4 reference and temporal filtering. |
-| `task-007` | `ms-05` | Instrument Data Layer | TBD | 3 | `planned` | Define tuning frequencies for profiles. |
+| `task-007` | `ms-05` | Instrument Data Layer | Gemini | 3 | `done` | Defined tuning frequencies for Guitar, Bass, and Ukulele. |
 | `task-008` | `ms-05` | Profile Selection UI | TBD | 4 | `planned` | Dropdown/Menu for switching instruments. |
 | `task-009` | `ms-06` | Waveform Canvas | TBD | 6 | `planned` | Real-time PCM data visualization. |
+| `task-010` | `ms-06` | Premium Adaptive Tuner UI Refresh | GitHub Copilot CLI | 5 | `in_review` | Refactored the tuner screen into premium phone/tablet Compose layouts matching the design references. |
 
 ## Effort Summary
-*   **Total effort:** 36 pts
-*   **Completed:** 23 pts
+*   **Total effort:** 41 pts
+*   **Completed:** 26 pts
 *   **In progress:** 0 pts
-*   **Remaining:** 13 pts
+*   **In review:** 5 pts
+*   **Remaining:** 10 pts
 
 ## State Definitions
 *   `planned`: Identified for future work.
