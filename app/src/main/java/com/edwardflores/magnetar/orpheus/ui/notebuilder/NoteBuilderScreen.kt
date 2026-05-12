@@ -12,16 +12,19 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -318,11 +321,18 @@ private fun NoteBuilderTabletScreen(
             onNavigate = onNavigate
         )
         Row(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            val leftScrollState = rememberScrollState()
+            val rightScrollState = rememberScrollState()
             Column(
-                modifier = Modifier.width(300.dp),
+                modifier = Modifier
+                    .width(300.dp)
+                    .fillMaxHeight()
+                    .verticalScroll(leftScrollState),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 PianoKeyboardWorkspaceCard(
@@ -338,17 +348,23 @@ private fun NoteBuilderTabletScreen(
                 )
             }
             Column(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 SelectedChordSummaryCard(state = state)
                 WorkspaceGridCard(
+                    modifier = Modifier.weight(1f),
                     selectedNotes = state.selectedNotes,
                     onToggleNote = onToggleNote
                 )
             }
             Column(
-                modifier = Modifier.width(280.dp),
+                modifier = Modifier
+                    .width(280.dp)
+                    .fillMaxHeight()
+                    .verticalScroll(rightScrollState),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 NoteSequenceCard(sequence = state.sequence)
@@ -620,10 +636,11 @@ private fun PhoneGridCard(
 
 @Composable
 private fun WorkspaceGridCard(
+    modifier: Modifier = Modifier,
     selectedNotes: List<NoteSelection>,
     onToggleNote: (NoteSelection) -> Unit
 ) {
-    MagnetarCard(modifier = Modifier.fillMaxWidth()) {
+    MagnetarCard(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -636,7 +653,12 @@ private fun WorkspaceGridCard(
             }
         }
         Spacer(modifier = Modifier.height(14.dp))
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f, fill = true),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
             items((0..5).toList()) { octave ->
                 OctaveRow(
                     octave = octave,

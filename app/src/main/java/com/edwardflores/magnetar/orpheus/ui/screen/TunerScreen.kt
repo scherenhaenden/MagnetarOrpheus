@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -70,32 +71,46 @@ fun TunerScreen(
                 .padding(horizontal = 18.dp, vertical = 12.dp)
         ) {
             val isTabletLayout = maxWidth >= 920.dp
-            val scrollState = rememberScrollState()
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(18.dp)
-            ) {
-                AppHeader(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 6.dp, bottom = 4.dp),
-                    showProfile = isTabletLayout,
-                    currentDestination = currentDestination,
-                    onNavigate = onNavigate
-                )
-
-                if (isTabletLayout) {
+            if (isTabletLayout) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(18.dp)
+                ) {
+                    AppHeader(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 6.dp, bottom = 4.dp),
+                        showProfile = true,
+                        currentDestination = currentDestination,
+                        onNavigate = onNavigate
+                    )
                     TabletLayout(
                         uiState = uiState,
                         versionName = versionName,
                         onCalibrationChange = onCalibrationChange,
                         onNamingSystemChange = onNamingSystemChange,
-                        onPresetSelected = onPresetSelected
+                        onPresetSelected = onPresetSelected,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
                     )
-                } else {
+                }
+            } else {
+                val scrollState = rememberScrollState()
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState),
+                    verticalArrangement = Arrangement.spacedBy(18.dp)
+                ) {
+                    AppHeader(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 6.dp, bottom = 4.dp),
+                        showProfile = false,
+                        currentDestination = currentDestination,
+                        onNavigate = onNavigate
+                    )
                     PhoneLayout(
                         uiState = uiState,
                         versionName = versionName,
@@ -158,15 +173,20 @@ private fun TabletLayout(
     versionName: String,
     onCalibrationChange: (Double) -> Unit,
     onNamingSystemChange: (NoteNamingSystem) -> Unit,
-    onPresetSelected: (Int) -> Unit
+    onPresetSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(18.dp),
         verticalAlignment = Alignment.Top
     ) {
+        val leftScrollState = rememberScrollState()
         Column(
-            modifier = Modifier.weight(1.75f),
+            modifier = Modifier
+                .weight(1.75f)
+                .fillMaxHeight()
+                .verticalScroll(leftScrollState),
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             ChromaticNoteRow(currentNote = uiState.chromaticNote)
@@ -212,7 +232,9 @@ private fun TabletLayout(
         }
 
         TabletSidePanel(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
             noteHistory = uiState.noteHistory,
             pitchStabilityPoints = uiState.pitchStabilityPoints,
             selectedInstrument = uiState.selectedInstrument,
