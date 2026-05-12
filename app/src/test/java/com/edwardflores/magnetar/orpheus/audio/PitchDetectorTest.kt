@@ -47,4 +47,11 @@ class PitchDetectorTest {
         val estimatedPitch = pitchDetector.estimatePitch(buffer)
         assertEquals(-1.0, estimatedPitch, 0.0)
     }
+
+    @Test
+    fun `default constructor works`() {
+        val detector = PitchDetector()
+        val buffer = FloatArray(1024)
+        assertEquals(-1.0, detector.estimatePitch(buffer), 0.0)
+    }
 }

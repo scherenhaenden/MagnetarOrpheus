@@ -1,7 +1,7 @@
 metadata:
   name: MagnetarOrpheus
   namespace: com.edwardflores.magnetar.orpheus
-  description: Professional native Android chromatic tuner with low-latency DSP.
+  description: Professional native Android tuner and note-builder suite with low-latency DSP.
   start_date: "2026-05-12"
   default_branch: master
 
@@ -31,7 +31,7 @@ milestones:
   ms-05:
     name: Instrument Profiles
     target_date: "2026-06-30"
-    state: planned
+    state: in_progress
   ms-06:
     name: Visual Analysis
     target_date: "2026-07-15"
@@ -83,6 +83,26 @@ tasks:
     title: Waveform Canvas
     owner: TBD
     state: planned
+  task-010:
+    milestone: ms-04
+    title: PR 11 Review Remediation
+    owner: Codex
+    state: done
+  task-011:
+    milestone: ms-04
+    title: Version Visibility and UI i18n Cleanup
+    owner: Codex
+    state: done
+  task-012:
+    milestone: ms-05
+    title: Note Builder Workspace Integration
+    owner: Codex
+    state: in_review
+  task-013:
+    milestone: ms-04
+    title: GitHub Release Build Pipeline
+    owner: Codex
+    state: in_review
 
 risks:
   - id: R1

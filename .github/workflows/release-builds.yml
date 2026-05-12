@@ -1,0 +1,78 @@
+name: Publish Release Build
+
+on:
+  push:
+    branches:
+      - builds
+
+permissions:
+  contents: write
+
+jobs:
+  publish-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Resolve build metadata
+        id: metadata
+        run: |
+          VERSION_NAME=$(sed -n 's/.*versionName = "\(.*\)"/\1/p' app/build.gradle.kts | head -n1)
+          if [ -z "$VERSION_NAME" ]; then
+            echo "Unable to resolve versionName from app/build.gradle.kts" >&2
+            exit 1
+          fi
+          TAG_NAME="build-v${VERSION_NAME}-${GITHUB_RUN_NUMBER}"
+          RELEASE_NAME="MagnetarOrpheus ${VERSION_NAME} (builds)"
+          PACKAGE_BASENAME="MagnetarOrpheus-${VERSION_NAME}"
+          echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+          echo "release_name=$RELEASE_NAME" >> "$GITHUB_OUTPUT"
+          echo "package_basename=$PACKAGE_BASENAME" >> "$GITHUB_OUTPUT"
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug
+
+      - name: Generate checksums
+        run: |
+          cd app/build/outputs/apk/debug
+          sha256sum app-debug.apk > app-debug.apk.sha256
+
+      - name: Package release zip
+        run: |
+          mkdir -p dist
+          cp app/build/outputs/apk/debug/app-debug.apk "dist/${{ steps.metadata.outputs.package_basename }}.apk"
+          cp app/build/outputs/apk/debug/app-debug.apk.sha256 "dist/${{ steps.metadata.outputs.package_basename }}.apk.sha256"
+          cd dist
+          zip "${{ steps.metadata.outputs.package_basename }}.zip" \
+            "${{ steps.metadata.outputs.package_basename }}.apk" \
+            "${{ steps.metadata.outputs.package_basename }}.apk.sha256"
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.metadata.outputs.tag_name }}
+          name: ${{ steps.metadata.outputs.release_name }}
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: true
+          prerelease: true
+          body: |
+            Automated MagnetarOrpheus build publication.
+
+            - Version: `${{ steps.metadata.outputs.version_name }}`
+            - Channel: `builds`
+            - Commit: `${{ github.sha }}`
+            - Workflow run: `${{ github.run_number }}`
+          files: |
+            dist/${{ steps.metadata.outputs.package_basename }}.zip
