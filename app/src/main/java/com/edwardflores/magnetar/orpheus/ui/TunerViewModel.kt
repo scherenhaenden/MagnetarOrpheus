@@ -1,5 +1,6 @@
 package com.edwardflores.magnetar.orpheus.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.edwardflores.magnetar.orpheus.audio.AudioCaptureProvider
@@ -63,6 +64,10 @@ class TunerViewModel(
     private var lastProcessedFrequency: Double? = null
 
     fun updateCalibration(ref: Double) {
+        if (ref <= 0 || !ref.isFinite()) {
+            Log.w("TunerViewModel", "Invalid calibration value ignored: $ref")
+            return
+        }
         _uiState.value = _uiState.value.copy(referenceA4 = ref)
         lastProcessedFrequency?.let { processFrequency(it) }
     }
@@ -81,6 +86,10 @@ class TunerViewModel(
     }
 
     private fun processFrequency(frequency: Double) {
+        if (frequency <= 0 || !frequency.isFinite()) {
+            Log.w("TunerViewModel", "Invalid frequency ignored: $frequency")
+            return
+        }
         lastProcessedFrequency = frequency
         val refA4 = _uiState.value.referenceA4
         // Calculate note based on reference A4

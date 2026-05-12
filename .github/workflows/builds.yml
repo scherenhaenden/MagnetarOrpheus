@@ -2,9 +2,9 @@ name: Build Application
 
 on:
   push:
-    branches: [ builds ]
+    branches: [ master, builds ]
   pull_request:
-    branches: [ builds ]
+    branches: [ master, builds ]
 
 jobs:
   build:

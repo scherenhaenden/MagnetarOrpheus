@@ -2,9 +2,9 @@ name: Unit Tests & Coverage
 
 on:
   push:
-    branches: [ tests ]
+    branches: [ master, tests ]
   pull_request:
-    branches: [ tests ]
+    branches: [ master, tests ]
 
 jobs:
   test:
