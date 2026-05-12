@@ -1,8 +1,10 @@
 package com.edwardflores.magnetar.orpheus.ui
 
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.edwardflores.magnetar.orpheus.R
 import com.edwardflores.magnetar.orpheus.audio.AudioCaptureProvider
 import com.edwardflores.magnetar.orpheus.audio.PitchDetector
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +28,8 @@ data class TunerUiState(
     val isTuned: Boolean = false,
     val isActive: Boolean = false,
     val referenceA4: Double = 440.0,
-    val namingSystem: NoteNamingSystem = NoteNamingSystem.SCIENTIFIC
+    val namingSystem: NoteNamingSystem = NoteNamingSystem.SCIENTIFIC,
+    @field:StringRes val calibrationErrorResId: Int? = null
 )
 
 class TunerViewModel(
@@ -66,9 +69,15 @@ class TunerViewModel(
     fun updateCalibration(ref: Double) {
         if (ref <= 0 || !ref.isFinite()) {
             Log.w("TunerViewModel", "Invalid calibration value ignored: $ref")
+            _uiState.value = _uiState.value.copy(
+                calibrationErrorResId = R.string.calibration_error_positive_hz
+            )
             return
         }
-        _uiState.value = _uiState.value.copy(referenceA4 = ref)
+        _uiState.value = _uiState.value.copy(
+            referenceA4 = ref,
+            calibrationErrorResId = null
+        )
         lastProcessedFrequency?.let { processFrequency(it) }
     }
 
@@ -108,7 +117,7 @@ class TunerViewModel(
         
         _uiState.value = _uiState.value.copy(
             frequency = frequency,
-            noteName = if (_uiState.value.namingSystem == NoteNamingSystem.SYLLABIC) noteName else "$noteName$octave",
+            noteName = "$noteName$octave",
             cents = cents,
             isTuned = cents in -5..5
         )

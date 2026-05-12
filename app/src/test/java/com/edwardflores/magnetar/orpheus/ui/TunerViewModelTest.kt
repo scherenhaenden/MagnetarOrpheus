@@ -1,6 +1,7 @@
 package com.edwardflores.magnetar.orpheus.ui
 
 import android.util.Log
+import com.edwardflores.magnetar.orpheus.R
 import com.edwardflores.magnetar.orpheus.audio.AudioCaptureProvider
 import com.edwardflores.magnetar.orpheus.audio.PitchDetector
 import io.mockk.coEvery
@@ -76,7 +77,7 @@ class TunerViewModelTest {
         advanceUntilIdle()
 
         viewModel.updateNamingSystem(NoteNamingSystem.SYLLABIC)
-        assertEquals("La", viewModel.uiState.value.noteName)
+        assertEquals("La4", viewModel.uiState.value.noteName)
 
         viewModel.updateNamingSystem(NoteNamingSystem.GERMAN)
         assertEquals("A4", viewModel.uiState.value.noteName)
@@ -138,6 +139,14 @@ class TunerViewModelTest {
     fun `updateCalibration without last frequency does not crash`() {
         viewModel.updateCalibration(432.0)
         assertEquals(432.0, viewModel.uiState.value.referenceA4, 0.0)
+    }
+
+    @Test
+    fun `updateCalibration with invalid value surfaces validation error`() {
+        viewModel.updateCalibration(0.0)
+
+        assertEquals(440.0, viewModel.uiState.value.referenceA4, 0.0)
+        assertEquals(R.string.calibration_error_positive_hz, viewModel.uiState.value.calibrationErrorResId)
     }
 
     @Test
