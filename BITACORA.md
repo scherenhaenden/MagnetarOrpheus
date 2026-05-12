@@ -4,6 +4,11 @@
 Chronological record of all significant project events, decisions, and state changes for MagnetarOrpheus.
 
 ---
+**Timestamp:** 2026-05-12 22:45 UTC
+**Author:** Codex
+**Entry:** Expanded `.github/workflows/release-builds.yml` so GitHub Releases now receives all three distribution assets from the `builds` branch pipeline: the versioned `.apk`, its `.apk.sha256` checksum, and the bundled `.zip`. The release source archives remain provided automatically by GitHub for the generated tag.
+
+---
 **Timestamp:** 2026-05-12 22:35 UTC
 **Author:** Codex
 **Entry:** Adjusted the standalone release-build workflow to match repository distribution preferences. `.github/workflows/release-builds.yml` now triggers on pushes/merges to the `builds` branch, packages the generated debug APK plus checksum into a versioned zip derived from `versionName`, and uploads that zip to GitHub Releases.

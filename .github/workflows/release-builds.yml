@@ -75,4 +75,6 @@ jobs:
             - Commit: `${{ github.sha }}`
             - Workflow run: `${{ github.run_number }}`
           files: |
+            dist/${{ steps.metadata.outputs.package_basename }}.apk
+            dist/${{ steps.metadata.outputs.package_basename }}.apk.sha256
             dist/${{ steps.metadata.outputs.package_basename }}.zip

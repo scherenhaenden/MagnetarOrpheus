@@ -27,7 +27,7 @@ Expected behavior:
 2.  The workflow builds the debug APK with JDK 21.
 3.  The workflow renames the package using the app `versionName`.
 4.  The workflow creates a zip containing the APK and its SHA-256 checksum.
-5.  The workflow publishes a prerelease in GitHub Releases containing that versioned zip.
+5.  The workflow publishes a prerelease in GitHub Releases containing the versioned `.apk`, `.apk.sha256`, and `.zip`.
 
 ## Current Coverage Focus
 The current branch state emphasizes:
