@@ -9,7 +9,7 @@ This plan captures the milestones, tasks, and progress for the MagnetarOrpheus A
 | `ms-01` | Project Setup & Canon | 2026-05-12 | Establish the Magnetar Canonical Model and project structure. | `done` |
 | `ms-02` | Audio Foundation | 2026-05-20 | Implement low-level audio capture and basic DSP pipeline. | `done` |
 | `ms-03` | Core Tuner UI | 2026-05-30 | Build the Jetpack Compose interface for visual feedback. | `done` |
-| `ms-04` | MVP Release | 2026-06-15 | Stable chromatic guitar tuner with calibration settings. | `in_progress` |
+| `ms-04` | MVP Release | 2026-06-15 | Stable chromatic guitar tuner with calibration settings. | `done` |
 
 ## Task Backlog Table
 | Task ID | Milestone | Title | Owner | Effort (pts) | State | Notes |
@@ -19,12 +19,12 @@ This plan captures the milestones, tasks, and progress for the MagnetarOrpheus A
 | `task-003` | `ms-02` | AudioRecord Integration | Gemini | 5 | `done` | Native audio capture layer. |
 | `task-004` | `ms-02` | Pitch Detection Algorithm | Gemini | 8 | `done` | Implementation of YIN or Autocorrelation. |
 | `task-005` | `ms-03` | Compose Tuner UI | Gemini | 5 | `done` | Visual indicator and note display. |
-| `task-006` | `ms-04` | Calibration & Stability | Gemini | 3 | `in_progress` | A4 reference and temporal filtering. |
+| `task-006` | `ms-04` | Calibration & Stability | Gemini | 3 | `done` | A4 reference and temporal filtering. |
 
 ## Effort Summary
 *   **Total effort:** 23 pts
-*   **Completed:** 20 pts
-*   **In progress:** 3 pts
+*   **Completed:** 23 pts
+*   **In progress:** 0 pts
 *   **Remaining:** 0 pts
 
 ## State Definitions

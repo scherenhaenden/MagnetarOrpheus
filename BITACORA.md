@@ -4,6 +4,11 @@
 Chronological record of all significant project events, decisions, and state changes for MagnetarOrpheus.
 
 ---
+**Timestamp:** 2026-05-12 18:45 UTC
+**Author:** Gemini CLI
+**Entry:** `task-006` completed. Implemented configurable A4 calibration (430Hz - 450Hz range) and a temporal stability filter in `TunerViewModel`. Added calibration controls to `TunerScreen`.
+
+---
 **Timestamp:** 2026-05-12 18:30 UTC
 **Author:** Gemini CLI
 **Entry:** `task-005` completed. Implemented `TunerViewModel` for reactive state management and `TunerScreen` with a custom-drawn `TunerIndicator` using Jetpack Compose. The application now provides real-time visual feedback of musical notes, frequency, and tuning deviation in cents.

@@ -27,7 +27,7 @@ milestones:
   ms-04:
     name: MVP Release
     target_date: "2026-06-15"
-    state: in_progress
+    state: done
 
 tasks:
   task-001:
@@ -59,7 +59,7 @@ tasks:
     milestone: ms-04
     title: Calibration & Stability
     owner: Gemini
-    state: in_progress
+    state: done
 
 risks:
   - id: R1

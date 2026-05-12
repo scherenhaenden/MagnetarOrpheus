@@ -34,6 +34,12 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import com.edwardflores.magnetar.orpheus.ui.TunerUiState
 import com.edwardflores.magnetar.orpheus.ui.TunerViewModel
 import com.edwardflores.magnetar.orpheus.ui.theme.MagnetarOrpheusTheme
@@ -66,6 +72,7 @@ class MainActivity : ComponentActivity() {
                     TunerScreen(
                         uiState = uiState,
                         hasPermission = hasAudioPermission,
+                        onCalibrationChange = { viewModel.updateCalibration(it) },
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -93,6 +100,7 @@ class MainActivity : ComponentActivity() {
 fun TunerScreen(
     uiState: TunerUiState,
     hasPermission: Boolean,
+    onCalibrationChange: (Double) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -125,6 +133,25 @@ fun TunerScreen(
                     text = if (uiState.cents > 0) "+${uiState.cents} cents" else "${uiState.cents} cents",
                     style = MaterialTheme.typography.bodyLarge
                 )
+
+                Spacer(modifier = Modifier.height(48.dp))
+
+                // Calibration Controls
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    IconButton(onClick = { onCalibrationChange(uiState.referenceA4 - 1) }) {
+                        Icon(Icons.Default.Remove, contentDescription = "Decrease Calibration")
+                    }
+                    Text(
+                        text = "A4 = ${uiState.referenceA4.toInt()} Hz",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    IconButton(onClick = { onCalibrationChange(uiState.referenceA4 + 1) }) {
+                        Icon(Icons.Default.Add, contentDescription = "Increase Calibration")
+                    }
+                }
             } else {
                 Text(text = "Microphone Access Denied", color = MaterialTheme.colorScheme.error)
                 Text(text = "Please grant permission to use the tuner.")
