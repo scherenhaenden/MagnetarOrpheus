@@ -40,6 +40,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Button
+import com.edwardflores.magnetar.orpheus.ui.NoteNamingSystem
 import com.edwardflores.magnetar.orpheus.ui.TunerUiState
 import com.edwardflores.magnetar.orpheus.ui.TunerViewModel
 import com.edwardflores.magnetar.orpheus.ui.theme.MagnetarOrpheusTheme
@@ -73,6 +75,7 @@ class MainActivity : ComponentActivity() {
                         uiState = uiState,
                         hasPermission = hasAudioPermission,
                         onCalibrationChange = { viewModel.updateCalibration(it) },
+                        onNamingSystemChange = { viewModel.updateNamingSystem(it) },
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -101,6 +104,7 @@ fun TunerScreen(
     uiState: TunerUiState,
     hasPermission: Boolean,
     onCalibrationChange: (Double) -> Unit,
+    onNamingSystemChange: (NoteNamingSystem) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -134,7 +138,23 @@ fun TunerScreen(
                     style = MaterialTheme.typography.bodyLarge
                 )
 
-                Spacer(modifier = Modifier.height(48.dp))
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Naming System Selection
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    NoteNamingSystem.values().forEach { system ->
+                        Button(
+                            onClick = { onNamingSystemChange(system) },
+                            enabled = uiState.namingSystem != system
+                        ) {
+                            Text(system.name.lowercase().replaceFirstChar { it.uppercase() })
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
 
                 // Calibration Controls
                 Row(

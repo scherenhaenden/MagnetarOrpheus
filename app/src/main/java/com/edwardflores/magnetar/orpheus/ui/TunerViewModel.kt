@@ -12,13 +12,20 @@ import kotlin.math.log2
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
+enum class NoteNamingSystem {
+    SCIENTIFIC, // C, D, E, F, G, A, B
+    SYLLABIC,   // Do, Re, Mi, Fa, Sol, La, Si (Italian/French)
+    GERMAN      // C, D, E, F, G, A, H
+}
+
 data class TunerUiState(
     val frequency: Double = 0.0,
     val noteName: String = "-",
     val cents: Int = 0,
     val isTuned: Boolean = false,
     val isActive: Boolean = false,
-    val referenceA4: Double = 440.0
+    val referenceA4: Double = 440.0,
+    val namingSystem: NoteNamingSystem = NoteNamingSystem.SCIENTIFIC
 )
 
 class TunerViewModel(
@@ -29,7 +36,9 @@ class TunerViewModel(
     private val _uiState = MutableStateFlow(TunerUiState())
     val uiState: StateFlow<TunerUiState> = _uiState.asStateFlow()
 
-    private val noteNames = listOf("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
+    private val scientificNotes = listOf("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
+    private val syllabicNotes = listOf("Do", "Do#", "Re", "Re#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si")
+    private val germanNotes = listOf("C", "Cis", "D", "Dis", "E", "F", "Fis", "G", "Gis", "A", "Ais", "H")
     
     // Simple temporal filter: sliding window or EMA
     private var lastFrequencies = mutableListOf<Double>()
@@ -55,6 +64,10 @@ class TunerViewModel(
         _uiState.value = _uiState.value.copy(referenceA4 = ref)
     }
 
+    fun updateNamingSystem(system: NoteNamingSystem) {
+        _uiState.value = _uiState.value.copy(namingSystem = system)
+    }
+
     private fun updateStabilityFilter(freq: Double): Double {
         lastFrequencies.add(freq)
         if (lastFrequencies.size > windowSize) {
@@ -68,13 +81,20 @@ class TunerViewModel(
         // Calculate note based on reference A4
         val n = 12 * log2(frequency / refA4) + 69
         val noteIndex = n.roundToInt()
-        val noteName = noteNames[(noteIndex % 12 + 12) % 12]
+        
+        val notes = when (_uiState.value.namingSystem) {
+            NoteNamingSystem.SCIENTIFIC -> scientificNotes
+            NoteNamingSystem.SYLLABIC -> syllabicNotes
+            NoteNamingSystem.GERMAN -> germanNotes
+        }
+        
+        val noteName = notes[(noteIndex % 12 + 12) % 12]
         val octave = (noteIndex / 12) - 1
         val cents = ((n - noteIndex) * 100).toInt()
         
         _uiState.value = _uiState.value.copy(
             frequency = frequency,
-            noteName = "$noteName$octave",
+            noteName = if (_uiState.value.namingSystem == NoteNamingSystem.SYLLABIC) noteName else "$noteName$octave",
             cents = cents,
             isTuned = cents in -5..5
         )
