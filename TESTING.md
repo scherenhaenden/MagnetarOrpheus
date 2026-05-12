@@ -32,7 +32,7 @@ Manual verification is still important for this branch because several changes a
 
 1.  Confirm the premium tuner visual restoration appears correctly in dark mode.
 2.  Confirm in-app navigation between `Tuner` and `Note Builder`.
-3.  Confirm phone and tablet Note Builder layouts behave as two distinct responsive experiences.
+3.  Confirm phone and tablet Note Builder layouts behave as two distinct responsive experiences and that tablet workspaces load without infinite-height Compose measurement failures.
 4.  Confirm note playback, stop, clear, and hold interactions on a real device or emulator.
 5.  Confirm selected-note state remains coherent when switching Note Builder input modes.
 

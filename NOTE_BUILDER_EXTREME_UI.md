@@ -140,6 +140,7 @@ The current local branch state goes beyond static mockup preparation and include
 *   A `NoteBuilderMusicTheory` layer that derives compact names such as `Cmaj7` and supporting subtitles from the current selection.
 *   A `NotePlaybackEngine` integration path for local playback of the selected notes.
 *   Responsive Compose views for phone and tablet-oriented Note Builder workspaces.
+*   Tablet workspace scroll regions bounded explicitly so the large-screen layout does not hit infinite-height Compose measurement failures.
 
 These branch-local changes do not replace the tuner. They extend the app into a two-workspace suite.
 
@@ -149,6 +150,6 @@ When this branch is manually tested, the following behaviors should be verified:
 1.  The user can navigate to Note Builder without losing the tuner feature.
 2.  Tuner and Note Builder feel like two different tools in the same product family.
 3.  Note Builder phone behavior shows one primary input method at a time.
-4.  Note Builder tablet behavior exposes a wider multi-panel workspace.
+4.  Note Builder tablet behavior exposes a wider multi-panel workspace without crashing or collapsing due to unbounded scroll/layout constraints.
 5.  Shared selected-note state remains coherent as the input mode changes.
 6.  Play, Stop, Clear, and Hold behave sensibly with real device audio output.
