@@ -41,6 +41,8 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Button
+import androidx.compose.ui.res.stringResource
+import com.edwardflores.magnetar.orpheus.BuildConfig
 import com.edwardflores.magnetar.orpheus.ui.NoteNamingSystem
 import com.edwardflores.magnetar.orpheus.ui.TunerUiState
 import com.edwardflores.magnetar.orpheus.ui.TunerViewModel
@@ -173,14 +175,21 @@ fun TunerScreen(
                     }
                 }
 
-                uiState.calibrationError?.let { error ->
+                uiState.calibrationErrorResId?.let { errorResId ->
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = error,
+                        text = stringResource(errorResId),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error
                     )
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = stringResource(R.string.version_label, BuildConfig.VERSION_NAME),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                )
             } else {
                 Text(text = "Microphone Access Denied", color = MaterialTheme.colorScheme.error)
                 Text(text = "Please grant permission to use the tuner.")

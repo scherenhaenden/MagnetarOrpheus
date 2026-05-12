@@ -1,6 +1,7 @@
 package com.edwardflores.magnetar.orpheus.ui
 
 import android.util.Log
+import com.edwardflores.magnetar.orpheus.R
 import com.edwardflores.magnetar.orpheus.audio.AudioCaptureProvider
 import com.edwardflores.magnetar.orpheus.audio.PitchDetector
 import io.mockk.coEvery
@@ -145,7 +146,7 @@ class TunerViewModelTest {
         viewModel.updateCalibration(0.0)
 
         assertEquals(440.0, viewModel.uiState.value.referenceA4, 0.0)
-        assertEquals("Calibration must be greater than 0 Hz.", viewModel.uiState.value.calibrationError)
+        assertEquals(R.string.calibration_error_positive_hz, viewModel.uiState.value.calibrationErrorResId)
     }
 
     @Test

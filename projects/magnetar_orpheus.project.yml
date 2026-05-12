@@ -88,6 +88,11 @@ tasks:
     title: PR 11 Review Remediation
     owner: Codex
     state: done
+  task-011:
+    milestone: ms-04
+    title: Version Visibility and UI i18n Cleanup
+    owner: Codex
+    state: done
 
 risks:
   - id: R1

@@ -4,6 +4,16 @@
 Chronological record of all significant project events, decisions, and state changes for MagnetarOrpheus.
 
 ---
+**Timestamp:** 2026-05-12 20:20 UTC
+**Author:** Codex
+**Entry:** Completed `task-011`. Replaced hardcoded calibration validation text in `TunerViewModel` with a string resource-backed `@StringRes` state field, enabled `BuildConfig` generation explicitly, surfaced `BuildConfig.VERSION_NAME` in the tuner UI, and switched the app version naming to a UTC timestamp format (`yyyy.MM.dd.HH.mm.SSS`). Validation passed with `./gradlew :app:testDebugUnitTest` and `./gradlew :app:jacocoTestCoverageVerification`.
+
+---
+**Timestamp:** 2026-05-12 20:05 UTC
+**Author:** Codex
+**Entry:** Started `task-011` (`in_progress`) on branch `fix/jdk-21-alignment-final` to remove hardcoded calibration UI text from `TunerViewModel`, route that validation through Android string resources, and surface the app build version inside the tuner UI using a timestamp-based version name.
+
+---
 **Timestamp:** 2026-05-12 19:45 UTC
 **Author:** Codex
 **Entry:** Completed `task-010`. PR `#11` review remediation is finished: Java baseline aligned to JDK 21 across IDE, Gradle, and CI; note display now includes octave consistently across naming systems; calibration validation now surfaces a UI error message; stale `buildDir` and enum-iteration review threads were resolved; and the Kotlin Android plugin suggestion was validated as not applicable because it breaks the current build with a duplicate `kotlin` extension. Local verification passed with `./gradlew :app:testDebugUnitTest` and `./gradlew :app:jacocoTestCoverageVerification`.

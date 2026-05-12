@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MagnetarOrpheus</string>
+    <string name="calibration_error_positive_hz">Calibration must be greater than 0 Hz.</string>
+    <string name="version_label">Version %1$s</string>
 </resources>
