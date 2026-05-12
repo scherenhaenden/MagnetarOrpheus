@@ -144,7 +144,7 @@ fun TunerScreen(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    NoteNamingSystem.values().forEach { system ->
+                    NoteNamingSystem.entries.forEach { system ->
                         Button(
                             onClick = { onNamingSystemChange(system) },
                             enabled = uiState.namingSystem != system
@@ -171,6 +171,15 @@ fun TunerScreen(
                     IconButton(onClick = { onCalibrationChange(uiState.referenceA4 + 1) }) {
                         Icon(Icons.Default.Add, contentDescription = "Increase Calibration")
                     }
+                }
+
+                uiState.calibrationError?.let { error ->
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
             } else {
                 Text(text = "Microphone Access Denied", color = MaterialTheme.colorScheme.error)

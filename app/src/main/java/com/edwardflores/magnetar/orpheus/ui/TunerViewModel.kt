@@ -26,7 +26,8 @@ data class TunerUiState(
     val isTuned: Boolean = false,
     val isActive: Boolean = false,
     val referenceA4: Double = 440.0,
-    val namingSystem: NoteNamingSystem = NoteNamingSystem.SCIENTIFIC
+    val namingSystem: NoteNamingSystem = NoteNamingSystem.SCIENTIFIC,
+    val calibrationError: String? = null
 )
 
 class TunerViewModel(
@@ -66,9 +67,13 @@ class TunerViewModel(
     fun updateCalibration(ref: Double) {
         if (ref <= 0 || !ref.isFinite()) {
             Log.w("TunerViewModel", "Invalid calibration value ignored: $ref")
+            _uiState.value = _uiState.value.copy(calibrationError = "Calibration must be greater than 0 Hz.")
             return
         }
-        _uiState.value = _uiState.value.copy(referenceA4 = ref)
+        _uiState.value = _uiState.value.copy(
+            referenceA4 = ref,
+            calibrationError = null
+        )
         lastProcessedFrequency?.let { processFrequency(it) }
     }
 
@@ -108,7 +113,7 @@ class TunerViewModel(
         
         _uiState.value = _uiState.value.copy(
             frequency = frequency,
-            noteName = if (_uiState.value.namingSystem == NoteNamingSystem.SYLLABIC) noteName else "$noteName$octave",
+            noteName = "$noteName$octave",
             cents = cents,
             isTuned = cents in -5..5
         )
