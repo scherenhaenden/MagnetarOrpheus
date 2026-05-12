@@ -1,7 +1,7 @@
 # Contributing to MagnetarOrpheus
 
 ## Getting Started
-1.  Ensure you have Android Studio and JDK 17+ installed.
+1.  Ensure you have Android Studio and JDK 21 installed.
 2.  Clone the repository.
 3.  Review `RULES.md` and `ARCHITECTURE.md`.
 
