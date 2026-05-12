@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     jacoco
 }
@@ -59,14 +60,16 @@ val jacocoTestReport by tasks.registering(JacocoReport::class) {
         "**/*Test*.*", "android/**/*.*", "**/theme/*", "**/MainActivity*",
         "**/AudioCaptureProvider*", "**/ComposableSingletons*"
     )
-    val debugTree = fileTree("${project.layout.buildDirectory.get()}/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes") {
+    val debugTree = files(
+        tasks.named("compileDebugKotlin", org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).map { it.destinationDirectory }
+    ).asFileTree.matching {
         exclude(fileFilter)
     }
     val mainSrc = "${project.projectDir}/src/main/java"
 
     sourceDirectories.setFrom(files(mainSrc))
     classDirectories.setFrom(files(debugTree))
-    executionData.setFrom(fileTree(project.buildDir) {
+    executionData.setFrom(fileTree(project.layout.buildDirectory) {
         include("jacoco/testDebugUnitTest.exec", "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
     })
 }

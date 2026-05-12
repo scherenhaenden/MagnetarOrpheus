@@ -63,6 +63,7 @@ class TunerViewModel(
     private var lastProcessedFrequency: Double? = null
 
     fun updateCalibration(ref: Double) {
+        if (ref <= 0) return
         _uiState.value = _uiState.value.copy(referenceA4 = ref)
         lastProcessedFrequency?.let { processFrequency(it) }
     }
@@ -81,6 +82,7 @@ class TunerViewModel(
     }
 
     private fun processFrequency(frequency: Double) {
+        if (frequency <= 0) return
         lastProcessedFrequency = frequency
         val refA4 = _uiState.value.referenceA4
         // Calculate note based on reference A4
