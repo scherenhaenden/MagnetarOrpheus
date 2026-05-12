@@ -4,6 +4,11 @@
 Chronological record of all significant project events, decisions, and state changes for MagnetarOrpheus.
 
 ---
+**Timestamp:** 2026-05-12 19:00 UTC
+**Author:** Gemini CLI
+**Entry:** Initiated Phase 2: Advanced Musician Utilities. Updated `PLAN.md` and project YAML with new milestones: `ms-05` (Instrument Profiles) and `ms-06` (Visual Analysis).
+
+---
 **Timestamp:** 2026-05-12 18:45 UTC
 **Author:** Gemini CLI
 **Entry:** `task-006` completed. Implemented configurable A4 calibration (430Hz - 450Hz range) and a temporal stability filter in `TunerViewModel`. Added calibration controls to `TunerScreen`.

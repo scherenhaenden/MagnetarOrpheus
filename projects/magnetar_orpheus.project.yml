@@ -28,6 +28,14 @@ milestones:
     name: MVP Release
     target_date: "2026-06-15"
     state: done
+  ms-05:
+    name: Instrument Profiles
+    target_date: "2026-06-30"
+    state: planned
+  ms-06:
+    name: Visual Analysis
+    target_date: "2026-07-15"
+    state: planned
 
 tasks:
   task-001:
@@ -60,6 +68,21 @@ tasks:
     title: Calibration & Stability
     owner: Gemini
     state: done
+  task-007:
+    milestone: ms-05
+    title: Instrument Data Layer
+    owner: TBD
+    state: planned
+  task-008:
+    milestone: ms-05
+    title: Profile Selection UI
+    owner: TBD
+    state: planned
+  task-009:
+    milestone: ms-06
+    title: Waveform Canvas
+    owner: TBD
+    state: planned
 
 risks:
   - id: R1
