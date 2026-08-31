@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.edwardflores.magnetar.orpheus.R
+import com.edwardflores.magnetar.orpheus.BuildConfig
 import com.edwardflores.magnetar.orpheus.audio.AudioCaptureProvider
 import com.edwardflores.magnetar.orpheus.audio.PitchDetector
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,6 +54,13 @@ class TunerViewModel(
         viewModelScope.launch {
             audioCaptureProvider.startCapture().collect { buffer ->
                 val result = pitchDetector.analyze(buffer)
+                if (BuildConfig.DEBUG && result.candidateFrequencyHz != null && !result.isPitchValid) {
+                    Log.d(
+                        "PitchTracker",
+                        "Rejected candidate=${result.candidateFrequencyHz}Hz confidence=${result.confidence} " +
+                            "rms=${result.rms} floor=${result.noiseFloor} snr=${result.signalToNoiseRatio}"
+                    )
+                }
                 val inputLevel = result.rms.toFloat().coerceIn(0f, 1f)
                 val waveformSamples = downSampleWaveform(buffer)
 

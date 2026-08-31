@@ -48,11 +48,14 @@ class NoiseFloorEstimator(
         totalSamplesProcessed += frameSize
 
         if (!isCalibrated) {
-            // Initial calibration phase: accumulate RMS values and estimate baseline robustly (median/mean)
-            calibrationRmsBuffer.add(rms)
-            val sorted = calibrationRmsBuffer.sorted()
-            val medianRms = if (sorted.isNotEmpty()) sorted[sorted.size / 2] else config.minAbsoluteRms
-            currentNoiseFloor = max(medianRms, config.minAbsoluteRms)
+            // Do not learn a clear musical note as ambient noise when tuning starts while
+            // the instrument is already sounding. Only low-confidence frames form the baseline.
+            if (confidence <= config.noiseUpdateMaxConfidence) {
+                calibrationRmsBuffer.add(rms)
+                val sorted = calibrationRmsBuffer.sorted()
+                val medianRms = if (sorted.isNotEmpty()) sorted[sorted.size / 2] else config.minAbsoluteRms
+                currentNoiseFloor = max(medianRms, config.minAbsoluteRms)
+            }
             return currentNoiseFloor
         }
 

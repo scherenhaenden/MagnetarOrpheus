@@ -40,6 +40,7 @@ class TunerViewModelTest {
         Dispatchers.setMain(testDispatcher)
         mockkStatic(Log::class)
         every { Log.w(any(), any<String>()) } returns 0
+        every { Log.d(any(), any<String>()) } returns 0
         every { pitchDetector.reset() } returns Unit
         viewModel = TunerViewModel(audioCaptureProvider, pitchDetector)
     }

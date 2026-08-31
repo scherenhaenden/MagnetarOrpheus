@@ -173,6 +173,18 @@ class PitchDetectorTest {
         assertEquals("Noise floor must freeze during sustained valid note", initialNoiseFloor, finalNoiseFloor, 0.001)
     }
 
+    @Test
+    fun `CASE 9b - a note played during initial calibration is not learned as noise`() {
+        val detector = PitchDetector(sampleRate, TunerConfig(initialCalibrationDurationMs = 400L))
+        val sineBuffer = generateSineWave(82.41, 4096, amplitude = 0.5f)
+
+        repeat(5) {
+            val result = detector.analyze(sineBuffer)
+            assertTrue("A clear guitar E2 must remain valid during startup calibration", result.isPitchValid)
+            assertTrue("Musical signal must not become the noise floor", result.noiseFloor < result.rms / 2)
+        }
+    }
+
     // CASO 10 — Outlier ambiental.
     @Test
     fun `CASE 10 - single high noise spike does not permanently ruin noise floor`() {
