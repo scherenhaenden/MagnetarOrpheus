@@ -42,6 +42,8 @@ class TunerViewModel(
     fun startTuning() {
         if (_uiState.value.isActive) return
 
+        pitchDetector.reset()
+
         _uiState.value = _uiState.value.copy(
             isActive = true,
             selectedInstrument = "Guitar",
@@ -50,16 +52,17 @@ class TunerViewModel(
 
         viewModelScope.launch {
             audioCaptureProvider.startCapture().collect { buffer ->
-                val inputLevel = calculateInputLevel(buffer)
+                val result = pitchDetector.analyze(buffer)
+                val inputLevel = result.rms.toFloat().coerceIn(0f, 1f)
                 val waveformSamples = downSampleWaveform(buffer)
+
                 _uiState.value = _uiState.value.copy(
                     inputLevel = inputLevel,
                     waveformSamples = waveformSamples
                 )
 
-                val frequency = pitchDetector.estimatePitch(buffer)
-                if (frequency > 0 && frequency.isFinite()) {
-                    val stableFreq = updateStabilityFilter(frequency)
+                if (result.isPitchValid && result.candidateFrequencyHz != null) {
+                    val stableFreq = updateStabilityFilter(result.candidateFrequencyHz)
                     processFrequency(stableFreq, inputLevel, waveformSamples)
                 }
             }
@@ -140,14 +143,6 @@ class TunerViewModel(
             pitchStabilityPoints = updatePitchStability(cents),
             calibrationErrorResId = null
         )
-    }
-
-    private fun calculateInputLevel(buffer: FloatArray): Float {
-        if (buffer.isEmpty()) return 0f
-        val rms = kotlin.math.sqrt(buffer.fold(0.0) { total, sample ->
-            total + sample * sample
-        } / buffer.size).toFloat()
-        return rms.coerceIn(0f, 1f)
     }
 
     private fun downSampleWaveform(buffer: FloatArray): List<Float> {
