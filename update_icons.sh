@@ -1,6 +1,23 @@
 #!/bin/bash
+set -euo pipefail
+
 ICON_SOURCE="design/icon.png"
 RES_DIR="app/src/main/res"
+
+if [ ! -r "$ICON_SOURCE" ]; then
+    echo "Error: source icon is not readable: $ICON_SOURCE" >&2
+    exit 1
+fi
+
+if ! command -v magick >/dev/null 2>&1; then
+    echo "Error: ImageMagick 7+ ('magick') is required." >&2
+    exit 1
+fi
+
+if [ ! -d "$RES_DIR" ] || [ ! -w "$RES_DIR" ]; then
+    echo "Error: resource directory is not writable: $RES_DIR" >&2
+    exit 1
+fi
 
 # Function to generate icons
 generate_icons() {
@@ -10,7 +27,13 @@ generate_icons() {
     local target_dir="$RES_DIR/mipmap-$density"
     
     mkdir -p "$target_dir"
-    magick "$ICON_SOURCE" -resize "${size}x${size}" "$target_dir/$filename.webp"
+    local output_file="$target_dir/$filename.webp"
+    echo "Generating ${size}x${size} ${filename} for ${density}..."
+    magick "$ICON_SOURCE" -resize "${size}x${size}" "$output_file"
+    if [ ! -f "$output_file" ]; then
+        echo "Error: icon was not generated: $output_file" >&2
+        exit 1
+    fi
 }
 
 # Launcher icons

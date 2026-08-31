@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.edwardflores.magnetar.orpheus.R
+import com.edwardflores.magnetar.orpheus.BuildConfig
 import com.edwardflores.magnetar.orpheus.audio.AudioCaptureProvider
 import com.edwardflores.magnetar.orpheus.audio.PitchDetector
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +43,8 @@ class TunerViewModel(
     fun startTuning() {
         if (_uiState.value.isActive) return
 
+        pitchDetector.reset()
+
         _uiState.value = _uiState.value.copy(
             isActive = true,
             selectedInstrument = "Guitar",
@@ -50,16 +53,24 @@ class TunerViewModel(
 
         viewModelScope.launch {
             audioCaptureProvider.startCapture().collect { buffer ->
-                val inputLevel = calculateInputLevel(buffer)
+                val result = pitchDetector.analyze(buffer)
+                if (BuildConfig.DEBUG && result.candidateFrequencyHz != null && !result.isPitchValid) {
+                    Log.d(
+                        "PitchTracker",
+                        "Rejected candidate=${result.candidateFrequencyHz}Hz confidence=${result.confidence} " +
+                            "rms=${result.rms} floor=${result.noiseFloor} snr=${result.signalToNoiseRatio}"
+                    )
+                }
+                val inputLevel = result.rms.toFloat().coerceIn(0f, 1f)
                 val waveformSamples = downSampleWaveform(buffer)
+
                 _uiState.value = _uiState.value.copy(
                     inputLevel = inputLevel,
                     waveformSamples = waveformSamples
                 )
 
-                val frequency = pitchDetector.estimatePitch(buffer)
-                if (frequency > 0 && frequency.isFinite()) {
-                    val stableFreq = updateStabilityFilter(frequency)
+                if (result.isPitchValid && result.candidateFrequencyHz != null) {
+                    val stableFreq = updateStabilityFilter(result.candidateFrequencyHz)
                     processFrequency(stableFreq, inputLevel, waveformSamples)
                 }
             }
@@ -140,14 +151,6 @@ class TunerViewModel(
             pitchStabilityPoints = updatePitchStability(cents),
             calibrationErrorResId = null
         )
-    }
-
-    private fun calculateInputLevel(buffer: FloatArray): Float {
-        if (buffer.isEmpty()) return 0f
-        val rms = kotlin.math.sqrt(buffer.fold(0.0) { total, sample ->
-            total + sample * sample
-        } / buffer.size).toFloat()
-        return rms.coerceIn(0f, 1f)
     }
 
     private fun downSampleWaveform(buffer: FloatArray): List<Float> {
