@@ -60,7 +60,7 @@ fun InputWaveform(
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Mic,
-                    contentDescription = "Microphone active",
+                    contentDescription = if (isActive) "Microphone active" else "Microphone idle",
                     tint = if (isActive) OrpheusColors.PrimaryGreen else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

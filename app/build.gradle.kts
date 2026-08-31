@@ -6,14 +6,14 @@ plugins {
 
 android {
     namespace = "com.edwardflores.magnetar.orpheus"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.edwardflores.magnetar.orpheus"
         minSdk = 26
-        targetSdk = 36
-        versionCode = 3
-        versionName = "2026.08.31.1446"
+        targetSdk = 37
+        versionCode = 4
+        versionName = "2026.08.31.1447"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
