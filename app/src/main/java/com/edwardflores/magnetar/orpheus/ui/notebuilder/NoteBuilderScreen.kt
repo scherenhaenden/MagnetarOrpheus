@@ -55,6 +55,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -620,7 +622,9 @@ private fun PianoKeyboard(
                     val whiteName = note.localizedDisplayName(noteLanguage)
                     OutlinedButton(
                         onClick = { onToggleNote(note) },
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .semantics { contentDescription = whiteName },
                         shape = RoundedCornerShape(14.dp),
                         contentPadding = PaddingValues(0.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
@@ -718,7 +722,7 @@ private fun WorkspaceGridCard(
             Text("NOTE GRID", color = NoteBuilderPalette.TextPrimary, style = MaterialTheme.typography.labelLarge)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Show Enharmonic", color = NoteBuilderPalette.TextSecondary, style = MaterialTheme.typography.labelMedium)
-                Switch(checked = false, onCheckedChange = {})
+                Switch(checked = false, onCheckedChange = {}, enabled = false)
             }
         }
         Spacer(modifier = Modifier.height(14.dp))
@@ -1034,7 +1038,7 @@ private fun NoteSequenceCard(sequence: List<String>) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("Loop", color = NoteBuilderPalette.TextSecondary)
-            Switch(checked = true, onCheckedChange = {})
+            Switch(checked = true, onCheckedChange = {}, enabled = false)
             Text("BPM 120", color = NoteBuilderPalette.TextSecondary)
         }
     }

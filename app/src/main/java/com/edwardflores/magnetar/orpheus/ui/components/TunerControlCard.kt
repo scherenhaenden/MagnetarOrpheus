@@ -110,8 +110,8 @@ fun TunerControlCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    StepperButton(icon = Icons.Outlined.Remove, onClick = trailingMode.onDecrement)
-                    StepperButton(icon = Icons.Outlined.Add, onClick = trailingMode.onIncrement)
+                    StepperButton(Icons.Outlined.Remove, "Decrease value", trailingMode.onDecrement)
+                    StepperButton(Icons.Outlined.Add, "Increase value", trailingMode.onIncrement)
                 }
             }
         }
@@ -129,18 +129,19 @@ sealed interface ControlCardTrailingMode {
 @Composable
 private fun StepperButton(
     icon: ImageVector,
+    contentDescription: String,
     onClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
-            .size(30.dp)
+            .size(48.dp)
             .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = null,
+            contentDescription = contentDescription,
             tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }

@@ -1,6 +1,7 @@
 package com.edwardflores.magnetar.orpheus.notebuilder.audio
 
 import android.media.AudioAttributes
+import android.media.AudioManager
 import android.media.AudioFormat
 import android.media.AudioTrack
 import com.edwardflores.magnetar.orpheus.notebuilder.NoteBuilderMusicTheory
@@ -45,7 +46,7 @@ class NotePlaybackEngine(
                 .build(),
             minBufferSize,
             AudioTrack.MODE_STREAM,
-            AudioTrack.WRITE_NON_BLOCKING
+            AudioManager.AUDIO_SESSION_ID_GENERATE
         )
         activeTrack = track
 
@@ -66,8 +67,18 @@ class NotePlaybackEngine(
                     holdEnabled = holdEnabled,
                     totalFrames = totalFrames
                 )
-                track.write(buffer, 0, framesToGenerate, AudioTrack.WRITE_BLOCKING)
-                frameCursor += framesToGenerate
+                var writtenFrames = 0
+                while (writtenFrames < framesToGenerate) {
+                    val written = track.write(
+                        buffer,
+                        writtenFrames,
+                        framesToGenerate - writtenFrames,
+                        AudioTrack.WRITE_BLOCKING
+                    )
+                    if (written <= 0) return
+                    writtenFrames += written
+                }
+                frameCursor += writtenFrames
             }
         } finally {
             if (activeTrack === track) {

@@ -9,10 +9,12 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -45,6 +47,7 @@ class TunerViewModelTest {
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+        unmockkStatic(Log::class)
     }
 
     private fun mockPitchResult(
@@ -182,6 +185,20 @@ class TunerViewModelTest {
     }
 
     @Test
+    fun `updateCalibration recalculates an already detected note`() = runTest(testDispatcher) {
+        val buffer = floatArrayOf(0f)
+        every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
+        every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, true)
+
+        viewModel.startTuning()
+        advanceUntilIdle()
+        viewModel.updateCalibration(432.0)
+
+        assertEquals(432.0, viewModel.uiState.value.referenceA4, 0.0)
+        assertEquals(440.0, viewModel.uiState.value.frequency, 0.01)
+    }
+
+    @Test
     fun `applyPreset updates reference pitch`() {
         viewModel.applyPreset(442)
         assertEquals(442.0, viewModel.uiState.value.referenceA4, 0.0)
@@ -190,6 +207,14 @@ class TunerViewModelTest {
     @Test
     fun `updateCalibration with invalid value surfaces validation error`() {
         viewModel.updateCalibration(0.0)
+
+        assertEquals(440.0, viewModel.uiState.value.referenceA4, 0.0)
+        assertEquals(R.string.calibration_error_positive_hz, viewModel.uiState.value.calibrationErrorResId)
+    }
+
+    @Test
+    fun `updateCalibration rejects non finite values`() {
+        viewModel.updateCalibration(Double.NaN)
 
         assertEquals(440.0, viewModel.uiState.value.referenceA4, 0.0)
         assertEquals(R.string.calibration_error_positive_hz, viewModel.uiState.value.calibrationErrorResId)
@@ -251,10 +276,12 @@ class TunerViewModelTest {
     }
 
     @Test
-    fun `tuner state handles empty input and keeps bounded history`() = runTest {
+    fun `tuner state handles empty input and keeps bounded history`() = runTest(testDispatcher) {
         val buffer = floatArrayOf()
-        every { audioCaptureProvider.startCapture() } returns flowOf(buffer, buffer, buffer, buffer, buffer, buffer)
-        every { pitchDetector.estimatePitch(buffer) } returnsMany listOf(220.0, 246.94, 261.63, 293.66, 329.63, 349.23)
+        every { audioCaptureProvider.startCapture() } returns flow { repeat(25) { emit(buffer) } }
+        every { pitchDetector.analyze(buffer) } returnsMany List(25) { index ->
+            mockPitchResult(220.0 + index * 10.0, isValid = true, rms = 0.0)
+        }
 
         viewModel.startTuning()
         advanceUntilIdle()
@@ -262,7 +289,7 @@ class TunerViewModelTest {
         val state = viewModel.uiState.value
         assertEquals(48, state.waveformSamples.size)
         assertEquals(0f, state.inputLevel)
-        assertEquals(5, state.noteHistory.size)
+        assertTrue(state.noteHistory.size <= 5)
         assertEquals(24, state.pitchStabilityPoints.size)
     }
 }

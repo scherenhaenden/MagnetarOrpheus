@@ -23,6 +23,7 @@ class NoteBuilderViewModel(
     val uiState: StateFlow<NoteBuilderUiState> = _uiState.asStateFlow()
 
     private var playbackJob: Job? = null
+    @Volatile
     private var playbackGeneration: Long = 0
 
     fun updateInputMode(mode: NoteBuilderInputMode) {

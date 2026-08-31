@@ -8,6 +8,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,6 +42,7 @@ class NoteBuilderViewModelTest {
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+        unmockkStatic(Log::class)
     }
 
     @Test
@@ -126,7 +128,7 @@ class NoteBuilderViewModelTest {
     }
 
     @Test
-    fun `playSelection invokes playback engine`() = runTest {
+    fun `playSelection invokes playback engine`() = runTest(testDispatcher) {
         coEvery { playbackEngine.playSelection(any(), any()) } returns Unit
 
         viewModel.playSelection()
@@ -142,7 +144,7 @@ class NoteBuilderViewModelTest {
     }
 
     @Test
-    fun `playSelection with hold enabled passes hold flag`() = runTest {
+    fun `playSelection with hold enabled passes hold flag`() = runTest(testDispatcher) {
         coEvery { playbackEngine.playSelection(any(), any()) } returns Unit
 
         viewModel.toggleHold()
@@ -153,7 +155,7 @@ class NoteBuilderViewModelTest {
     }
 
     @Test
-    fun `playSelection does nothing when no notes selected`() = runTest {
+    fun `playSelection does nothing when no notes selected`() = runTest(testDispatcher) {
         viewModel.clearSelection()
 
         viewModel.playSelection()
@@ -164,7 +166,7 @@ class NoteBuilderViewModelTest {
     }
 
     @Test
-    fun `playSelection surfaces playback errors`() = runTest {
+    fun `playSelection surfaces playback errors`() = runTest(testDispatcher) {
         coEvery { playbackEngine.playSelection(any(), any()) } throws IllegalStateException("boom")
 
         viewModel.playSelection()
@@ -175,7 +177,7 @@ class NoteBuilderViewModelTest {
     }
 
     @Test
-    fun `successful playback clears previous playback errors`() = runTest {
+    fun `successful playback clears previous playback errors`() = runTest(testDispatcher) {
         coEvery { playbackEngine.playSelection(any(), any()) } throws IllegalStateException("boom") andThen Unit
 
         viewModel.playSelection()
@@ -188,7 +190,7 @@ class NoteBuilderViewModelTest {
     }
 
     @Test
-    fun `stopPlayback stops engine and updates state`() = runTest {
+    fun `stopPlayback stops engine and updates state`() = runTest(testDispatcher) {
         coEvery { playbackEngine.playSelection(any(), any()) } coAnswers { kotlinx.coroutines.awaitCancellation() }
 
         viewModel.playSelection()
@@ -203,7 +205,7 @@ class NoteBuilderViewModelTest {
     }
 
     @Test
-    fun `changing notes while playing retriggers playback`() = runTest {
+    fun `changing notes while playing retriggers playback`() = runTest(testDispatcher) {
         var callCount = 0
         coEvery { playbackEngine.playSelection(any(), any()) } coAnswers {
             callCount += 1

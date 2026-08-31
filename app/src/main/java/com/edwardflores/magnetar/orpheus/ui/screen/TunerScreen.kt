@@ -81,11 +81,25 @@ fun TunerScreen(
         color = MaterialTheme.colorScheme.background
     ) {
         if (!hasPermission) {
-            PermissionState(modifier = Modifier.fillMaxSize())
-            return@Surface
-        }
-
-        BoxWithConstraints(
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 18.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp)
+            ) {
+                AppHeader(
+                    modifier = Modifier.fillMaxWidth(),
+                    showProfile = false,
+                    appLanguage = appLanguage,
+                    noteLanguage = noteLanguage,
+                    currentDestination = currentDestination,
+                    onNavigate = onNavigate,
+                    onAppLanguageChange = onAppLanguageChange,
+                    onNoteLanguageChange = onNoteLanguageChange
+                )
+                PermissionState(modifier = Modifier.weight(1f))
+            }
+        } else BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 18.dp, vertical = 12.dp)

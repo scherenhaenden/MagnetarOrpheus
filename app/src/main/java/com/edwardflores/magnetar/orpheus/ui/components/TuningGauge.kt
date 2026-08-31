@@ -44,7 +44,7 @@ fun TuningGauge(
         val strokeWidth = width * 0.015f
         val tickLengthMinor = width * 0.025f
         val tickLengthMajor = width * 0.065f
-        val radius = width * 0.42f
+        val radius = minOf(width, height) * 0.42f
         val center = Offset(width / 2f, height * 0.88f)
         val arcRect = Rect(
             offset = Offset(center.x - radius, center.y - radius),
