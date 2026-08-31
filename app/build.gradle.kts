@@ -12,8 +12,8 @@ android {
         applicationId = "com.edwardflores.magnetar.orpheus"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "2026.05.12.1554"
+        versionCode = 3
+        versionName = "2026.08.31.1446"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
