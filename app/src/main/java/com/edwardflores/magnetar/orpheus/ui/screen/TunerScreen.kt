@@ -159,6 +159,7 @@ private fun PhoneLayout(
     onNamingSystemChange: (NoteNamingSystem) -> Unit
 ) {
     var showPitchDialog by remember { mutableStateOf(false) }
+    var showModeDialog by remember { mutableStateOf(false) }
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -167,7 +168,8 @@ private fun PhoneLayout(
                 value = uiState.tunerMode,
                 subtitle = uiState.selectedInstrument,
                 leadingIcon = Icons.Outlined.GraphicEq,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                onClick = { showModeDialog = true }
             )
             TunerControlCard(
                 title = "Reference Pitch",
@@ -203,6 +205,14 @@ private fun PhoneLayout(
             }
         )
     }
+
+    if (showModeDialog) {
+        TunerModeDialog(
+            currentMode = uiState.tunerMode,
+            currentInstrument = uiState.selectedInstrument,
+            onDismiss = { showModeDialog = false }
+        )
+    }
 }
 
 @Composable
@@ -215,6 +225,7 @@ private fun TabletLayout(
     modifier: Modifier = Modifier
 ) {
     var showPitchDialog by remember { mutableStateOf(false) }
+    var showModeDialog by remember { mutableStateOf(false) }
 
     Row(
         modifier = modifier,
@@ -235,7 +246,8 @@ private fun TabletLayout(
                     value = uiState.tunerMode,
                     subtitle = uiState.selectedInstrument,
                     leadingIcon = Icons.Outlined.GraphicEq,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    onClick = { showModeDialog = true }
                 )
                 TunerControlCard(
                     title = "Reference Pitch",
@@ -292,6 +304,74 @@ private fun TabletLayout(
             }
         )
     }
+
+    if (showModeDialog) {
+        TunerModeDialog(
+            currentMode = uiState.tunerMode,
+            currentInstrument = uiState.selectedInstrument,
+            onDismiss = { showModeDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun TunerModeDialog(
+    currentMode: String,
+    currentInstrument: String,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Tuner Mode",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                listOf("Chromatic", "Guitar", "Bass", "Violin", "Ukulele").forEach { mode ->
+                    val isSelected = mode == currentMode || mode == currentInstrument
+                    Surface(
+                        onClick = onDismiss,
+                        shape = RoundedCornerShape(16.dp),
+                        color = if (isSelected) OrpheusColors.PrimaryGreen.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surface,
+                        border = BorderStroke(
+                            1.dp,
+                            if (isSelected) OrpheusColors.PrimaryGreen else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = mode,
+                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                                color = if (isSelected) OrpheusColors.PrimaryGreen else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(containerColor = OrpheusColors.PrimaryGreen)
+            ) {
+                Text("Close", color = MaterialTheme.colorScheme.surface)
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        tonalElevation = 0.dp
+    )
 }
 
 @Composable
