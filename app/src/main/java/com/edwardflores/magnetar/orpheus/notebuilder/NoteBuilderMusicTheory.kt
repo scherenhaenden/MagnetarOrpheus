@@ -26,7 +26,9 @@ object NoteBuilderMusicTheory {
             )
         }
 
-        val sorted = notes.distinctBy { it.pitchClass to it.octave }.sortedBy(::toMidiNumber)
+        val sorted = notes
+            .distinctBy { it.pitchClass to it.octave }
+            .sortedWith { first, second -> toMidiNumber(first).compareTo(toMidiNumber(second)) }
         val root = sorted.first()
         val rootName = formatNote(root, noteLanguage)
         val rootPitch = formatPitchClass(root.pitchClass, noteLanguage)

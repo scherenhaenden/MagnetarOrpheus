@@ -84,4 +84,42 @@ class AppModelsTest {
         assertEquals(NoteNamingSystem.SYLLABIC, NoteLanguage.SPANISH.toNamingSystem())
         assertEquals(NoteNamingSystem.GERMAN, NoteLanguage.GERMAN.toNamingSystem())
     }
+
+    @Test
+    fun `all app languages provide complete strings and localized destinations`() {
+        AppLanguage.entries.forEach { language ->
+            val strings = appStrings(language)
+            val labels = listOf(
+                strings.settings,
+                strings.appLanguage,
+                strings.noteLanguage,
+                strings.close,
+                strings.tunerTitle,
+                strings.tunerSubtitle,
+                strings.noteBuilderTitle,
+                strings.noteBuilderSubtitle,
+                strings.noteBuilderFeatureLabel,
+                strings.keyboard,
+                strings.grid,
+                strings.selectedNotes,
+                strings.noNotesSelected,
+                strings.selectNotesPrompt,
+                strings.play,
+                strings.replay,
+                strings.stop,
+                strings.clear,
+                strings.hold,
+                strings.aboutThisSelection,
+                strings.quality
+            )
+
+            assertTrue("$language has an empty translation", labels.all { it.isNotBlank() })
+            assertEquals(strings.tunerTitle, AppDestination.TUNER.localizedTitle(strings))
+            assertEquals(strings.tunerSubtitle, AppDestination.TUNER.localizedSubtitle(strings))
+            assertEquals(strings.noteBuilderTitle, AppDestination.NOTE_BUILDER.localizedTitle(strings))
+            assertEquals(strings.noteBuilderSubtitle, AppDestination.NOTE_BUILDER.localizedSubtitle(strings))
+        }
+
+        assertEquals(NoteNamingSystem.SCIENTIFIC, NoteLanguage.ENGLISH.toNamingSystem())
+    }
 }

@@ -43,7 +43,7 @@ The current branch state extends the original tuner MVP in several ways:
 *   Premium dark-mode tuner visuals have been restored and decomposed into reusable UI components.
 *   In-app navigation now separates **Tuner** and **Note Builder** as two different destinations.
 *   The Note Builder branch state includes responsive phone/tablet layouts, note-selection state, music-theory naming, playback wiring, and tablet-safe bounded scroll regions.
-*   The Android app version target has been raised to `2026.05.12.1554`.
+*   The Android app version target has been raised to `2026.08.31.1446`.
 *   A standalone GitHub Actions workflow now exists for manually publishing downloadable APK builds to GitHub Releases.
 
 ## YAML Project Schema
