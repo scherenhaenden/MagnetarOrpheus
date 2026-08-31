@@ -142,11 +142,26 @@ class TunerViewModelTest {
     }
 
     @Test
+    fun `applyPreset updates reference pitch`() {
+        viewModel.applyPreset(442)
+        assertEquals(442.0, viewModel.uiState.value.referenceA4, 0.0)
+    }
+
+    @Test
     fun `updateCalibration with invalid value surfaces validation error`() {
         viewModel.updateCalibration(0.0)
 
         assertEquals(440.0, viewModel.uiState.value.referenceA4, 0.0)
         assertEquals(R.string.calibration_error_positive_hz, viewModel.uiState.value.calibrationErrorResId)
+    }
+
+    @Test
+    fun `valid calibration clears previous validation error`() {
+        viewModel.updateCalibration(0.0)
+        viewModel.updateCalibration(441.0)
+
+        assertEquals(441.0, viewModel.uiState.value.referenceA4, 0.0)
+        assertEquals(null, viewModel.uiState.value.calibrationErrorResId)
     }
 
     @Test
@@ -174,5 +189,40 @@ class TunerViewModelTest {
             viewModel.updateNamingSystem(system)
             assertTrue(viewModel.uiState.value.noteName.isNotEmpty())
         }
+    }
+
+    @Test
+    fun `startTuning updates waveform input level history and labels`() = runTest {
+        val buffer = floatArrayOf(0.5f, -0.5f, 0.5f, -0.5f, 0.25f, -0.25f)
+        every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
+        every { pitchDetector.estimatePitch(buffer) } returns 440.0
+
+        viewModel.startTuning()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertTrue(state.inputLevel > 0f)
+        assertTrue(state.waveformSamples.isNotEmpty())
+        assertEquals("A", state.noteLabel)
+        assertEquals("A", state.chromaticNote)
+        assertEquals("A4", state.noteHistory.first().note)
+        assertTrue(state.pitchStabilityPoints.isNotEmpty())
+        assertEquals("Guitar", state.selectedInstrument)
+    }
+
+    @Test
+    fun `tuner state handles empty input and keeps bounded history`() = runTest {
+        val buffer = floatArrayOf()
+        every { audioCaptureProvider.startCapture() } returns flowOf(buffer, buffer, buffer, buffer, buffer, buffer)
+        every { pitchDetector.estimatePitch(buffer) } returnsMany listOf(220.0, 246.94, 261.63, 293.66, 329.63, 349.23)
+
+        viewModel.startTuning()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(48, state.waveformSamples.size)
+        assertEquals(0f, state.inputLevel)
+        assertEquals(5, state.noteHistory.size)
+        assertEquals(24, state.pitchStabilityPoints.size)
     }
 }
