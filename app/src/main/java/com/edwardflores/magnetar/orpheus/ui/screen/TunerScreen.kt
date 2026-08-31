@@ -1,5 +1,6 @@
 package com.edwardflores.magnetar.orpheus.ui.screen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,16 +16,29 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material.icons.outlined.MusicNote
+import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -144,15 +158,10 @@ private fun PhoneLayout(
     onCalibrationChange: (Double) -> Unit,
     onNamingSystemChange: (NoteNamingSystem) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
-        ChromaticNoteRow(currentNote = uiState.chromaticNote)
-        MainTunerPanel(uiState = uiState, gaugeHeight = 420.dp)
-        InputWaveform(
-            waveformSamples = uiState.waveformSamples,
-            inputLevel = uiState.inputLevel,
-            isActive = uiState.isActive
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+    var showPitchDialog by remember { mutableStateOf(false) }
+
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             TunerControlCard(
                 title = "Tuner Mode",
                 value = uiState.tunerMode,
@@ -166,18 +175,33 @@ private fun PhoneLayout(
                 subtitle = uiState.selectedTuning,
                 leadingIcon = Icons.Outlined.Tune,
                 modifier = Modifier.weight(1f),
-                trailingMode = ControlCardTrailingMode.Stepper(
-                    onIncrement = { onCalibrationChange(uiState.referenceA4 + 1) },
-                    onDecrement = { onCalibrationChange(uiState.referenceA4 - 1) }
-                )
+                onClick = { showPitchDialog = true }
             )
         }
+        ChromaticNoteRow(currentNote = uiState.chromaticNote)
+        MainTunerPanel(uiState = uiState, gaugeHeight = 380.dp)
+        InputWaveform(
+            waveformSamples = uiState.waveformSamples,
+            inputLevel = uiState.inputLevel,
+            isActive = uiState.isActive
+        )
         CalibrationError(uiState = uiState)
         NoteSystemSelector(
             currentSystem = uiState.namingSystem,
             onSystemSelected = onNamingSystemChange
         )
         VersionFooter(versionName = versionName)
+    }
+
+    if (showPitchDialog) {
+        ReferencePitchDialog(
+            currentPitch = uiState.referenceA4,
+            calibrationErrorResId = uiState.calibrationErrorResId,
+            onDismiss = { showPitchDialog = false },
+            onSave = { newPitch ->
+                onCalibrationChange(newPitch)
+            }
+        )
     }
 }
 
@@ -190,6 +214,8 @@ private fun TabletLayout(
     onPresetSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showPitchDialog by remember { mutableStateOf(false) }
+
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(18.dp),
@@ -203,13 +229,6 @@ private fun TabletLayout(
                 .verticalScroll(leftScrollState),
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-            ChromaticNoteRow(currentNote = uiState.chromaticNote)
-            MainTunerPanel(uiState = uiState, gaugeHeight = 500.dp)
-            InputWaveform(
-                waveformSamples = uiState.waveformSamples,
-                inputLevel = uiState.inputLevel,
-                isActive = uiState.isActive
-            )
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 TunerControlCard(
                     title = "Tuner Mode",
@@ -224,10 +243,7 @@ private fun TabletLayout(
                     subtitle = uiState.selectedTuning,
                     leadingIcon = Icons.Outlined.Tune,
                     modifier = Modifier.weight(1f),
-                    trailingMode = ControlCardTrailingMode.Stepper(
-                        onIncrement = { onCalibrationChange(uiState.referenceA4 + 1) },
-                        onDecrement = { onCalibrationChange(uiState.referenceA4 - 1) }
-                    )
+                    onClick = { showPitchDialog = true }
                 )
                 TunerControlCard(
                     title = "Note System",
@@ -237,6 +253,13 @@ private fun TabletLayout(
                     modifier = Modifier.weight(1f)
                 )
             }
+            ChromaticNoteRow(currentNote = uiState.chromaticNote)
+            MainTunerPanel(uiState = uiState, gaugeHeight = 460.dp)
+            InputWaveform(
+                waveformSamples = uiState.waveformSamples,
+                inputLevel = uiState.inputLevel,
+                isActive = uiState.isActive
+            )
             CalibrationError(uiState = uiState)
             NoteSystemSelector(
                 currentSystem = uiState.namingSystem,
@@ -256,6 +279,17 @@ private fun TabletLayout(
             quickPresets = uiState.quickPresets,
             referenceA4 = uiState.referenceA4,
             onPresetSelected = onPresetSelected
+        )
+    }
+
+    if (showPitchDialog) {
+        ReferencePitchDialog(
+            currentPitch = uiState.referenceA4,
+            calibrationErrorResId = uiState.calibrationErrorResId,
+            onDismiss = { showPitchDialog = false },
+            onSave = { newPitch ->
+                onCalibrationChange(newPitch)
+            }
         )
     }
 }
@@ -333,6 +367,126 @@ private fun NoteSystemSelector(
             )
         }
     }
+}
+
+@Composable
+private fun ReferencePitchDialog(
+    currentPitch: Double,
+    calibrationErrorResId: Int?,
+    onDismiss: () -> Unit,
+    onSave: (Double) -> Unit
+) {
+    var tempPitch by remember(currentPitch) { mutableStateOf(currentPitch) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Reference Pitch",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "A4 = ${tempPitch.toInt()} Hz",
+                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                    color = OrpheusColors.PrimaryGreen
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    IconButton(
+                        onClick = { tempPitch = (tempPitch - 1).coerceAtLeast(410.0) },
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Remove,
+                            contentDescription = "Decrease",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    Text(
+                        text = "${tempPitch.toInt()} Hz",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    IconButton(
+                        onClick = { tempPitch = (tempPitch + 1).coerceAtMost(470.0) },
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Add,
+                            contentDescription = "Increase",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.horizontalScroll(rememberScrollState())
+                ) {
+                    listOf(415, 432, 440, 442, 444).forEach { hz ->
+                        val isSelected = tempPitch.toInt() == hz
+                        Surface(
+                            onClick = { tempPitch = hz.toDouble() },
+                            shape = RoundedCornerShape(16.dp),
+                            color = if (isSelected) OrpheusColors.PrimaryGreen.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surface,
+                            border = BorderStroke(
+                                1.dp,
+                                if (isSelected) OrpheusColors.PrimaryGreen else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                            )
+                        ) {
+                            Text(
+                                text = "$hz Hz",
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = if (isSelected) OrpheusColors.PrimaryGreen else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+
+                if (calibrationErrorResId != null) {
+                    Text(
+                        text = stringResource(calibrationErrorResId),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onSave(tempPitch)
+                    onDismiss()
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = OrpheusColors.PrimaryGreen)
+            ) {
+                Text("Save", color = MaterialTheme.colorScheme.surface)
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        tonalElevation = 0.dp
+    )
 }
 
 @Composable
