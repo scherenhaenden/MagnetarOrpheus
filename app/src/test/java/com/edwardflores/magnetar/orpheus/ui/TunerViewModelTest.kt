@@ -249,4 +249,20 @@ class TunerViewModelTest {
         assertTrue(state.pitchStabilityPoints.isNotEmpty())
         assertEquals("Guitar", state.selectedInstrument)
     }
+
+    @Test
+    fun `tuner state handles empty input and keeps bounded history`() = runTest {
+        val buffer = floatArrayOf()
+        every { audioCaptureProvider.startCapture() } returns flowOf(buffer, buffer, buffer, buffer, buffer, buffer)
+        every { pitchDetector.estimatePitch(buffer) } returnsMany listOf(220.0, 246.94, 261.63, 293.66, 329.63, 349.23)
+
+        viewModel.startTuning()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(48, state.waveformSamples.size)
+        assertEquals(0f, state.inputLevel)
+        assertEquals(5, state.noteHistory.size)
+        assertEquals(24, state.pitchStabilityPoints.size)
+    }
 }

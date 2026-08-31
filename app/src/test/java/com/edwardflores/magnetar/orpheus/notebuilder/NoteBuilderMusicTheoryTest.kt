@@ -183,4 +183,70 @@ class NoteBuilderMusicTheoryTest {
     fun `toMidiNumber rejects unsupported pitch classes`() {
         NoteBuilderMusicTheory.toMidiNumber(NoteSelection("Hb", 4))
     }
+
+    @Test
+    fun `all localized theory labels and interval names are reachable`() {
+        val chordExamples = listOf(
+            listOf(NoteSelection("C", 4)),
+            listOf(NoteSelection("C", 4), NoteSelection("E", 4), NoteSelection("G", 4)),
+            listOf(NoteSelection("C", 4), NoteSelection("D#", 4), NoteSelection("G", 4)),
+            listOf(NoteSelection("C", 4), NoteSelection("D#", 4), NoteSelection("F#", 4)),
+            listOf(NoteSelection("C", 4), NoteSelection("E", 4), NoteSelection("G#", 4)),
+            listOf(NoteSelection("C", 4), NoteSelection("D", 4), NoteSelection("G", 4)),
+            listOf(NoteSelection("C", 4), NoteSelection("F", 4), NoteSelection("G", 4)),
+            listOf(NoteSelection("C", 4), NoteSelection("E", 4), NoteSelection("G", 4), NoteSelection("A#", 4)),
+            listOf(NoteSelection("C", 4), NoteSelection("E", 4), NoteSelection("G", 4), NoteSelection("B", 4)),
+            listOf(NoteSelection("C", 4), NoteSelection("D#", 4), NoteSelection("G", 4), NoteSelection("A#", 4)),
+            listOf(NoteSelection("C", 4), NoteSelection("D#", 4), NoteSelection("F#", 4), NoteSelection("A", 4)),
+            listOf(NoteSelection("C", 4), NoteSelection("D#", 4), NoteSelection("F#", 4), NoteSelection("A#", 4)),
+            listOf(NoteSelection("C", 4), NoteSelection("C#", 4), NoteSelection("G", 4))
+        )
+        val chromatic = listOf("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
+
+        NoteLanguage.entries.forEach { language ->
+            assertTrue(NoteBuilderMusicTheory.analyzeSelection(emptyList(), language).title.isNotBlank())
+            chordExamples.forEach { notes ->
+                val analysis = NoteBuilderMusicTheory.analyzeSelection(notes, language)
+                assertTrue(analysis.title.isNotBlank())
+                assertTrue(analysis.subtitle.isNotBlank())
+                assertTrue(analysis.quality.isNotBlank())
+            }
+            chromatic.forEach { pitchClass ->
+                val interval = NoteBuilderMusicTheory.analyzeSelection(
+                    listOf(NoteSelection("C", 4), NoteSelection(pitchClass, 5)),
+                    language
+                )
+                assertTrue(interval.title.isNotBlank())
+            }
+            assertTrue(
+                NoteBuilderMusicTheory.analyzeSelection(
+                    listOf(NoteSelection("C", 4), NoteSelection("C", 5)),
+                    language
+                ).title.isNotBlank()
+            )
+        }
+    }
+
+    @Test
+    fun `note naming formatter supports every language and chromatic pitch`() {
+        val expectedNames = mapOf(
+            NoteLanguage.ENGLISH to listOf("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"),
+            NoteLanguage.SPANISH to listOf("Do", "Do#", "Re", "Re#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"),
+            NoteLanguage.GERMAN to listOf("C", "Cis", "D", "Dis", "E", "F", "Fis", "G", "Gis", "A", "Ais", "H")
+        )
+        val chromatic = listOf("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
+
+        expectedNames.forEach { (language, names) ->
+            chromatic.zip(names).forEach { (pitchClass, expected) ->
+                assertEquals(expected, NoteNamingFormatter.formatPitchClass(pitchClass, language))
+                assertEquals("${expected}4", NoteNamingFormatter.formatNote(NoteSelection(pitchClass, 4), language))
+                assertEquals(expected, NoteNamingFormatter.formatNote(NoteSelection(pitchClass, 4), language, includeOctave = false))
+            }
+        }
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `note naming formatter rejects unsupported pitch class`() {
+        NoteNamingFormatter.formatPitchClass("Hb", NoteLanguage.ENGLISH)
+    }
 }
