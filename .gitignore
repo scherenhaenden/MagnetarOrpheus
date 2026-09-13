@@ -2,6 +2,7 @@
 .gradle
 /.kotlin
 /local.properties
+/.idea/
 /.idea/caches
 /.idea/deploymentTargetSelector.xml
 /.idea/libraries

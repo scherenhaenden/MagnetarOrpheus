@@ -39,7 +39,7 @@ data class InstrumentProfile(
 
     val noteSequence: String
         get() = notes.joinToString("") { note ->
-            note.name.takeWhile { character -> character.isLetter() || character == '#' || character == 'b' }
+            note.name.takeWhile { character -> character.isLetter() || character == '#' }
         }
 
     val tuningDisplayName: String

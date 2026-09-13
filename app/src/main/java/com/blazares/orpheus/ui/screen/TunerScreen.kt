@@ -200,6 +200,19 @@ private fun PhoneLayout(
     var showModeDialog by remember { mutableStateOf(false) }
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        ChromaticNoteRow(currentNote = uiState.chromaticNote)
+        MainTunerPanel(uiState = uiState, gaugeHeight = 380.dp)
+        InputWaveform(
+            waveformSamples = uiState.waveformSamples,
+            inputLevel = uiState.inputLevel,
+            isActive = uiState.isActive
+        )
+        CaptureError(uiState = uiState)
+        CalibrationError(uiState = uiState)
+        NoteSystemSelector(
+            currentSystem = uiState.namingSystem,
+            onSystemSelected = onNamingSystemChange
+        )
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             TunerControlCard(
                 title = "Instrument Profile",
@@ -218,19 +231,6 @@ private fun PhoneLayout(
                 onClick = { showPitchDialog = true }
             )
         }
-        ChromaticNoteRow(currentNote = uiState.chromaticNote)
-        MainTunerPanel(uiState = uiState, gaugeHeight = 380.dp)
-        InputWaveform(
-            waveformSamples = uiState.waveformSamples,
-            inputLevel = uiState.inputLevel,
-            isActive = uiState.isActive
-        )
-        CaptureError(uiState = uiState)
-        CalibrationError(uiState = uiState)
-        NoteSystemSelector(
-            currentSystem = uiState.namingSystem,
-            onSystemSelected = onNamingSystemChange
-        )
         VersionFooter(versionName = versionName)
     }
 
@@ -290,6 +290,19 @@ private fun TabletLayout(
                 .verticalScroll(leftScrollState),
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
+            ChromaticNoteRow(currentNote = uiState.chromaticNote)
+            MainTunerPanel(uiState = uiState, gaugeHeight = 460.dp)
+            InputWaveform(
+                waveformSamples = uiState.waveformSamples,
+                inputLevel = uiState.inputLevel,
+                isActive = uiState.isActive
+            )
+            CaptureError(uiState = uiState)
+            CalibrationError(uiState = uiState)
+            NoteSystemSelector(
+                currentSystem = uiState.namingSystem,
+                onSystemSelected = onNamingSystemChange
+            )
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 TunerControlCard(
                     title = "Instrument Profile",
@@ -315,19 +328,6 @@ private fun TabletLayout(
                     modifier = Modifier.weight(1f)
                 )
             }
-            ChromaticNoteRow(currentNote = uiState.chromaticNote)
-            MainTunerPanel(uiState = uiState, gaugeHeight = 460.dp)
-            InputWaveform(
-                waveformSamples = uiState.waveformSamples,
-                inputLevel = uiState.inputLevel,
-                isActive = uiState.isActive
-            )
-            CaptureError(uiState = uiState)
-            CalibrationError(uiState = uiState)
-            NoteSystemSelector(
-                currentSystem = uiState.namingSystem,
-                onSystemSelected = onNamingSystemChange
-            )
             VersionFooter(versionName = versionName)
         }
 

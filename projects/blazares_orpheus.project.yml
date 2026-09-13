@@ -132,6 +132,11 @@ tasks:
     title: Production Hardening and Release Readiness
     owner: ChatGPT
     state: in_progress
+  task-019:
+    milestone: ms-07
+    title: Replace Mock-Based Tests with Real and Manual Test Seams
+    owner: ChatGPT
+    state: planned
 
 risks:
   - id: R1

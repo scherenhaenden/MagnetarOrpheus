@@ -1,19 +1,13 @@
 package com.blazares.orpheus.ui
 
-import com.blazares.orpheus.audio.AudioCaptureProvider
-import com.blazares.orpheus.audio.PitchDetector
 import com.blazares.orpheus.models.InstrumentProfiles
-import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class TunerProfileSelectionTest {
-    private fun createViewModel() = TunerViewModel(
-        audioCaptureProvider = mockk<AudioCaptureProvider>(relaxed = true),
-        pitchDetector = mockk<PitchDetector>(relaxed = true)
-    )
+    private fun createViewModel() = TunerViewModel()
 
     @Test
     fun `default profile identity matches guitar standard`() {

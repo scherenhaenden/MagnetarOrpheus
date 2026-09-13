@@ -91,6 +91,7 @@ class InstrumentProfileTest {
         assertNull(InstrumentProfiles.GuitarStandard.nearestTarget(0.0))
         assertNull(InstrumentProfiles.GuitarStandard.nearestTarget(Double.NaN))
         assertNull(InstrumentProfiles.GuitarStandard.nearestTarget(110.0, 0.0))
+        assertNull(InstrumentProfiles.GuitarStandard.nearestTarget(110.0, Double.NaN))
         assertNull(empty.nearestTarget(440.0))
     }
 
@@ -139,5 +140,17 @@ class InstrumentProfileTest {
         assertEquals("name", profile.tuningName)
         assertEquals("", profile.noteSequence)
         assertEquals("name ()", profile.tuningDisplayName)
+    }
+
+    @Test
+    fun `note sequence preserves flat pitch names`() {
+        val profile = InstrumentProfile(
+            id = "flat",
+            name = "Clarinet (Bb)",
+            notes = listOf(TuningNote("Bb3", 233.08, 1))
+        )
+
+        assertEquals("Bb", profile.noteSequence)
+        assertEquals("Bb (Bb)", profile.tuningDisplayName)
     }
 }

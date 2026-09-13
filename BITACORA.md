@@ -4,6 +4,11 @@
 Chronological record of all significant project events, decisions, and state changes for BlazaresOrpheus.
 
 ---
+**Timestamp:** 2026-09-13 16:30 UTC
+**Author:** ChatGPT
+**Entry:** Adopted a no-new-mocks testing policy. New profile-selection tests now exercise the real `TunerViewModel`, and `AudioCaptureProvider` resolves `AudioRecord` capabilities lazily so JVM tests can construct production objects without mocking Android audio APIs. Existing MockK usage remains legacy migration debt under `task-019`; future tests will prefer real implementations, deterministic signals, small hand-written seams only at unavoidable platform/device boundaries, and instrumentation for actual audio behavior.
+
+---
 **Timestamp:** 2026-09-13 15:25 UTC
 **Author:** ChatGPT
 **Entry:** Continued `task-008` and `task-018` from PR #35 on branch `fix/production-hardening-continuation-2026-09-13`. Expanded the canonical instrument catalog from three standard-only profiles to seven profiles (Guitar Standard/Drop D/D Standard, Bass Standard/Drop D, Ukulele Soprano/Low G), added stable profile identity to tuner state, removed the duplicated UI profile table, added Compose/unit coverage for profile selection, extracted deterministic microphone-permission and lifecycle controllers with unit coverage, added harmonic-rich/noisy pitch-accuracy tests, added release lint, dependency review, CodeQL, Dependabot, signed artifact verification, explicit Android backup scopes, and cleartext-traffic hardening. Physical-device latency/accuracy and the real release keystore remain external validation items.

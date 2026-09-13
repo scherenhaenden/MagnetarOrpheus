@@ -1,7 +1,7 @@
 # Testing Strategy for BlazaresOrpheus
 
 ## Test Layers
-1. **Unit tests (JUnit 4 + MockK):** DSP, pitch tracking, state management, music theory, and workspace logic.
+1. **Unit tests (JUnit 4 + real implementations):** DSP, pitch tracking, state management, music theory, and workspace logic use production objects and deterministic inputs wherever the JVM can execute them.
 2. **Instrumentation / Compose tests:** Activity and UI behavior on Android emulators.
 3. **Release-build verification:** Prove that the minified release APK and Android App Bundle can be produced on CI.
 4. **Physical-device validation:** Measure end-to-end audio latency, tuner accuracy, microphone behavior, and OEM/device-specific audio differences.
@@ -28,6 +28,12 @@ Use these commands from the repository root:
 * instrumentation tests on API 26 (the minimum supported API) and API 35 (modern Android coverage).
 
 The emulator matrix is intentionally not presented as full device-fragmentation proof. Audio HAL, microphone hardware, vendor power management, sample-rate behavior, and permission/UI differences still require representative physical devices.
+
+## Test Doubles Policy
+
+This project prioritizes executable truth over interaction scripts. New tests must not introduce mocking frameworks when the real implementation can run in the test environment. Prefer production objects, deterministic synthetic signals, in-memory state, and small hand-written fakes only at unavoidable Android or device boundaries. Hardware behavior belongs in instrumentation and physical-device validation.
+
+Existing MockK-based tests are legacy debt and will be migrated incrementally under `task-019`; MockK remains only until each affected test has a real implementation or an explicitly documented manual seam.
 
 ## Release Distribution
 `.github/workflows/release-builds.yml` publishes release artifacts from the `builds` branch or manual dispatch.

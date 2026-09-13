@@ -26,7 +26,9 @@ class MainActivityTest {
         Intent(
             InstrumentationRegistry.getInstrumentation().targetContext,
             MainActivity::class.java
-        ).putExtra(MainActivity.EXTRA_SKIP_AUDIO_PERMISSION_REQUEST, true)
+        )
+            .putExtra(MainActivity.EXTRA_SKIP_AUDIO_PERMISSION_REQUEST, true)
+            .putExtra(MainActivity.EXTRA_SKIP_SPLASH, true)
     )
 
     private val composeRule = createEmptyComposeRule()

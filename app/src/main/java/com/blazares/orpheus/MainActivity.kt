@@ -53,6 +53,9 @@ class MainActivity : ComponentActivity() {
     private val skipAudioPermissionHandling: Boolean
         get() = BuildConfig.DEBUG && intent.getBooleanExtra(EXTRA_SKIP_AUDIO_PERMISSION_REQUEST, false)
 
+    private val skipSplashForTests: Boolean
+        get() = BuildConfig.DEBUG && intent.getBooleanExtra(EXTRA_SKIP_SPLASH, false)
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -75,7 +78,7 @@ class MainActivity : ComponentActivity() {
                 // Android 12+ owns the first-frame splash. Keep the richer Compose
                 // animation only on older releases so users never see two splashes.
                 var showSplash by rememberSaveable {
-                    mutableStateOf(Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+                    mutableStateOf(Build.VERSION.SDK_INT < Build.VERSION_CODES.S && !skipSplashForTests)
                 }
 
                 if (showSplash) {
@@ -224,6 +227,8 @@ class MainActivity : ComponentActivity() {
         /** Keeps instrumentation tests on the deterministic permission-gated UI. */
         const val EXTRA_SKIP_AUDIO_PERMISSION_REQUEST =
             "com.blazares.orpheus.extra.SKIP_AUDIO_PERMISSION_REQUEST"
+        /** Keeps instrumentation tests independent of the animated legacy splash screen. */
+        const val EXTRA_SKIP_SPLASH = "com.blazares.orpheus.extra.SKIP_SPLASH"
         const val PREFERENCES_NAME = "orpheus_preferences"
         const val APP_LANGUAGE_KEY = "app_language"
         const val NOTE_LANGUAGE_KEY = "note_language"
