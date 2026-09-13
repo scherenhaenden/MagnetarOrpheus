@@ -2,6 +2,7 @@ package com.blazares.orpheus
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -53,7 +54,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BlazaresOrpheusTheme {
-                var showSplash by rememberSaveable { mutableStateOf(true) }
+                // Android 12+ owns the first-frame splash. Keep the richer Compose
+                // animation only on older releases so users never see two splashes.
+                var showSplash by rememberSaveable {
+                    mutableStateOf(Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+                }
 
                 if (showSplash) {
                     OrpheusSplashScreen(onFinished = { showSplash = false })

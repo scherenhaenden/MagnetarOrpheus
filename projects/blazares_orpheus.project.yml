@@ -118,6 +118,11 @@ tasks:
     title: Orpheus Loading Splash
     owner: Codex
     state: done
+  task-017:
+    milestone: ms-04
+    title: PR 32 Splash and Package Migration Remediation
+    owner: Codex
+    state: done
 
 risks:
   - id: R1

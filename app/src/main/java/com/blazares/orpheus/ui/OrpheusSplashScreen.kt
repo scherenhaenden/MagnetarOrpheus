@@ -10,11 +10,15 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -75,13 +79,19 @@ fun OrpheusSplashScreen(
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(
-                modifier = Modifier.size(width = 300.dp, height = 390.dp),
+            BoxWithConstraints(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .widthIn(max = 360.dp)
+                    .aspectRatio(300f / 390f),
                 contentAlignment = Alignment.Center
             ) {
+                // The canvas is constrained by the same available width as the
+                // illustration, keeping the animated ring inside narrow screens.
                 Canvas(
                     modifier = Modifier
-                        .size(350.dp)
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
                         .graphicsLayer {
                             scaleX = pulse
                             scaleY = pulse
@@ -110,7 +120,7 @@ fun OrpheusSplashScreen(
                     )
 
                     val bars = listOf(0.22f, 0.38f, 0.58f, 0.82f, 0.58f, 0.38f, 0.22f)
-                    val spacing = 16.dp.toPx()
+                    val spacing = size.minDimension * 0.046f
                     bars.forEachIndexed { index, heightRatio ->
                         val x = center.x + (index - 3) * spacing
                         val halfHeight = size.minDimension * 0.16f * heightRatio
@@ -128,7 +138,8 @@ fun OrpheusSplashScreen(
                     painter = painterResource(R.drawable.orpheus_splash_figure),
                     contentDescription = stringResource(R.string.splash_figure_description),
                     modifier = Modifier
-                        .size(width = 250.dp, height = 375.dp)
+                        .fillMaxWidth(0.83f)
+                        .aspectRatio(2f / 3f)
                         .alpha(0.96f)
                 )
             }
