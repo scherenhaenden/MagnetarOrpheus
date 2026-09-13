@@ -1,5 +1,9 @@
 package com.blazares.orpheus.models
 
+import kotlin.math.abs
+import kotlin.math.log2
+import kotlin.math.roundToInt
+
 /**
  * Represents a specific note in an instrument's tuning.
  */
@@ -7,6 +11,12 @@ data class TuningNote(
     val name: String,
     val frequency: Double,
     val stringNumber: Int
+)
+
+data class ProfileTuningTarget(
+    val note: TuningNote,
+    val calibratedFrequencyHz: Double,
+    val centsFromTarget: Int
 )
 
 /**
@@ -34,6 +44,31 @@ data class InstrumentProfile(
 
     val tuningDisplayName: String
         get() = "$tuningName ($noteSequence)"
+
+    /**
+     * Finds the profile string closest to an observed pitch. Stored profile frequencies are based
+     * on A4=440 Hz and are scaled to the user's current calibration before cents are calculated.
+     */
+    fun nearestTarget(frequencyHz: Double, referenceA4Hz: Double = 440.0): ProfileTuningTarget? {
+        if (frequencyHz <= 0.0 || !frequencyHz.isFinite() ||
+            referenceA4Hz <= 0.0 || !referenceA4Hz.isFinite() || notes.isEmpty()
+        ) {
+            return null
+        }
+
+        val calibrationScale = referenceA4Hz / 440.0
+        return notes
+            .map { note ->
+                val calibratedFrequency = note.frequency * calibrationScale
+                val cents = (1200.0 * log2(frequencyHz / calibratedFrequency)).roundToInt()
+                ProfileTuningTarget(
+                    note = note,
+                    calibratedFrequencyHz = calibratedFrequency,
+                    centsFromTarget = cents
+                )
+            }
+            .minByOrNull { target -> abs(target.centsFromTarget) }
+    }
 }
 
 object InstrumentProfiles {
