@@ -52,7 +52,7 @@ class MainActivityTest {
     fun launchWithoutAudioPermission_showsPermissionGateAndExplicitAction() {
         composeRule.onNodeWithText("Microphone access is required").assertIsDisplayed()
         composeRule.onNodeWithText(
-            "Grant RECORD_AUDIO permission to activate the tuner and waveform panels."
+            "Allow microphone access to activate the tuner and waveform panels. Audio is processed locally on this device."
         ).assertIsDisplayed()
         composeRule.onNodeWithText("Allow microphone access").assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Menu").assertIsDisplayed()
