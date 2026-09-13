@@ -110,7 +110,9 @@ jobs:
           fi
 
           "$BUILD_TOOLS_DIR/apksigner" verify --verbose --print-certs "$APK_PATH"
-          jarsigner -verify -strict "$AAB_PATH"
+          # Android upload/signing certificates are normally self-signed. Verify the AAB's
+          # cryptographic integrity without imposing a public PKIX trust chain or TSA timestamp.
+          jarsigner -verify -verbose -certs "$AAB_PATH"
 
       - name: Stage release artifacts and checksums
         shell: bash

@@ -46,7 +46,7 @@ jobs:
             -alias orpheus-ci \
             -keyalg RSA \
             -keysize 2048 \
-            -validity 1 \
+            -validity 3650 \
             -dname "CN=BlazaresOrpheus CI, OU=CI, O=BlazaresOrpheus, C=DE"
           echo "ORPHEUS_RELEASE_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
           echo "ORPHEUS_RELEASE_KEYSTORE_PASSWORD=ci-changeit" >> "$GITHUB_ENV"
@@ -67,7 +67,10 @@ jobs:
           BUILD_TOOLS_DIR=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n1)
           test -x "$BUILD_TOOLS_DIR/apksigner"
           "$BUILD_TOOLS_DIR/apksigner" verify --verbose --print-certs "$APK_PATH"
-          jarsigner -verify -strict "$AAB_PATH"
+          # Android signing certificates are intentionally self-signed. The default verifier
+          # still fails for a missing/invalid signature or modified entries; --strict would
+          # additionally require a public PKIX chain and timestamp that Android does not use.
+          jarsigner -verify -verbose -certs "$AAB_PATH"
 
   instrumentation:
     runs-on: ubuntu-latest
