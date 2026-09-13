@@ -38,6 +38,9 @@ class MainActivity : ComponentActivity() {
     private var hasAudioPermission by mutableStateOf(false)
     private val preferences by lazy { getSharedPreferences(PREFERENCES_NAME, MODE_PRIVATE) }
 
+    private val skipAudioPermissionHandling: Boolean
+        get() = BuildConfig.DEBUG && intent.getBooleanExtra(EXTRA_SKIP_AUDIO_PERMISSION_REQUEST, false)
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -47,8 +50,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (!BuildConfig.DEBUG || !intent.getBooleanExtra(EXTRA_SKIP_AUDIO_PERMISSION_REQUEST, false)) {
-            checkAudioPermission()
+        if (!skipAudioPermissionHandling) {
+            refreshAudioPermissionState()
         }
 
         enableEdgeToEdge()
@@ -127,6 +130,7 @@ class MainActivity : ComponentActivity() {
                             onCalibrationChange = { viewModel.updateCalibration(it) },
                             onNamingSystemChange = { viewModel.updateNamingSystem(it) },
                             onPresetSelected = { viewModel.applyPreset(it) },
+                            onRequestAudioPermission = ::requestAudioPermission,
                             onStartTuning = viewModel::startTuning,
                             onStopTuning = viewModel::stopTuning,
                             modifier = Modifier.padding(innerPadding)
@@ -155,11 +159,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (!skipAudioPermissionHandling) {
+            refreshAudioPermissionState()
+        }
+    }
+
     companion object {
-        /**
-         * Keeps instrumentation tests in the permission-gated UI without starting audio capture.
-         * The normal launch path still requests RECORD_AUDIO as before.
-         */
+        /** Keeps instrumentation tests on the deterministic permission-gated UI. */
         const val EXTRA_SKIP_AUDIO_PERMISSION_REQUEST =
             "com.blazares.orpheus.extra.SKIP_AUDIO_PERMISSION_REQUEST"
         const val PREFERENCES_NAME = "orpheus_preferences"
@@ -167,18 +175,22 @@ class MainActivity : ComponentActivity() {
         const val NOTE_LANGUAGE_KEY = "note_language"
     }
 
-    private fun checkAudioPermission() {
-        when {
-            ContextCompat.checkSelfPermission(
+    private fun refreshAudioPermissionState() {
+        hasAudioPermission = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun requestAudioPermission() {
+        if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.RECORD_AUDIO
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                hasAudioPermission = true
-            }
-
-            else -> {
-                requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-            }
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            hasAudioPermission = true
+            return
         }
+        requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
     }
 }
