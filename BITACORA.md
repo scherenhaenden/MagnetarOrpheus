@@ -4,6 +4,11 @@
 Chronological record of all significant project events, decisions, and state changes for BlazaresOrpheus.
 
 ---
+**Timestamp:** 2026-09-13 14:54 UTC
+**Author:** ChatGPT
+**Entry:** Started `task-018` (`in_progress`) on branch `fix/production-hardening-2026-09-13`. Scope is intentionally grouped as one production-hardening task to respect WIP limits: stop tuner capture when the app backgrounds, make microphone permission user-initiated, harden release output with R8 plus AAB/APK and optional CI signing, replace the placeholder security policy, document privacy/Data Safety posture, and extend regression coverage. Hardware-dependent latency/accuracy validation remains evidence work rather than a claim to be manufactured in CI.
+
+---
 **Timestamp:** 2026-09-13 00:45 UTC
 **Author:** Codex
 **Entry:** Resolved PR #32 review feedback. Android 12+ now uses the native dark platform splash with the Orpheus figure as the only initial splash, older releases retain the Compose animation, the ring and figure scale from available width without clipping on narrow phones, and `MIGRATION.md` documents the intentional package-ID transition and release strategy.
