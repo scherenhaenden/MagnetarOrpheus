@@ -141,6 +141,7 @@ class MainActivity : ComponentActivity() {
                                 onCalibrationChange = { viewModel.updateCalibration(it) },
                                 onNamingSystemChange = { viewModel.updateNamingSystem(it) },
                                 onPresetSelected = { viewModel.applyPreset(it) },
+                                onInstrumentProfileSelected = { viewModel.selectInstrumentProfile(it) },
                                 onStartTuning = viewModel::startTuning,
                                 onStopTuning = viewModel::stopTuning,
                                 modifier = Modifier.fillMaxSize()
