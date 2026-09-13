@@ -324,6 +324,7 @@ private fun TabletLayout(
                 inputLevel = uiState.inputLevel,
                 isActive = uiState.isActive
             )
+            CaptureError(uiState = uiState)
             CalibrationError(uiState = uiState)
             NoteSystemSelector(
                 currentSystem = uiState.namingSystem,
