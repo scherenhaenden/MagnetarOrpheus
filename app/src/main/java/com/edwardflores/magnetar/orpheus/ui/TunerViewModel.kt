@@ -96,18 +96,22 @@ class TunerViewModel(
                 throw exception
             } catch (exception: AudioCaptureException) {
                 Log.w("TunerViewModel", "Audio capture failed: ${exception.message}")
-                _uiState.value = _uiState.value.copy(
-                    isActive = false,
-                    captureErrorResId = R.string.capture_error_microphone_unavailable
-                )
+                markCaptureFailed()
             } catch (exception: Exception) {
                 Log.w("TunerViewModel", "Unexpected audio capture failure: ${exception.message}")
-                _uiState.value = _uiState.value.copy(
-                    isActive = false,
-                    captureErrorResId = R.string.capture_error_microphone_unavailable
-                )
+                markCaptureFailed()
             }
         }
+    }
+
+    private fun markCaptureFailed() {
+        lastFrequencies.clear()
+        _uiState.value = _uiState.value.copy(
+            isActive = false,
+            inputLevel = 0f,
+            waveformSamples = List(waveformSampleCount) { 0f },
+            captureErrorResId = R.string.capture_error_microphone_unavailable
+        )
     }
 
     fun stopTuning() {
