@@ -1,9 +1,12 @@
 package com.blazares.orpheus
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -42,6 +45,7 @@ class MainActivity : ComponentActivity() {
     private val viewModel: TunerViewModel by viewModels()
     private val noteBuilderViewModel: NoteBuilderViewModel by viewModels()
     private var hasAudioPermission by mutableStateOf(false)
+    private var shouldOpenAudioSettings by mutableStateOf(false)
     private val preferences by lazy { getSharedPreferences(PREFERENCES_NAME, MODE_PRIVATE) }
 
     private val skipAudioPermissionHandling: Boolean
@@ -51,6 +55,8 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         hasAudioPermission = isGranted
+        shouldOpenAudioSettings = !isGranted && hasRequestedAudioPermissionBefore() &&
+            !shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -167,7 +173,15 @@ class MainActivity : ComponentActivity() {
                                         .align(Alignment.BottomCenter)
                                         .padding(bottom = 48.dp)
                                 ) {
-                                    Text(stringResource(R.string.microphone_permission_action))
+                                    Text(
+                                        stringResource(
+                                            if (shouldOpenAudioSettings) {
+                                                R.string.microphone_permission_open_settings
+                                            } else {
+                                                R.string.microphone_permission_action
+                                            }
+                                        )
+                                    )
                                 }
                             }
                         }
@@ -211,6 +225,7 @@ class MainActivity : ComponentActivity() {
         const val NOTE_LANGUAGE_KEY = "note_language"
         const val INSTRUMENT_PROFILE_KEY = "instrument_profile"
         const val REFERENCE_A4_KEY = "reference_a4"
+        const val AUDIO_PERMISSION_REQUESTED_KEY = "audio_permission_requested"
     }
 
     private fun restoreTunerPreferences() {
@@ -227,7 +242,12 @@ class MainActivity : ComponentActivity() {
             this,
             Manifest.permission.RECORD_AUDIO
         ) == PackageManager.PERMISSION_GRANTED
+        shouldOpenAudioSettings = !hasAudioPermission && hasRequestedAudioPermissionBefore() &&
+            !shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)
     }
+
+    private fun hasRequestedAudioPermissionBefore(): Boolean =
+        preferences.getBoolean(AUDIO_PERMISSION_REQUESTED_KEY, false)
 
     private fun requestAudioPermission() {
         if (ContextCompat.checkSelfPermission(
@@ -236,8 +256,21 @@ class MainActivity : ComponentActivity() {
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             hasAudioPermission = true
+            shouldOpenAudioSettings = false
             return
         }
+
+        if (shouldOpenAudioSettings) {
+            startActivity(
+                Intent(
+                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.parse("package:$packageName")
+                )
+            )
+            return
+        }
+
+        preferences.edit().putBoolean(AUDIO_PERMISSION_REQUESTED_KEY, true).apply()
         requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
     }
 }
