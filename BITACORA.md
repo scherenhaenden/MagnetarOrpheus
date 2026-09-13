@@ -4,9 +4,19 @@
 Chronological record of all significant project events, decisions, and state changes for BlazaresOrpheus.
 
 ---
+**Timestamp:** 2026-09-13 00:45 UTC
+**Author:** Codex
+**Entry:** Resolved PR #32 review feedback. Android 12+ now uses the native dark platform splash with the Orpheus figure as the only initial splash, older releases retain the Compose animation, the ring and figure scale from available width without clipping on narrow phones, and `MIGRATION.md` documents the intentional package-ID transition and release strategy.
+
+---
 **Timestamp:** 2026-09-13 00:00 UTC
 **Author:** Codex
 **Entry:** Started and completed the local Blazares Orpheus rebrand. Migrated the Android namespace and application ID to `com.blazares.orpheus`, updated shipped and repository-facing branding, renamed the local project metadata, refreshed launcher and design screenshot assets, and intentionally left the external Git remote unchanged pending explicit authorization.
+
+---
+**Timestamp:** 2026-09-13 00:20 UTC
+**Author:** Codex
+**Entry:** Added the Orpheus loading splash: a short Compose transition with an animated green/cyan waveform ring, a transparent Orpheus-playing-lyre illustration, and resource-backed BLAZARES / ORPHEUS branding. The existing tuner and Note Builder content remain unchanged behind the splash.
 
 ---
 **Timestamp:** 2026-05-12 23:10 UTC

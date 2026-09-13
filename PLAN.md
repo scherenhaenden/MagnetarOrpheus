@@ -30,10 +30,11 @@ This plan captures the milestones, tasks, and progress for the BlazaresOrpheus A
 | `task-012` | `ms-05` | Note Builder Workspace Integration | Codex | 5 | `in_review` | Document and wire separate Tuner and Note Builder destinations, premium UI restoration, responsive Note Builder layouts, tablet layout stabilization, theory naming, and playback scaffolding. |
 | `task-013` | `ms-04` | GitHub Release Build Pipeline | Codex | 2 | `in_review` | Add a standalone workflow that builds on merges to `builds`, packages the APK into a versioned zip, and publishes it to GitHub Releases for later download. |
 | `task-014` | `ms-05` | App and Note Language Settings | Codex | 5 | `in_progress` | Add a settings surface for app language and note language, extend second-feature note naming beyond English defaults, and keep the rest of the app stable. |
+| `task-017` | `ms-04` | PR 32 Splash and Package Migration Remediation | Codex | 2 | `done` | Use the Android 12 platform splash without a duplicate Compose frame, make the illustration responsive, and document the new package identity migration strategy. |
 
 ## Effort Summary
-*   **Total effort:** 52 pts
-*   **Completed:** 27 pts
+*   **Total effort:** 54 pts
+*   **Completed:** 29 pts
 *   **In progress:** 5 pts
 *   **In review:** 7 pts
 *   **Remaining:** 13 pts

@@ -31,6 +31,7 @@ This project strictly follows the **Blazares Canonical Project Model** for docum
 | `BLOCKERS.md` | Documented impediments and escalation paths. |
 | `BRANCHING_MODEL.md` | Git branching strategy (Standard: `master` as default). |
 | `WIP_GUIDELINES.md` | Policies regarding Work-In-Progress limits. |
+| `MIGRATION.md` | Package identity and release guidance for the Magnetar-to-Blazares rebrand. |
 
 ## Progress Model Overview
 We track progress through a structured lifecycle:

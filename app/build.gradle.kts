@@ -64,6 +64,7 @@ val jacocoTestReport by tasks.registering(JacocoReport::class) {
         "**/*Test*.*", "android/**/*.*", "**/theme/*", "**/MainActivity*",
         "**/AudioCaptureProvider*", "**/ComposableSingletons*",
         "**/ui/components/*", "**/ui/screen/*", "**/ui/notebuilder/NoteBuilderScreen*",
+        "**/ui/OrpheusSplashScreen*",
         "**/ui/notebuilder/NoteBuilderPalette*", "**/notebuilder/audio/*"
     )
     val debugTree = files(
