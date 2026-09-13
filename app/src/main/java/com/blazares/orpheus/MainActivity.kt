@@ -9,16 +9,22 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.blazares.orpheus.ui.AppLanguage
 import com.blazares.orpheus.ui.AppDestination
@@ -117,24 +123,39 @@ class MainActivity : ComponentActivity() {
 
                     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                         when (currentDestination) {
-                        AppDestination.TUNER -> TunerScreen(
-                            uiState = uiState,
-                            hasPermission = hasAudioPermission,
-                            versionName = BuildConfig.VERSION_NAME,
-                            appLanguage = appLanguage,
-                            noteLanguage = noteLanguage,
-                            currentDestination = currentDestination,
-                            onNavigate = ::navigateTo,
-                            onAppLanguageChange = ::setAppLanguage,
-                            onNoteLanguageChange = ::setNoteLanguage,
-                            onCalibrationChange = { viewModel.updateCalibration(it) },
-                            onNamingSystemChange = { viewModel.updateNamingSystem(it) },
-                            onPresetSelected = { viewModel.applyPreset(it) },
-                            onRequestAudioPermission = ::requestAudioPermission,
-                            onStartTuning = viewModel::startTuning,
-                            onStopTuning = viewModel::stopTuning,
-                            modifier = Modifier.padding(innerPadding)
-                        )
+                        AppDestination.TUNER -> Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding)
+                        ) {
+                            TunerScreen(
+                                uiState = uiState,
+                                hasPermission = hasAudioPermission,
+                                versionName = BuildConfig.VERSION_NAME,
+                                appLanguage = appLanguage,
+                                noteLanguage = noteLanguage,
+                                currentDestination = currentDestination,
+                                onNavigate = ::navigateTo,
+                                onAppLanguageChange = ::setAppLanguage,
+                                onNoteLanguageChange = ::setNoteLanguage,
+                                onCalibrationChange = { viewModel.updateCalibration(it) },
+                                onNamingSystemChange = { viewModel.updateNamingSystem(it) },
+                                onPresetSelected = { viewModel.applyPreset(it) },
+                                onStartTuning = viewModel::startTuning,
+                                onStopTuning = viewModel::stopTuning,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                            if (!hasAudioPermission) {
+                                Button(
+                                    onClick = ::requestAudioPermission,
+                                    modifier = Modifier
+                                        .align(Alignment.BottomCenter)
+                                        .padding(bottom = 48.dp)
+                                ) {
+                                    Text(stringResource(R.string.microphone_permission_action))
+                                }
+                            }
+                        }
 
                         AppDestination.NOTE_BUILDER -> NoteBuilderScreen(
                             state = noteBuilderUiState,
