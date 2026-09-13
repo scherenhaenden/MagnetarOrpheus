@@ -4,7 +4,7 @@ buildscript {
         resolutionStrategy {
             force(
                 "org.jdom:jdom2:2.0.6.1",
-                "org.bitbucket.b_c:jose4j:0.9.6",
+                "org.bitbucket.b_c:jose4j:0.9.7",
                 "org.bouncycastle:bcpkix-jdk18on:1.84",
                 "org.bouncycastle:bcprov-jdk18on:1.84",
                 "org.bouncycastle:bcutil-jdk18on:1.84"
