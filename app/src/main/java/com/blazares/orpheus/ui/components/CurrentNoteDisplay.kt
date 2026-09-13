@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.blazares.orpheus.ui.TunerUiState
 import com.blazares.orpheus.ui.theme.OrpheusColors
+import kotlin.math.abs
 
 @Composable
 fun CurrentNoteDisplay(
@@ -59,5 +60,19 @@ fun CurrentNoteDisplay(
                 else -> OrpheusColors.DangerRed
             }
         )
+
+        uiState.profileTargetText?.let { targetText ->
+            val targetCents = uiState.profileTargetCents ?: 0
+            Text(
+                text = targetText,
+                style = MaterialTheme.typography.labelLarge,
+                color = when {
+                    !uiState.isActive -> MaterialTheme.colorScheme.onSurfaceVariant
+                    abs(targetCents) <= 5 -> OrpheusColors.PrimaryGreen
+                    abs(targetCents) <= 20 -> OrpheusColors.WarningAmber
+                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                }
+            )
+        }
     }
 }
