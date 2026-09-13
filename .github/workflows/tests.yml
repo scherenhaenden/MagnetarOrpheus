@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ master, tests ]
 
+permissions:
+  contents: read
+
 jobs:
   unit-and-release:
     runs-on: ubuntu-latest
