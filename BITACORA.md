@@ -4,6 +4,11 @@
 Chronological record of all significant project events, decisions, and state changes for BlazaresOrpheus.
 
 ---
+**Timestamp:** 2026-09-13 15:10 UTC
+**Author:** ChatGPT
+**Entry:** Reconciled `task-007` to `in_review` after confirming that the Guitar, Bass, and Ukulele profile data layer already exists on the current codebase, and started `task-008` (`in_progress`) as the second ChatGPT WIP slot. The remaining gap is behavioral/UI wiring: `TunerViewModel` is still hard-coded to Guitar Standard and the current tuner-mode dialog dismisses without changing profiles.
+
+---
 **Timestamp:** 2026-09-13 14:54 UTC
 **Author:** ChatGPT
 **Entry:** Started `task-018` (`in_progress`) on branch `fix/production-hardening-2026-09-13`. Scope is intentionally grouped as one production-hardening task to respect WIP limits: stop tuner capture when the app backgrounds, make microphone permission user-initiated, harden release output with R8 plus AAB/APK and optional CI signing, replace the placeholder security policy, document privacy/Data Safety posture, and extend regression coverage. Hardware-dependent latency/accuracy validation remains evidence work rather than a claim to be manufactured in CI.
