@@ -34,11 +34,12 @@ data class TunerUiState(
     val referenceA4: Double = 440.0,
     val namingSystem: NoteNamingSystem = NoteNamingSystem.SCIENTIFIC,
     @field:StringRes val calibrationErrorResId: Int? = null,
+    @field:StringRes val captureErrorResId: Int? = null,
     val tunerMode: String = "Chromatic",
     val inputLevel: Float = 0f,
-    val waveformSamples: List<Float> = defaultWaveformSamples(),
-    val noteHistory: List<NoteHistoryItem> = defaultNoteHistory(),
-    val pitchStabilityPoints: List<Float> = defaultPitchStabilityPoints(),
+    val waveformSamples: List<Float> = List(48) { 0f },
+    val noteHistory: List<NoteHistoryItem> = emptyList(),
+    val pitchStabilityPoints: List<Float> = emptyList(),
     val selectedInstrument: String = "Guitar",
     val selectedTuning: String = "Standard (EADGBE)",
     val quickPresets: List<QuickPreset> = defaultQuickPresets()
@@ -62,26 +63,4 @@ private fun defaultQuickPresets(): List<QuickPreset> = listOf(
     QuickPreset(name = "Standard", referenceHz = 440),
     QuickPreset(name = "Orchestral", referenceHz = 442),
     QuickPreset(name = "Baroque", referenceHz = 415)
-)
-
-private fun defaultWaveformSamples(): List<Float> = listOf(
-    0.04f, 0.08f, 0.12f, 0.18f, 0.15f, 0.10f, 0.06f, 0.02f,
-    -0.03f, -0.08f, -0.16f, -0.22f, -0.18f, -0.10f, -0.04f, 0.03f,
-    0.10f, 0.18f, 0.26f, 0.30f, 0.24f, 0.12f, 0.06f, -0.02f,
-    -0.10f, -0.18f, -0.24f, -0.26f, -0.20f, -0.12f, -0.05f, 0.01f,
-    0.08f, 0.15f, 0.22f, 0.18f, 0.10f, 0.04f, 0.00f, -0.03f
-)
-
-private fun defaultNoteHistory(): List<NoteHistoryItem> = listOf(
-    NoteHistoryItem("A", "A4", 440.0, 2, "10:42:21"),
-    NoteHistoryItem("E", "E4", 329.6, -1, "10:41:56"),
-    NoteHistoryItem("G", "G4", 392.0, 3, "10:41:28"),
-    NoteHistoryItem("B", "B4", 493.9, 5, "10:40:57"),
-    NoteHistoryItem("D", "D5", 587.3, -2, "10:40:21")
-)
-
-private fun defaultPitchStabilityPoints(): List<Float> = listOf(
-    1f, 2f, 0f, 3f, 1f, -1f, 0f, -3f,
-    -1f, 2f, 1f, 0f, 3f, 2f, 1f, 0f,
-    -1f, -2f, 0f, 1f, 2f, 1f, 0f, -1f
 )

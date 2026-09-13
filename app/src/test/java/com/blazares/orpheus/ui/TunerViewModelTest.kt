@@ -3,6 +3,7 @@ package com.blazares.orpheus.ui
 import android.util.Log
 import com.blazares.orpheus.R
 import com.blazares.orpheus.audio.AudioCaptureProvider
+import com.blazares.orpheus.audio.AudioCaptureException
 import com.blazares.orpheus.audio.PitchDetector
 import com.blazares.orpheus.audio.PitchResult
 import io.mockk.coEvery
@@ -13,6 +14,7 @@ import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -292,5 +294,131 @@ class TunerViewModelTest {
         assertEquals(0f, state.inputLevel)
         assertTrue(state.noteHistory.size <= 5)
         assertEquals(24, state.pitchStabilityPoints.size)
+    }
+
+    @Test
+    fun `audio capture failure is surfaced and deactivates the tuner`() = runTest(testDispatcher) {
+        every { audioCaptureProvider.startCapture() } returns flow {
+            throw AudioCaptureException("microphone busy")
+        }
+
+        viewModel.startTuning()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isActive)
+        assertEquals(R.string.capture_error_microphone_unavailable, state.captureErrorResId)
+    }
+
+    @Test
+    fun `capture failure clears live indicators after partial capture`() = runTest(testDispatcher) {
+        val buffer = floatArrayOf(0.5f, -0.5f)
+        every { audioCaptureProvider.startCapture() } returns flow {
+            emit(buffer)
+            throw AudioCaptureException("microphone disconnected")
+        }
+        every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, true)
+
+        viewModel.startTuning()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isActive)
+        assertEquals(0f, state.inputLevel)
+        assertTrue(state.waveformSamples.all { it == 0f })
+        assertEquals(R.string.capture_error_microphone_unavailable, state.captureErrorResId)
+    }
+
+    @Test
+    fun `unexpected capture failure can be recovered by restarting`() = runTest(testDispatcher) {
+        val buffer = floatArrayOf(0.25f, -0.25f)
+        var captureCount = 0
+        every { audioCaptureProvider.startCapture() } answers {
+            if (captureCount++ == 0) {
+                flow { throw IllegalStateException("capture worker stopped") }
+            } else {
+                flowOf(buffer)
+            }
+        }
+        every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, true)
+
+        viewModel.startTuning()
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isActive)
+        assertEquals(R.string.capture_error_microphone_unavailable, viewModel.uiState.value.captureErrorResId)
+
+        viewModel.startTuning()
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.isActive)
+        assertEquals(null, viewModel.uiState.value.captureErrorResId)
+        assertEquals(440.0, viewModel.uiState.value.frequency, 0.01)
+        assertEquals(2, captureCount)
+    }
+
+    @Test
+    fun `stopTuning cancels capture without surfacing an error and permits restart`() = runTest(testDispatcher) {
+        val buffer = floatArrayOf(0.25f, -0.25f)
+        var captureCount = 0
+        var firstCaptureCancelled = false
+        every { audioCaptureProvider.startCapture() } answers {
+            if (captureCount++ == 0) {
+                flow {
+                    try {
+                        emit(buffer)
+                        awaitCancellation()
+                    } finally {
+                        firstCaptureCancelled = true
+                    }
+                }
+            } else {
+                flowOf(buffer)
+            }
+        }
+        every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, true)
+
+        viewModel.startTuning()
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.isActive)
+
+        viewModel.stopTuning()
+        advanceUntilIdle()
+
+        assertTrue(firstCaptureCancelled)
+        assertFalse(viewModel.uiState.value.isActive)
+        assertEquals(null, viewModel.uiState.value.captureErrorResId)
+
+        viewModel.startTuning()
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.isActive)
+        assertEquals(440.0, viewModel.uiState.value.frequency, 0.01)
+        assertEquals(2, captureCount)
+    }
+
+    @Test
+    fun `stopTuning clears live capture indicators`() = runTest(testDispatcher) {
+        val buffer = floatArrayOf(0.5f, -0.5f)
+        every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
+        every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, true)
+
+        viewModel.startTuning()
+        advanceUntilIdle()
+        viewModel.stopTuning()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isActive)
+        assertEquals(0f, state.inputLevel)
+        assertTrue(state.waveformSamples.all { it == 0f })
+    }
+
+    @Test
+    fun `initial tuner state contains no fabricated session data`() {
+        val state = TunerUiState()
+
+        assertTrue(state.waveformSamples.all { it == 0f })
+        assertTrue(state.noteHistory.isEmpty())
+        assertTrue(state.pitchStabilityPoints.isEmpty())
     }
 }
