@@ -2,6 +2,7 @@ package com.blazares.orpheus
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,6 +23,7 @@ import androidx.core.content.ContextCompat
 import com.blazares.orpheus.ui.AppLanguage
 import com.blazares.orpheus.ui.AppDestination
 import com.blazares.orpheus.ui.NoteLanguage
+import com.blazares.orpheus.ui.OrpheusSplashScreen
 import com.blazares.orpheus.ui.TunerViewModel
 import com.blazares.orpheus.ui.toNamingSystem
 import com.blazares.orpheus.ui.notebuilder.NoteBuilderScreen
@@ -52,51 +54,66 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BlazaresOrpheusTheme {
-                val uiState by viewModel.uiState.collectAsState()
-                val noteBuilderUiState by noteBuilderViewModel.uiState.collectAsState()
-                var currentDestination by rememberSaveable { mutableStateOf(AppDestination.TUNER) }
-                var appLanguageCode by rememberSaveable {
-                    mutableStateOf(preferences.getString(APP_LANGUAGE_KEY, AppLanguage.ENGLISH.code) ?: AppLanguage.ENGLISH.code)
-                }
-                val appLanguage = AppLanguage.entries.firstOrNull { it.code == appLanguageCode } ?: AppLanguage.ENGLISH
-                var noteLanguageCode by rememberSaveable {
-                    mutableStateOf(preferences.getString(NOTE_LANGUAGE_KEY, NoteLanguage.ENGLISH.code) ?: NoteLanguage.ENGLISH.code)
-                }
-                val noteLanguage = NoteLanguage.entries.firstOrNull { it.code == noteLanguageCode } ?: NoteLanguage.ENGLISH
-
-                fun setAppLanguage(language: AppLanguage) {
-                    appLanguageCode = language.code
-                    preferences.edit().putString(APP_LANGUAGE_KEY, language.code).apply()
+                // Android 12+ owns the first-frame splash. Keep the richer Compose
+                // animation only on older releases so users never see two splashes.
+                var showSplash by rememberSaveable {
+                    mutableStateOf(Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
                 }
 
-                fun setNoteLanguage(language: NoteLanguage) {
-                    noteLanguageCode = language.code
-                    preferences.edit().putString(NOTE_LANGUAGE_KEY, language.code).apply()
-                    viewModel.updateNamingSystem(language.toNamingSystem())
-                    noteBuilderViewModel.updateNoteLanguage(language)
-                }
-
-                LaunchedEffect(noteLanguage) {
-                    viewModel.updateNamingSystem(noteLanguage.toNamingSystem())
-                    noteBuilderViewModel.updateNoteLanguage(noteLanguage)
-                }
-
-                fun navigateTo(destination: AppDestination) {
-                    if (currentDestination == AppDestination.NOTE_BUILDER &&
-                        destination != AppDestination.NOTE_BUILDER
-                    ) {
-                        noteBuilderViewModel.stopPlayback()
+                if (showSplash) {
+                    OrpheusSplashScreen(onFinished = { showSplash = false })
+                } else {
+                    val uiState by viewModel.uiState.collectAsState()
+                    val noteBuilderUiState by noteBuilderViewModel.uiState.collectAsState()
+                    var currentDestination by rememberSaveable { mutableStateOf(AppDestination.TUNER) }
+                    var appLanguageCode by rememberSaveable {
+                        mutableStateOf(
+                            preferences.getString(APP_LANGUAGE_KEY, AppLanguage.ENGLISH.code)
+                                ?: AppLanguage.ENGLISH.code
+                        )
                     }
-                    if (currentDestination == AppDestination.TUNER &&
-                        destination != AppDestination.TUNER
-                    ) {
-                        viewModel.stopTuning()
+                    val appLanguage = AppLanguage.entries.firstOrNull { it.code == appLanguageCode } ?: AppLanguage.ENGLISH
+                    var noteLanguageCode by rememberSaveable {
+                        mutableStateOf(
+                            preferences.getString(NOTE_LANGUAGE_KEY, NoteLanguage.ENGLISH.code)
+                                ?: NoteLanguage.ENGLISH.code
+                        )
                     }
-                    currentDestination = destination
-                }
+                    val noteLanguage = NoteLanguage.entries.firstOrNull { it.code == noteLanguageCode } ?: NoteLanguage.ENGLISH
 
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    when (currentDestination) {
+                    fun setAppLanguage(language: AppLanguage) {
+                        appLanguageCode = language.code
+                        preferences.edit().putString(APP_LANGUAGE_KEY, language.code).apply()
+                    }
+
+                    fun setNoteLanguage(language: NoteLanguage) {
+                        noteLanguageCode = language.code
+                        preferences.edit().putString(NOTE_LANGUAGE_KEY, language.code).apply()
+                        viewModel.updateNamingSystem(language.toNamingSystem())
+                        noteBuilderViewModel.updateNoteLanguage(language)
+                    }
+
+                    LaunchedEffect(noteLanguage) {
+                        viewModel.updateNamingSystem(noteLanguage.toNamingSystem())
+                        noteBuilderViewModel.updateNoteLanguage(noteLanguage)
+                    }
+
+                    fun navigateTo(destination: AppDestination) {
+                        if (currentDestination == AppDestination.NOTE_BUILDER &&
+                            destination != AppDestination.NOTE_BUILDER
+                        ) {
+                            noteBuilderViewModel.stopPlayback()
+                        }
+                        if (currentDestination == AppDestination.TUNER &&
+                            destination != AppDestination.TUNER
+                        ) {
+                            viewModel.stopTuning()
+                        }
+                        currentDestination = destination
+                    }
+
+                    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                        when (currentDestination) {
                         AppDestination.TUNER -> TunerScreen(
                             uiState = uiState,
                             hasPermission = hasAudioPermission,
@@ -131,6 +148,7 @@ class MainActivity : ComponentActivity() {
                             onNoteLanguageChange = ::setNoteLanguage,
                             modifier = Modifier.padding(innerPadding)
                         )
+                        }
                     }
                 }
             }
