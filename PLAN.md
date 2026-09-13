@@ -33,13 +33,14 @@ This plan captures the milestones, tasks, and progress for the BlazaresOrpheus A
 | `task-014` | `ms-05` | App and Note Language Settings | Codex | 5 | `in_progress` | Add a settings surface for app language and note language, extend second-feature note naming beyond English defaults, and keep the rest of the app stable. |
 | `task-017` | `ms-04` | PR 32 Splash and Package Migration Remediation | Codex | 2 | `done` | Use the Android 12 platform splash without a duplicate Compose frame, make the illustration responsive, and document the new package identity migration strategy. |
 | `task-018` | `ms-07` | Production Hardening and Release Readiness | ChatGPT | 13 | `in_progress` | Stop tuner capture on background, improve permission UX, enable R8, produce release AAB/APK with optional CI signing, replace security template, document privacy/data-safety posture, and add regression coverage where feasible. |
+| `task-019` | `ms-07` | Replace Mock-Based Tests with Real and Manual Test Seams | ChatGPT | 5 | `planned` | Migrate legacy MockK tests incrementally; prefer real implementations, deterministic signals, hand-written seams only at unavoidable Android/device boundaries, and instrumentation for hardware behavior. |
 
 ## Effort Summary
-*   **Total effort:** 67 pts
+*   **Total effort:** 72 pts
 *   **Completed:** 29 pts
 *   **In progress:** 22 pts
 *   **In review:** 10 pts
-*   **Remaining:** 6 pts
+*   **Remaining:** 11 pts
 
 ## State Definitions
 *   `planned`: Identified for future work.

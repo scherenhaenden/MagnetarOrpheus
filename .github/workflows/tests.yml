@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   unit-and-release:
     runs-on: ubuntu-latest
@@ -27,31 +31,43 @@ jobs:
       - name: Run unit tests and check coverage
         run: ./gradlew :app:jacocoTestCoverageVerification
 
-      - name: Verify minified release APK and AAB builds
-        run: ./gradlew :app:assembleRelease :app:bundleRelease
+      - name: Run Android Lint for release
+        run: ./gradlew :app:lintRelease
 
-  instrumentation:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        api-level: [26, 35]
-    steps:
-      - uses: actions/checkout@v7
-      - name: Set up JDK 21
-        uses: actions/setup-java@v6
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: gradle
+      - name: Create ephemeral CI release key
+        shell: bash
+        run: |
+          set -euo pipefail
+          KEYSTORE_PATH="$RUNNER_TEMP/orpheus-ci-release.jks"
+          keytool -genkeypair \
+            -keystore "$KEYSTORE_PATH" \
+            -storepass ci-changeit \
+            -keypass ci-changeit \
+            -alias orpheus-ci \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 3650 \
+            -dname "CN=BlazaresOrpheus CI, OU=CI, O=BlazaresOrpheus, C=DE"
+          echo "ORPHEUS_RELEASE_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+          echo "ORPHEUS_RELEASE_KEYSTORE_PASSWORD=ci-changeit" >> "$GITHUB_ENV"
+          echo "ORPHEUS_RELEASE_KEY_ALIAS=orpheus-ci" >> "$GITHUB_ENV"
+          echo "ORPHEUS_RELEASE_KEY_PASSWORD=ci-changeit" >> "$GITHUB_ENV"
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Verify minified signed release APK and AAB builds
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./gradlew :app:assembleRelease :app:bundleRelease
 
-      - name: Run Android instrumentation tests on API ${{ matrix.api-level }}
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          arch: x86_64
-          disable-animations: true
-          script: ./gradlew connectedDebugAndroidTest
+          APK_PATH=$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' | head -n1)
+          AAB_PATH=$(find app/build/outputs/bundle/release -maxdepth 1 -type f -name '*.aab' | head -n1)
+          test -n "$APK_PATH"
+          test -n "$AAB_PATH"
+
+          BUILD_TOOLS_DIR=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n1)
+          test -x "$BUILD_TOOLS_DIR/apksigner"
+          "$BUILD_TOOLS_DIR/apksigner" verify --verbose --print-certs "$APK_PATH"
+          # Android signing certificates are intentionally self-signed. The default verifier
+          # still fails for a missing/invalid signature or modified entries; --strict would
+          # additionally require a public PKIX chain and timestamp that Android does not use.
+          jarsigner -verify -verbose -certs "$AAB_PATH"

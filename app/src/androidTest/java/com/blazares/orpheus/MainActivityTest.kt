@@ -26,7 +26,9 @@ class MainActivityTest {
         Intent(
             InstrumentationRegistry.getInstrumentation().targetContext,
             MainActivity::class.java
-        ).putExtra(MainActivity.EXTRA_SKIP_AUDIO_PERMISSION_REQUEST, true)
+        )
+            .putExtra(MainActivity.EXTRA_SKIP_AUDIO_PERMISSION_REQUEST, true)
+            .putExtra(MainActivity.EXTRA_SKIP_SPLASH, true)
     )
 
     private val composeRule = createEmptyComposeRule()
@@ -84,6 +86,20 @@ class MainActivityTest {
         composeRule.onNodeWithText("Ajustes").assertIsDisplayed()
         composeRule.onNodeWithText("Idioma de la app").assertIsDisplayed()
         composeRule.onNodeWithText("Cerrar").performClick()
+
+        composeRule.onNodeWithContentDescription("Menu").performClick()
+        composeRule.onNodeWithText("Afinador").assertIsDisplayed()
+        composeRule.onNodeWithText("Constructor de notas").assertIsDisplayed()
+    }
+
+    @Test
+    fun appLanguagePreference_survivesActivityRecreation() {
+        composeRule.onNodeWithContentDescription("Settings").performClick()
+        composeRule.onNodeWithText("Español").performClick()
+        composeRule.onNodeWithText("Cerrar").performClick()
+
+        activityRule.scenario.recreate()
+        composeRule.waitForIdle()
 
         composeRule.onNodeWithContentDescription("Menu").performClick()
         composeRule.onNodeWithText("Afinador").assertIsDisplayed()

@@ -45,14 +45,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.blazares.orpheus.R
+import com.blazares.orpheus.models.InstrumentProfiles
 import com.blazares.orpheus.ui.AppLanguage
 import com.blazares.orpheus.ui.AppDestination
 import com.blazares.orpheus.ui.NoteLanguage
 import com.blazares.orpheus.ui.NoteNamingSystem
+import com.blazares.orpheus.ui.TunerLifecycleController
 import com.blazares.orpheus.ui.TunerUiState
 import com.blazares.orpheus.ui.components.AppHeader
 import com.blazares.orpheus.ui.components.ChromaticNoteRow
@@ -84,20 +84,16 @@ fun TunerScreen(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner, hasPermission) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_START -> if (hasPermission) onStartTuning()
-                Lifecycle.Event.ON_STOP -> onStopTuning()
-                else -> Unit
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        if (hasPermission && lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-            onStartTuning()
-        }
+        val controller = TunerLifecycleController(
+            hasPermission = hasPermission,
+            onStartTuning = onStartTuning,
+            onStopTuning = onStopTuning
+        )
+        lifecycleOwner.lifecycle.addObserver(controller)
+        controller.synchronize(lifecycleOwner.lifecycle.currentState)
         onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-            onStopTuning()
+            lifecycleOwner.lifecycle.removeObserver(controller)
+            controller.dispose()
         }
     }
 
@@ -204,6 +200,19 @@ private fun PhoneLayout(
     var showModeDialog by remember { mutableStateOf(false) }
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        ChromaticNoteRow(currentNote = uiState.chromaticNote)
+        MainTunerPanel(uiState = uiState, gaugeHeight = 380.dp)
+        InputWaveform(
+            waveformSamples = uiState.waveformSamples,
+            inputLevel = uiState.inputLevel,
+            isActive = uiState.isActive
+        )
+        CaptureError(uiState = uiState)
+        CalibrationError(uiState = uiState)
+        NoteSystemSelector(
+            currentSystem = uiState.namingSystem,
+            onSystemSelected = onNamingSystemChange
+        )
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             TunerControlCard(
                 title = "Instrument Profile",
@@ -222,19 +231,6 @@ private fun PhoneLayout(
                 onClick = { showPitchDialog = true }
             )
         }
-        ChromaticNoteRow(currentNote = uiState.chromaticNote)
-        MainTunerPanel(uiState = uiState, gaugeHeight = 380.dp)
-        InputWaveform(
-            waveformSamples = uiState.waveformSamples,
-            inputLevel = uiState.inputLevel,
-            isActive = uiState.isActive
-        )
-        CaptureError(uiState = uiState)
-        CalibrationError(uiState = uiState)
-        NoteSystemSelector(
-            currentSystem = uiState.namingSystem,
-            onSystemSelected = onNamingSystemChange
-        )
         VersionFooter(versionName = versionName)
     }
 
@@ -243,15 +239,13 @@ private fun PhoneLayout(
             currentPitch = uiState.referenceA4,
             calibrationErrorResId = uiState.calibrationErrorResId,
             onDismiss = { showPitchDialog = false },
-            onSave = { newPitch ->
-                onCalibrationChange(newPitch)
-            }
+            onSave = onCalibrationChange
         )
     }
 
     if (showModeDialog) {
         InstrumentProfileDialog(
-            currentInstrument = uiState.selectedInstrument,
+            currentProfileId = uiState.selectedProfileId,
             onProfileSelected = onInstrumentProfileSelected,
             onDismiss = { showModeDialog = false }
         )
@@ -296,6 +290,19 @@ private fun TabletLayout(
                 .verticalScroll(leftScrollState),
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
+            ChromaticNoteRow(currentNote = uiState.chromaticNote)
+            MainTunerPanel(uiState = uiState, gaugeHeight = 460.dp)
+            InputWaveform(
+                waveformSamples = uiState.waveformSamples,
+                inputLevel = uiState.inputLevel,
+                isActive = uiState.isActive
+            )
+            CaptureError(uiState = uiState)
+            CalibrationError(uiState = uiState)
+            NoteSystemSelector(
+                currentSystem = uiState.namingSystem,
+                onSystemSelected = onNamingSystemChange
+            )
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 TunerControlCard(
                     title = "Instrument Profile",
@@ -321,19 +328,6 @@ private fun TabletLayout(
                     modifier = Modifier.weight(1f)
                 )
             }
-            ChromaticNoteRow(currentNote = uiState.chromaticNote)
-            MainTunerPanel(uiState = uiState, gaugeHeight = 460.dp)
-            InputWaveform(
-                waveformSamples = uiState.waveformSamples,
-                inputLevel = uiState.inputLevel,
-                isActive = uiState.isActive
-            )
-            CaptureError(uiState = uiState)
-            CalibrationError(uiState = uiState)
-            NoteSystemSelector(
-                currentSystem = uiState.namingSystem,
-                onSystemSelected = onNamingSystemChange
-            )
             VersionFooter(versionName = versionName)
         }
 
@@ -356,39 +350,25 @@ private fun TabletLayout(
             currentPitch = uiState.referenceA4,
             calibrationErrorResId = uiState.calibrationErrorResId,
             onDismiss = { showPitchDialog = false },
-            onSave = { newPitch ->
-                onCalibrationChange(newPitch)
-            }
+            onSave = onCalibrationChange
         )
     }
 
     if (showModeDialog) {
         InstrumentProfileDialog(
-            currentInstrument = uiState.selectedInstrument,
+            currentProfileId = uiState.selectedProfileId,
             onProfileSelected = onInstrumentProfileSelected,
             onDismiss = { showModeDialog = false }
         )
     }
 }
 
-private data class ProfileOption(
-    val label: String,
-    val profileId: String,
-    val tuningLabel: String
-)
-
 @Composable
 private fun InstrumentProfileDialog(
-    currentInstrument: String,
+    currentProfileId: String,
     onProfileSelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val profiles = listOf(
-        ProfileOption("Guitar", "guitar_std", "Standard (EADGBE)"),
-        ProfileOption("Bass", "bass_std", "Standard (EADG)"),
-        ProfileOption("Ukulele", "ukulele_std", "Soprano (GCEA)")
-    )
-
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -401,20 +381,30 @@ private fun InstrumentProfileDialog(
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
             ) {
-                profiles.forEach { profile ->
-                    val isSelected = profile.label == currentInstrument
+                InstrumentProfiles.All.forEach { profile ->
+                    val isSelected = profile.id == currentProfileId
                     Surface(
                         onClick = {
-                            onProfileSelected(profile.profileId)
+                            onProfileSelected(profile.id)
                             onDismiss()
                         },
                         shape = RoundedCornerShape(16.dp),
-                        color = if (isSelected) OrpheusColors.PrimaryGreen.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surface,
+                        color = if (isSelected) {
+                            OrpheusColors.PrimaryGreen.copy(alpha = 0.2f)
+                        } else {
+                            MaterialTheme.colorScheme.surface
+                        },
                         border = BorderStroke(
                             1.dp,
-                            if (isSelected) OrpheusColors.PrimaryGreen else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                            if (isSelected) {
+                                OrpheusColors.PrimaryGreen
+                            } else {
+                                MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                            }
                         ),
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -423,12 +413,16 @@ private fun InstrumentProfileDialog(
                             verticalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
                             Text(
-                                text = profile.label,
+                                text = profile.instrumentName,
                                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
-                                color = if (isSelected) OrpheusColors.PrimaryGreen else MaterialTheme.colorScheme.onSurface
+                                color = if (isSelected) {
+                                    OrpheusColors.PrimaryGreen
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                }
                             )
                             Text(
-                                text = profile.tuningLabel,
+                                text = profile.tuningDisplayName,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -509,17 +503,29 @@ private fun NoteSystemSelector(
                 modifier = Modifier
                     .clickable { onSystemSelected(system) }
                     .background(
-                        color = if (isSelected) OrpheusColors.PrimaryGreen.copy(alpha = 0.14f) else MaterialTheme.colorScheme.surface,
+                        color = if (isSelected) {
+                            OrpheusColors.PrimaryGreen.copy(alpha = 0.14f)
+                        } else {
+                            MaterialTheme.colorScheme.surface
+                        },
                         shape = RoundedCornerShape(18.dp)
                     )
                     .border(
                         width = 1.dp,
-                        color = if (isSelected) OrpheusColors.PrimaryGreen.copy(alpha = 0.55f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                        color = if (isSelected) {
+                            OrpheusColors.PrimaryGreen.copy(alpha = 0.55f)
+                        } else {
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                        },
                         shape = RoundedCornerShape(18.dp)
                     )
                     .padding(horizontal = 16.dp, vertical = 10.dp),
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
-                color = if (isSelected) OrpheusColors.PrimaryGreen else MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (isSelected) {
+                    OrpheusColors.PrimaryGreen
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                }
             )
         }
     }
@@ -561,8 +567,7 @@ private fun ReferencePitchDialog(
                 ) {
                     IconButton(
                         onClick = { tempPitch = (tempPitch - 1).coerceAtLeast(410.0) },
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Remove,
@@ -579,8 +584,7 @@ private fun ReferencePitchDialog(
 
                     IconButton(
                         onClick = { tempPitch = (tempPitch + 1).coerceAtMost(470.0) },
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Add,
@@ -599,17 +603,29 @@ private fun ReferencePitchDialog(
                         Surface(
                             onClick = { tempPitch = hz.toDouble() },
                             shape = RoundedCornerShape(16.dp),
-                            color = if (isSelected) OrpheusColors.PrimaryGreen.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surface,
+                            color = if (isSelected) {
+                                OrpheusColors.PrimaryGreen.copy(alpha = 0.2f)
+                            } else {
+                                MaterialTheme.colorScheme.surface
+                            },
                             border = BorderStroke(
                                 1.dp,
-                                if (isSelected) OrpheusColors.PrimaryGreen else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                                if (isSelected) {
+                                    OrpheusColors.PrimaryGreen
+                                } else {
+                                    MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                                }
                             )
                         ) {
                             Text(
                                 text = "$hz Hz",
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                                 style = MaterialTheme.typography.labelLarge,
-                                color = if (isSelected) OrpheusColors.PrimaryGreen else MaterialTheme.colorScheme.onSurface
+                                color = if (isSelected) {
+                                    OrpheusColors.PrimaryGreen
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                }
                             )
                         }
                     }

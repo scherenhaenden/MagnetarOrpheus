@@ -22,8 +22,13 @@ class AudioCaptureProvider(
 ) {
     private val channelConfig = AudioFormat.CHANNEL_IN_MONO
     private val audioFormat = AudioFormat.ENCODING_PCM_16BIT
-    private val minBufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat)
-    private val bufferSize = minBufferSize * bufferSizeFactor
+    // Resolve Android audio capabilities only when capture actually starts. Construction is
+    // safe for JVM tests and for ViewModels created before runtime permission is granted.
+    private val minBufferSize: Int by lazy {
+        AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat)
+    }
+    private val bufferSize: Int
+        get() = minBufferSize * bufferSizeFactor
 
     @SuppressLint("MissingPermission")
     fun startCapture(): Flow<FloatArray> = flow {

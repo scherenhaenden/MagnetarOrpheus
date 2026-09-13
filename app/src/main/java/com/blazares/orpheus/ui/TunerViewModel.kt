@@ -40,15 +40,9 @@ class TunerViewModel(
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
     private var selectedProfile = InstrumentProfiles.GuitarStandard
     private val selectedInstrument: String
-        get() = selectedProfile.name.substringBefore(" (")
+        get() = selectedProfile.instrumentName
     private val selectedTuning: String
-        get() {
-            val tuningName = selectedProfile.name.substringAfter(" (").removeSuffix(")")
-            val tuningNotes = selectedProfile.notes.joinToString("") { note ->
-                note.name.takeWhile { character -> character.isLetter() }
-            }
-            return "$tuningName ($tuningNotes)"
-        }
+        get() = selectedProfile.tuningDisplayName
     private var lastProcessedFrequency: Double? = null
     private var tuningJob: Job? = null
 
@@ -63,6 +57,7 @@ class TunerViewModel(
         temporalPitchTracker.reset()
         _uiState.value = _uiState.value.copy(
             isActive = true,
+            selectedProfileId = selectedProfile.id,
             selectedInstrument = selectedInstrument,
             selectedTuning = selectedTuning,
             calibrationErrorResId = null,
@@ -140,7 +135,7 @@ class TunerViewModel(
             referenceA4 = ref,
             calibrationErrorResId = null
         )
-        // Re-label the current note without adding stale audio to history or stability data.
+        // Re-label both the chromatic note and the nearest profile target for the new calibration.
         lastProcessedFrequency?.let {
             processFrequency(it, recordHistory = false, recordStability = false)
         }
@@ -157,9 +152,13 @@ class TunerViewModel(
         selectedProfile = profile
         temporalPitchTracker.reset()
         _uiState.value = _uiState.value.copy(
+            selectedProfileId = selectedProfile.id,
             selectedInstrument = selectedInstrument,
             selectedTuning = selectedTuning
         )
+        lastProcessedFrequency?.let {
+            processFrequency(it, recordHistory = false, recordStability = false)
+        }
         return true
     }
 
@@ -196,6 +195,7 @@ class TunerViewModel(
         val octave = (noteIndex / 12) - 1
         val cents = ((n - noteIndex) * 100).toInt()
         val scientificNoteName = "${scientificNotes[normalizedIndex]}$octave"
+        val profileTarget = selectedProfile.nearestTarget(frequency, refA4)
 
         _uiState.value = _uiState.value.copy(
             frequency = frequency,
@@ -209,8 +209,13 @@ class TunerViewModel(
             waveformSamples = waveformSamples,
             noteHistory = if (recordHistory) updateNoteHistory(scientificNoteName, frequency, cents) else _uiState.value.noteHistory,
             pitchStabilityPoints = if (recordStability) updatePitchStability(cents) else _uiState.value.pitchStabilityPoints,
+            selectedProfileId = selectedProfile.id,
             selectedInstrument = selectedInstrument,
             selectedTuning = selectedTuning,
+            profileTargetNote = profileTarget?.note?.name,
+            profileTargetStringNumber = profileTarget?.note?.stringNumber,
+            profileTargetFrequencyHz = profileTarget?.calibratedFrequencyHz,
+            profileTargetCents = profileTarget?.centsFromTarget,
             calibrationErrorResId = null
         )
     }

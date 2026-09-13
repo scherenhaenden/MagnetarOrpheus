@@ -4,6 +4,16 @@
 Chronological record of all significant project events, decisions, and state changes for BlazaresOrpheus.
 
 ---
+**Timestamp:** 2026-09-13 16:30 UTC
+**Author:** ChatGPT
+**Entry:** Adopted a no-new-mocks testing policy. New profile-selection tests now exercise the real `TunerViewModel`, and `AudioCaptureProvider` resolves `AudioRecord` capabilities lazily so JVM tests can construct production objects without mocking Android audio APIs. Existing MockK usage remains legacy migration debt under `task-019`; future tests will prefer real implementations, deterministic signals, small hand-written seams only at unavoidable platform/device boundaries, and instrumentation for actual audio behavior.
+
+---
+**Timestamp:** 2026-09-13 15:25 UTC
+**Author:** ChatGPT
+**Entry:** Continued `task-008` and `task-018` from PR #35 on branch `fix/production-hardening-continuation-2026-09-13`. Expanded the canonical instrument catalog from three standard-only profiles to seven profiles (Guitar Standard/Drop D/D Standard, Bass Standard/Drop D, Ukulele Soprano/Low G), added stable profile identity to tuner state, removed the duplicated UI profile table, added Compose/unit coverage for profile selection, extracted deterministic microphone-permission and lifecycle controllers with unit coverage, added harmonic-rich/noisy pitch-accuracy tests, added release lint, dependency review, CodeQL, Dependabot, signed artifact verification, explicit Android backup scopes, and cleartext-traffic hardening. Physical-device latency/accuracy and the real release keystore remain external validation items.
+
+---
 **Timestamp:** 2026-09-13 15:10 UTC
 **Author:** ChatGPT
 **Entry:** Reconciled `task-007` to `in_review` after confirming that the Guitar, Bass, and Ukulele profile data layer already exists on the current codebase, and started `task-008` (`in_progress`) as the second ChatGPT WIP slot. The remaining gap is behavioral/UI wiring: `TunerViewModel` is still hard-coded to Guitar Standard and the current tuner-mode dialog dismisses without changing profiles.
@@ -16,7 +26,7 @@ Chronological record of all significant project events, decisions, and state cha
 ---
 **Timestamp:** 2026-09-13 00:45 UTC
 **Author:** Codex
-**Entry:** Resolved PR #32 review feedback. Android 12+ now uses the native dark platform splash with the Orpheus figure as the only initial splash, older releases retain the Compose animation, the ring and figure scale from available width without clipping on narrow phones, and `MIGRATION.md` documents the intentional package-ID transition and release strategy.
+**Entry:** Resolved PR #32 review feedback. Android 12+ now uses the native dark platform splash with the Orpheus figure as the only initial splash, older releases retain the Compose animation, the ring and figure scale from available width without clipping on narrow phones, and `MIGRATION.md` documents the new package identity migration strategy.
 
 ---
 **Timestamp:** 2026-09-13 00:00 UTC
