@@ -3,6 +3,7 @@ package com.edwardflores.magnetar.orpheus.ui
 import android.util.Log
 import com.edwardflores.magnetar.orpheus.R
 import com.edwardflores.magnetar.orpheus.audio.AudioCaptureProvider
+import com.edwardflores.magnetar.orpheus.audio.AudioCaptureException
 import com.edwardflores.magnetar.orpheus.audio.PitchDetector
 import com.edwardflores.magnetar.orpheus.audio.PitchResult
 import io.mockk.coEvery
@@ -292,5 +293,44 @@ class TunerViewModelTest {
         assertEquals(0f, state.inputLevel)
         assertTrue(state.noteHistory.size <= 5)
         assertEquals(24, state.pitchStabilityPoints.size)
+    }
+
+    @Test
+    fun `audio capture failure is surfaced and deactivates the tuner`() = runTest(testDispatcher) {
+        every { audioCaptureProvider.startCapture() } returns flow {
+            throw AudioCaptureException("microphone busy")
+        }
+
+        viewModel.startTuning()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isActive)
+        assertEquals(R.string.capture_error_microphone_unavailable, state.captureErrorResId)
+    }
+
+    @Test
+    fun `stopTuning clears live capture indicators`() = runTest(testDispatcher) {
+        val buffer = floatArrayOf(0.5f, -0.5f)
+        every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
+        every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, true)
+
+        viewModel.startTuning()
+        advanceUntilIdle()
+        viewModel.stopTuning()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isActive)
+        assertEquals(0f, state.inputLevel)
+        assertTrue(state.waveformSamples.all { it == 0f })
+    }
+
+    @Test
+    fun `initial tuner state contains no fabricated session data`() {
+        val state = TunerUiState()
+
+        assertTrue(state.waveformSamples.all { it == 0f })
+        assertTrue(state.noteHistory.isEmpty())
+        assertTrue(state.pitchStabilityPoints.isEmpty())
     }
 }

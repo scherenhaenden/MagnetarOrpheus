@@ -3,14 +3,17 @@ package com.edwardflores.magnetar.orpheus.ui
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.edwardflores.magnetar.orpheus.R
 import com.edwardflores.magnetar.orpheus.BuildConfig
+import com.edwardflores.magnetar.orpheus.R
+import com.edwardflores.magnetar.orpheus.audio.AudioCaptureException
 import com.edwardflores.magnetar.orpheus.audio.AudioCaptureProvider
 import com.edwardflores.magnetar.orpheus.audio.PitchDetector
 import com.edwardflores.magnetar.orpheus.models.InstrumentProfiles
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -46,6 +49,7 @@ class TunerViewModel(
         }
     private var lastFrequencies = mutableListOf<Double>()
     private var lastProcessedFrequency: Double? = null
+    private var tuningJob: Job? = null
 
     private val windowSize = 3
     private val waveformSampleCount = 48
@@ -60,33 +64,61 @@ class TunerViewModel(
             isActive = true,
             selectedInstrument = selectedInstrument,
             selectedTuning = selectedTuning,
-            calibrationErrorResId = null
+            calibrationErrorResId = null,
+            captureErrorResId = null
         )
 
-        viewModelScope.launch {
-            audioCaptureProvider.startCapture().collect { buffer ->
-                val result = pitchDetector.analyze(buffer)
-                if (BuildConfig.DEBUG && result.candidateFrequencyHz != null && !result.isPitchValid) {
-                    Log.d(
-                        "PitchTracker",
-                        "Rejected candidate=${result.candidateFrequencyHz}Hz confidence=${result.confidence} " +
-                            "rms=${result.rms} floor=${result.noiseFloor} snr=${result.signalToNoiseRatio}"
+        tuningJob = viewModelScope.launch {
+            try {
+                audioCaptureProvider.startCapture().collect { buffer ->
+                    val result = pitchDetector.analyze(buffer)
+                    if (BuildConfig.DEBUG && result.candidateFrequencyHz != null && !result.isPitchValid) {
+                        Log.d(
+                            "PitchTracker",
+                            "Rejected candidate=${result.candidateFrequencyHz}Hz confidence=${result.confidence} " +
+                                "rms=${result.rms} floor=${result.noiseFloor} snr=${result.signalToNoiseRatio}"
+                        )
+                    }
+                    val inputLevel = result.rms.toFloat().coerceIn(0f, 1f)
+                    val waveformSamples = downSampleWaveform(buffer)
+
+                    _uiState.value = _uiState.value.copy(
+                        inputLevel = inputLevel,
+                        waveformSamples = waveformSamples
                     )
-                }
-                val inputLevel = result.rms.toFloat().coerceIn(0f, 1f)
-                val waveformSamples = downSampleWaveform(buffer)
 
+                    if (result.isPitchValid && result.candidateFrequencyHz != null) {
+                        val stableFreq = updateStabilityFilter(result.candidateFrequencyHz)
+                        processFrequency(stableFreq, inputLevel, waveformSamples)
+                    }
+                }
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (exception: AudioCaptureException) {
+                Log.w("TunerViewModel", "Audio capture failed: ${exception.message}")
                 _uiState.value = _uiState.value.copy(
-                    inputLevel = inputLevel,
-                    waveformSamples = waveformSamples
+                    isActive = false,
+                    captureErrorResId = R.string.capture_error_microphone_unavailable
                 )
-
-                if (result.isPitchValid && result.candidateFrequencyHz != null) {
-                    val stableFreq = updateStabilityFilter(result.candidateFrequencyHz)
-                    processFrequency(stableFreq, inputLevel, waveformSamples)
-                }
+            } catch (exception: Exception) {
+                Log.w("TunerViewModel", "Unexpected audio capture failure: ${exception.message}")
+                _uiState.value = _uiState.value.copy(
+                    isActive = false,
+                    captureErrorResId = R.string.capture_error_microphone_unavailable
+                )
             }
         }
+    }
+
+    fun stopTuning() {
+        tuningJob?.cancel()
+        tuningJob = null
+        lastFrequencies.clear()
+        _uiState.value = _uiState.value.copy(
+            isActive = false,
+            inputLevel = 0f,
+            waveformSamples = List(waveformSampleCount) { 0f }
+        )
     }
 
     fun updateCalibration(ref: Double) {
@@ -219,5 +251,10 @@ class TunerViewModel(
             points.removeAt(0)
         }
         return points
+    }
+
+    override fun onCleared() {
+        stopTuning()
+        super.onCleared()
     }
 }

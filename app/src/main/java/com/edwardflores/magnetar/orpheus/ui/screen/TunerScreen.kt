@@ -35,6 +35,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +45,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.edwardflores.magnetar.orpheus.R
 import com.edwardflores.magnetar.orpheus.ui.AppLanguage
 import com.edwardflores.magnetar.orpheus.ui.AppDestination
@@ -74,8 +78,29 @@ fun TunerScreen(
     onCalibrationChange: (Double) -> Unit,
     onNamingSystemChange: (NoteNamingSystem) -> Unit,
     onPresetSelected: (Int) -> Unit,
+    onStartTuning: () -> Unit,
+    onStopTuning: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner, hasPermission) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_START -> if (hasPermission) onStartTuning()
+                Lifecycle.Event.ON_STOP -> onStopTuning()
+                else -> Unit
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        if (hasPermission && lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+            onStartTuning()
+        }
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            onStopTuning()
+        }
+    }
+
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -201,6 +226,7 @@ private fun PhoneLayout(
             inputLevel = uiState.inputLevel,
             isActive = uiState.isActive
         )
+        CaptureError(uiState = uiState)
         CalibrationError(uiState = uiState)
         NoteSystemSelector(
             currentSystem = uiState.namingSystem,
@@ -225,6 +251,18 @@ private fun PhoneLayout(
             currentMode = uiState.tunerMode,
             currentInstrument = uiState.selectedInstrument,
             onDismiss = { showModeDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun CaptureError(uiState: TunerUiState) {
+    uiState.captureErrorResId?.let { errorResId ->
+        Text(
+            text = stringResource(errorResId),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }

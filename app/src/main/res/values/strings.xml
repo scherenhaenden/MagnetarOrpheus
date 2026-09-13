@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">MagnetarOrpheus</string>
     <string name="calibration_error_positive_hz">Calibration must be greater than 0 Hz.</string>
+    <string name="capture_error_microphone_unavailable">The microphone could not be started. Check that it is not being used by another app, then try again.</string>
     <string name="version_label">Version %1$s</string>
 </resources>

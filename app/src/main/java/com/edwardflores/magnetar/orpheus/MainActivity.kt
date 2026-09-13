@@ -34,14 +34,12 @@ class MainActivity : ComponentActivity() {
     private val viewModel: TunerViewModel by viewModels()
     private val noteBuilderViewModel: NoteBuilderViewModel by viewModels()
     private var hasAudioPermission by mutableStateOf(false)
+    private val preferences by lazy { getSharedPreferences(PREFERENCES_NAME, MODE_PRIVATE) }
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         hasAudioPermission = isGranted
-        if (isGranted) {
-            viewModel.startTuning()
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,10 +53,26 @@ class MainActivity : ComponentActivity() {
                 val uiState by viewModel.uiState.collectAsState()
                 val noteBuilderUiState by noteBuilderViewModel.uiState.collectAsState()
                 var currentDestination by rememberSaveable { mutableStateOf(AppDestination.TUNER) }
-                var appLanguageCode by rememberSaveable { mutableStateOf(AppLanguage.ENGLISH.code) }
+                var appLanguageCode by rememberSaveable {
+                    mutableStateOf(preferences.getString(APP_LANGUAGE_KEY, AppLanguage.ENGLISH.code) ?: AppLanguage.ENGLISH.code)
+                }
                 val appLanguage = AppLanguage.entries.firstOrNull { it.code == appLanguageCode } ?: AppLanguage.ENGLISH
-                var noteLanguageCode by rememberSaveable { mutableStateOf(NoteLanguage.ENGLISH.code) }
+                var noteLanguageCode by rememberSaveable {
+                    mutableStateOf(preferences.getString(NOTE_LANGUAGE_KEY, NoteLanguage.ENGLISH.code) ?: NoteLanguage.ENGLISH.code)
+                }
                 val noteLanguage = NoteLanguage.entries.firstOrNull { it.code == noteLanguageCode } ?: NoteLanguage.ENGLISH
+
+                fun setAppLanguage(language: AppLanguage) {
+                    appLanguageCode = language.code
+                    preferences.edit().putString(APP_LANGUAGE_KEY, language.code).apply()
+                }
+
+                fun setNoteLanguage(language: NoteLanguage) {
+                    noteLanguageCode = language.code
+                    preferences.edit().putString(NOTE_LANGUAGE_KEY, language.code).apply()
+                    viewModel.updateNamingSystem(language.toNamingSystem())
+                    noteBuilderViewModel.updateNoteLanguage(language)
+                }
 
                 LaunchedEffect(noteLanguage) {
                     viewModel.updateNamingSystem(noteLanguage.toNamingSystem())
@@ -70,6 +84,11 @@ class MainActivity : ComponentActivity() {
                         destination != AppDestination.NOTE_BUILDER
                     ) {
                         noteBuilderViewModel.stopPlayback()
+                    }
+                    if (currentDestination == AppDestination.TUNER &&
+                        destination != AppDestination.TUNER
+                    ) {
+                        viewModel.stopTuning()
                     }
                     currentDestination = destination
                 }
@@ -84,15 +103,13 @@ class MainActivity : ComponentActivity() {
                             noteLanguage = noteLanguage,
                             currentDestination = currentDestination,
                             onNavigate = ::navigateTo,
-                            onAppLanguageChange = { appLanguageCode = it.code },
-                            onNoteLanguageChange = {
-                                noteLanguageCode = it.code
-                                viewModel.updateNamingSystem(it.toNamingSystem())
-                                noteBuilderViewModel.updateNoteLanguage(it)
-                            },
+                            onAppLanguageChange = ::setAppLanguage,
+                            onNoteLanguageChange = ::setNoteLanguage,
                             onCalibrationChange = { viewModel.updateCalibration(it) },
                             onNamingSystemChange = { viewModel.updateNamingSystem(it) },
                             onPresetSelected = { viewModel.applyPreset(it) },
+                            onStartTuning = viewModel::startTuning,
+                            onStopTuning = viewModel::stopTuning,
                             modifier = Modifier.padding(innerPadding)
                         )
 
@@ -108,18 +125,20 @@ class MainActivity : ComponentActivity() {
                             noteLanguage = noteLanguage,
                             currentDestination = currentDestination,
                             onNavigate = ::navigateTo,
-                            onAppLanguageChange = { appLanguageCode = it.code },
-                            onNoteLanguageChange = {
-                                noteLanguageCode = it.code
-                                viewModel.updateNamingSystem(it.toNamingSystem())
-                                noteBuilderViewModel.updateNoteLanguage(it)
-                            },
+                            onAppLanguageChange = ::setAppLanguage,
+                            onNoteLanguageChange = ::setNoteLanguage,
                             modifier = Modifier.padding(innerPadding)
                         )
                     }
                 }
             }
         }
+    }
+
+    private companion object {
+        const val PREFERENCES_NAME = "orpheus_preferences"
+        const val APP_LANGUAGE_KEY = "app_language"
+        const val NOTE_LANGUAGE_KEY = "note_language"
     }
 
     private fun checkAudioPermission() {
@@ -129,7 +148,6 @@ class MainActivity : ComponentActivity() {
                 Manifest.permission.RECORD_AUDIO
             ) == PackageManager.PERMISSION_GRANTED -> {
                 hasAudioPermission = true
-                viewModel.startTuning()
             }
 
             else -> {
