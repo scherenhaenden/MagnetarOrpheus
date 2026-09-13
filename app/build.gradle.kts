@@ -4,6 +4,17 @@ plugins {
     jacoco
 }
 
+val releaseKeystorePath = System.getenv("ORPHEUS_RELEASE_KEYSTORE_PATH")
+val releaseKeystorePassword = System.getenv("ORPHEUS_RELEASE_KEYSTORE_PASSWORD")
+val releaseKeyAlias = System.getenv("ORPHEUS_RELEASE_KEY_ALIAS")
+val releaseKeyPassword = System.getenv("ORPHEUS_RELEASE_KEY_PASSWORD")
+val releaseSigningConfigured = listOf(
+    releaseKeystorePath,
+    releaseKeystorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword
+).all { !it.isNullOrBlank() }
+
 android {
     namespace = "com.blazares.orpheus"
     compileSdk = 37
@@ -18,17 +29,32 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            if (releaseSigningConfigured) {
+                storeFile = file(requireNotNull(releaseKeystorePath))
+                storePassword = releaseKeystorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         debug {
             enableUnitTestCoverage = true
             enableAndroidTestCoverage = true
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            if (releaseSigningConfigured) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
     compileOptions {
