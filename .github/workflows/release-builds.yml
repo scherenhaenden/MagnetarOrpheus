@@ -139,7 +139,7 @@ jobs:
           zip -j "$ZIP_OUT" "$APK_OUT" "$AAB_OUT" "$CHECKSUM_OUT"
 
       - name: Publish GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.metadata.outputs.tag_name }}
           name: ${{ steps.metadata.outputs.release_name }}
