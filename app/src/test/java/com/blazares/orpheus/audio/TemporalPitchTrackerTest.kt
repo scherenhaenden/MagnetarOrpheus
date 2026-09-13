@@ -14,14 +14,13 @@ class TemporalPitchTrackerTest {
     }
 
     @Test
-    fun `nearby candidates use a rolling median`() {
+    fun `nearby candidates use a bounded rolling median`() {
         val tracker = TemporalPitchTracker()
 
         tracker.update(440.0)
-        tracker.update(442.0)
-        val stable = tracker.update(444.0)
-
-        assertEquals(442.0, stable!!, 0.001)
+        assertEquals(441.0, tracker.update(442.0)!!, 0.001)
+        assertEquals(442.0, tracker.update(444.0)!!, 0.001)
+        assertEquals(444.0, tracker.update(446.0)!!, 0.001)
     }
 
     @Test
@@ -75,28 +74,53 @@ class TemporalPitchTrackerTest {
     }
 
     @Test
-    fun `invalid candidates are ignored`() {
+    fun `invalid candidates are ignored before and after lock`() {
         val tracker = TemporalPitchTracker()
 
         assertNull(tracker.update(Double.NaN))
         assertNull(tracker.update(0.0))
+        assertNull(tracker.update(-440.0))
 
         tracker.update(440.0)
         assertEquals(440.0, tracker.update(Double.POSITIVE_INFINITY)!!, 0.001)
     }
 
     @Test
-    fun `reset removes the previous pitch lock`() {
+    fun `reset removes the previous pitch lock and pending switch`() {
         val tracker = TemporalPitchTracker()
 
         tracker.update(440.0)
+        tracker.update(329.63)
         tracker.reset()
 
         assertEquals(329.63, tracker.update(329.63)!!, 0.001)
     }
 
     @Test(expected = IllegalArgumentException::class)
-    fun `invalid configuration is rejected`() {
+    fun `zero median window is rejected`() {
         TemporalPitchTracker(medianWindowSize = 0)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `zero continuity range is rejected`() {
+        TemporalPitchTracker(continuityCents = 0.0)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `zero switch cluster range is rejected`() {
+        TemporalPitchTracker(switchClusterCents = 0.0)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `zero switch confirmation count is rejected`() {
+        TemporalPitchTracker(switchConfirmationFrames = 0)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `octave confirmation cannot be shorter than normal confirmation`() {
+        TemporalPitchTracker(
+            switchConfirmationFrames = 3,
+            octaveSwitchConfirmationFrames = 2
+        )
     }
 }
