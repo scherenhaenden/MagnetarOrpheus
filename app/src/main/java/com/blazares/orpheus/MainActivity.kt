@@ -59,6 +59,7 @@ class MainActivity : ComponentActivity() {
         if (!skipAudioPermissionHandling) {
             refreshAudioPermissionState()
         }
+        restoreTunerPreferences()
 
         enableEdgeToEdge()
         setContent {
@@ -102,6 +103,19 @@ class MainActivity : ComponentActivity() {
                         noteBuilderViewModel.updateNoteLanguage(language)
                     }
 
+                    fun setReferencePitch(referenceHz: Double) {
+                        viewModel.updateCalibration(referenceHz)
+                        if (referenceHz > 0.0 && referenceHz.isFinite()) {
+                            preferences.edit().putFloat(REFERENCE_A4_KEY, referenceHz.toFloat()).apply()
+                        }
+                    }
+
+                    fun setInstrumentProfile(profileId: String) {
+                        if (viewModel.selectInstrumentProfile(profileId)) {
+                            preferences.edit().putString(INSTRUMENT_PROFILE_KEY, profileId).apply()
+                        }
+                    }
+
                     LaunchedEffect(noteLanguage) {
                         viewModel.updateNamingSystem(noteLanguage.toNamingSystem())
                         noteBuilderViewModel.updateNoteLanguage(noteLanguage)
@@ -138,10 +152,10 @@ class MainActivity : ComponentActivity() {
                                 onNavigate = ::navigateTo,
                                 onAppLanguageChange = ::setAppLanguage,
                                 onNoteLanguageChange = ::setNoteLanguage,
-                                onCalibrationChange = { viewModel.updateCalibration(it) },
+                                onCalibrationChange = ::setReferencePitch,
                                 onNamingSystemChange = { viewModel.updateNamingSystem(it) },
-                                onPresetSelected = { viewModel.applyPreset(it) },
-                                onInstrumentProfileSelected = { viewModel.selectInstrumentProfile(it) },
+                                onPresetSelected = { setReferencePitch(it.toDouble()) },
+                                onInstrumentProfileSelected = ::setInstrumentProfile,
                                 onStartTuning = viewModel::startTuning,
                                 onStopTuning = viewModel::stopTuning,
                                 modifier = Modifier.fillMaxSize()
@@ -195,6 +209,17 @@ class MainActivity : ComponentActivity() {
         const val PREFERENCES_NAME = "orpheus_preferences"
         const val APP_LANGUAGE_KEY = "app_language"
         const val NOTE_LANGUAGE_KEY = "note_language"
+        const val INSTRUMENT_PROFILE_KEY = "instrument_profile"
+        const val REFERENCE_A4_KEY = "reference_a4"
+    }
+
+    private fun restoreTunerPreferences() {
+        preferences.getString(INSTRUMENT_PROFILE_KEY, null)?.let(viewModel::selectInstrumentProfile)
+        if (preferences.contains(REFERENCE_A4_KEY)) {
+            viewModel.updateCalibration(
+                preferences.getFloat(REFERENCE_A4_KEY, 440f).toDouble()
+            )
+        }
     }
 
     private fun refreshAudioPermissionState() {
