@@ -10,7 +10,7 @@ This plan captures the milestones, tasks, and progress for the MagnetarOrpheus A
 | `ms-02` | Audio Foundation | 2026-05-20 | Implement low-level audio capture and basic DSP pipeline. | `done` |
 | `ms-03` | Core Tuner UI | 2026-05-30 | Build the Jetpack Compose interface for visual feedback. | `done` |
 | `ms-04` | MVP Release | 2026-06-15 | Stable chromatic guitar tuner with calibration settings. | `done` |
-| `ms-05` | Instrument Profiles | 2026-06-30 | Preset tunings for Guitar, Bass, and Ukulele. | `planned` |
+| `ms-05` | Instrument Profiles | 2026-06-30 | Preset tunings for Guitar, Bass, and Ukulele. | `in_progress` |
 | `ms-06` | Visual Analysis | 2026-07-15 | Real-time waveform display and pitch history. | `planned` |
 
 ## Task Backlog Table

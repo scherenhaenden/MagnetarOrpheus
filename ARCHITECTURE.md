@@ -1,7 +1,7 @@
 # Architecture of MagnetarOrpheus
 
 ## System Overview
-MagnetarOrpheus follows a Clean Architecture pattern, separating audio acquisition, signal processing, and reactive UI state.
+MagnetarOrpheus follows a Clean Architecture pattern, separating audio acquisition, signal processing, and reactive UI state. The product targets sub-cent tuning precision and is designed for sub-20ms audio latency on Android API 26+; these are design targets, not measured benchmarks.
 
 The product now has two UI feature surfaces with shared branding but different interaction goals:
 
@@ -30,3 +30,9 @@ The product now has two UI feature surfaces with shared branding but different i
 *   **Concurrency:** Kotlin Coroutines & Flow
 *   **Audio API:** Android AudioRecord
 *   **Build System:** Gradle (Kotlin DSL)
+
+## Signal Processing Notes
+*   **Algorithm:** YIN pitch detection.
+*   **Difference function:** d_t(τ) = sum(j = 1..W) of (x_j - x_(j+τ))².
+*   **CMNDF:** Cumulative Mean Normalized Difference Function.
+*   **Interpolation:** Parabolic interpolation improves sub-sample pitch accuracy.

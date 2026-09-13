@@ -2,7 +2,6 @@ package com.edwardflores.magnetar.orpheus.ui.components
 
 import android.graphics.Paint
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -38,7 +37,7 @@ fun TuningGauge(
     }
     val labelTextSize = with(density) { 16.sp.toPx() }
 
-    Canvas(modifier = modifier.fillMaxSize()) {
+    Canvas(modifier = modifier) {
         val width = size.width
         val height = size.height
         val strokeWidth = width * 0.015f

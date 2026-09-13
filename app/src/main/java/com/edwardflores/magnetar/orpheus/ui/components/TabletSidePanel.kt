@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import com.edwardflores.magnetar.orpheus.ui.NoteHistoryItem
 import com.edwardflores.magnetar.orpheus.ui.QuickPreset
 import com.edwardflores.magnetar.orpheus.ui.theme.OrpheusColors
+import java.util.Locale
 
 @Composable
 fun TabletSidePanel(
@@ -87,7 +88,7 @@ fun TabletSidePanel(
                             modifier = Modifier.weight(0.7f)
                         )
                         Text(
-                            text = String.format("%.1f Hz", item.frequencyHz),
+                            text = String.format(Locale.US, "%.1f Hz", item.frequencyHz),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.weight(1f)
