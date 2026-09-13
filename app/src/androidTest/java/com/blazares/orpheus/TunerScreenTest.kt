@@ -1,5 +1,6 @@
 package com.blazares.orpheus
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -54,5 +55,46 @@ class TunerScreenTest {
         composeRule.runOnIdle {
             assertEquals("guitar_drop_d", selectedProfileId)
         }
+    }
+
+    @Test
+    fun removingTunerFromComposition_stopsCaptureExactlyOnce() {
+        val showTuner = mutableStateOf(true)
+        var startCalls = 0
+        var stopCalls = 0
+
+        composeRule.setContent {
+            BlazaresOrpheusTheme {
+                if (showTuner.value) {
+                    TunerScreen(
+                        uiState = TunerUiState(),
+                        hasPermission = true,
+                        versionName = "test",
+                        appLanguage = AppLanguage.ENGLISH,
+                        noteLanguage = NoteLanguage.ENGLISH,
+                        currentDestination = AppDestination.TUNER,
+                        onNavigate = {},
+                        onAppLanguageChange = {},
+                        onNoteLanguageChange = {},
+                        onCalibrationChange = {},
+                        onNamingSystemChange = {},
+                        onPresetSelected = {},
+                        onInstrumentProfileSelected = {},
+                        onStartTuning = { startCalls++ },
+                        onStopTuning = { stopCalls++ }
+                    )
+                }
+            }
+        }
+
+        composeRule.waitForIdle()
+        assertEquals(1, startCalls)
+
+        composeRule.runOnUiThread {
+            showTuner.value = false
+        }
+        composeRule.waitForIdle()
+
+        assertEquals(1, stopCalls)
     }
 }
