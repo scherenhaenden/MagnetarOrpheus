@@ -34,8 +34,40 @@ jobs:
       - name: Run Android Lint for release
         run: ./gradlew :app:lintRelease
 
-      - name: Verify minified release APK and AAB builds
-        run: ./gradlew :app:assembleRelease :app:bundleRelease
+      - name: Create ephemeral CI release key
+        shell: bash
+        run: |
+          set -euo pipefail
+          KEYSTORE_PATH="$RUNNER_TEMP/orpheus-ci-release.jks"
+          keytool -genkeypair \
+            -keystore "$KEYSTORE_PATH" \
+            -storepass ci-changeit \
+            -keypass ci-changeit \
+            -alias orpheus-ci \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 1 \
+            -dname "CN=BlazaresOrpheus CI, OU=CI, O=BlazaresOrpheus, C=DE"
+          echo "ORPHEUS_RELEASE_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+          echo "ORPHEUS_RELEASE_KEYSTORE_PASSWORD=ci-changeit" >> "$GITHUB_ENV"
+          echo "ORPHEUS_RELEASE_KEY_ALIAS=orpheus-ci" >> "$GITHUB_ENV"
+          echo "ORPHEUS_RELEASE_KEY_PASSWORD=ci-changeit" >> "$GITHUB_ENV"
+
+      - name: Verify minified signed release APK and AAB builds
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./gradlew :app:assembleRelease :app:bundleRelease
+
+          APK_PATH=$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' | head -n1)
+          AAB_PATH=$(find app/build/outputs/bundle/release -maxdepth 1 -type f -name '*.aab' | head -n1)
+          test -n "$APK_PATH"
+          test -n "$AAB_PATH"
+
+          BUILD_TOOLS_DIR=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n1)
+          test -x "$BUILD_TOOLS_DIR/apksigner"
+          "$BUILD_TOOLS_DIR/apksigner" verify --verbose --print-certs "$APK_PATH"
+          jarsigner -verify -strict "$AAB_PATH"
 
   instrumentation:
     runs-on: ubuntu-latest

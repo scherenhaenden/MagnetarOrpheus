@@ -78,7 +78,7 @@ tasks.withType<Test> {
     }
 }
 
-val jacocoTestReport by tasks.registering(JacocoReport::class) {
+val jacocoTestReport = tasks.register<JacocoReport>("jacocoTestReport") {
     dependsOn(tasks.named("testDebugUnitTest"))
     reports {
         xml.required.set(true)
@@ -107,11 +107,11 @@ val jacocoTestReport by tasks.registering(JacocoReport::class) {
     })
 }
 
-val jacocoTestCoverageVerification by tasks.registering(JacocoCoverageVerification::class) {
+val jacocoTestCoverageVerification = tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
     dependsOn(jacocoTestReport)
-    sourceDirectories.setFrom(jacocoTestReport.get().sourceDirectories)
-    classDirectories.setFrom(jacocoTestReport.get().classDirectories)
-    executionData.setFrom(jacocoTestReport.get().executionData)
+    sourceDirectories.setFrom(jacocoTestReport.map { it.sourceDirectories })
+    classDirectories.setFrom(jacocoTestReport.map { it.classDirectories })
+    executionData.setFrom(jacocoTestReport.map { it.executionData })
     violationRules {
         rule {
             limit {
