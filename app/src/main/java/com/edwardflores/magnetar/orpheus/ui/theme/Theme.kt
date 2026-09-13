@@ -20,8 +20,11 @@ private val OrpheusDarkColorScheme = darkColorScheme(
     error = OrpheusColors.DangerRed
 )
 
+@Suppress("UNUSED_PARAMETER")
 @Composable
 fun MagnetarOrpheusTheme(
+    darkTheme: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     MaterialTheme(

@@ -1,33 +1,73 @@
-# MagnetarOrpheus: Premium Chromatic Instrument Tuner
+# Canonical Project Model of MagnetarOrpheus
 
-## 🎼 Vision
-Magnetar Orpheus is a professional-grade dark-mode chromatic instrument tuner for Android. Designed for musicians who demand precision, it combines high-performance Digital Signal Processing (DSP) with a premium "cockpit" interface that feels like a high-end audio instrument rather than a casual mobile app.
+## Purpose
+MagnetarOrpheus is a professionally engineered native Android application focused on real-time musician tooling. It currently contains two distinct feature surfaces inside the same product:
 
-## 🚀 Key Features
-- **Extreme Precision:** Sub-cent tuning accuracy using the YIN Pitch Detection algorithm.
-- **Premium Adaptive UI:** Stunning graphite/neon-green aesthetics with optimized layouts for both Phones (Portrait) and Tablets (Landscape).
-- **International Support:** Toggle between Scientific, Syllabic (La, Si, Do...), and German note naming systems.
-- **Instrument Profiles:** Predefined tuning sets for Guitar, Bass, and Ukulele.
-- **Real-time Analytics:** Integrated waveform visualization, pitch stability graphs, and tuning history.
-- **Calibration:** Configurable A4 reference pitch (430Hz - 450Hz).
+1.  A **chromatic tuner** for live pitch detection, calibration, and tuning feedback.
+2.  A **Note Builder workspace** for selecting, auditioning, and inspecting notes, intervals, and chords.
 
-## 🛠 Technical Highlights
-- **Architecture:** Clean Architecture with Unidirectional Data Flow.
-- **Performance:** 60FPS UI rendering using Jetpack Compose and custom Canvas drawing.
-- **Stability:** Temporal filtering to reduce visual jitter in noisy environments.
-- **Quality:** Automated CI/CD with >90% code coverage enforcement via JaCoCo.
+The tuner remains the primary real-time analysis surface. The Note Builder is a secondary workspace that shares the same Magnetar design language but does not replace the tuner.
 
-## 📱 Design Specification
-The application follows the **Magnetar Orpheus Extreme UI Design Specification**, prioritizing:
-- **High Contrast:** Neon green signal elements on a deep graphite background (#05080A).
-- **Unambiguous UX:** Clear, large note displays and stable numeric frequency data.
-- **Professional Aesthetics:** Minimalistic, technical, and high-contrast geometry.
+This project strictly follows the **Magnetar Canonical Project Model** for documentation, planning, and governance to ensure high maintainability, architectural integrity, and professional engineering standards.
 
-## 🛠 Setup & Build
-1. Clone the repository.
-2. Open in Android Studio (Ladybug or newer).
-3. Ensure you have Android SDK 34+ and JDK 17.
-4. Run `./gradlew build` to verify the build and test coverage.
+## How to Use This Repository
+1.  **Understand the Standard:** This repository follows the Magnetar standard for project management.
+2.  **Consult the Documentation:** All project decisions, tasks, and status are tracked in the root markdown files.
+3.  **Follow the Rules:** Replicate the required documentation set for any major sub-modules.
+4.  **Governance:** Follow the WIP (Work-In-Progress), branching (using `master` as default), and blocker escalation rules.
+5.  **AI Collaboration:** If you are an AI collaborator, parse the `projects/magnetar_orpheus.project.yml` file first.
 
-## 📜 License
-Internal development for Magnetar Ecosystem.
+## Project Contents
+| File | Purpose |
+| :--- | :--- |
+| `PLAN.md` | Project tasks, milestones, and effort tracking. |
+| `BITACORA.md` | Chronological logbook of all significant events and decisions. |
+| `NOTE_BUILDER_EXTREME_UI.md` | Premium Note Builder workspace specification and responsive design rules. |
+| `REQUIREMENTS.md` | Detailed functional and non-functional specifications. |
+| `ARCHITECTURE.md` | System structure, DSP layers, and module definitions. |
+| `RULES.md` | Naming conventions, workflow standards, and canonical rules. |
+| `STATUS.md` | Real-time health summary, progress stats, and active risks. |
+| `TESTING.md` | Test strategy, coverage targets, and reporting rules. |
+| `BLOCKERS.md` | Documented impediments and escalation paths. |
+| `BRANCHING_MODEL.md` | Git branching strategy (Standard: `master` as default). |
+| `WIP_GUIDELINES.md` | Policies regarding Work-In-Progress limits. |
+
+## Progress Model Overview
+We track progress through a structured lifecycle:
+`planned` → `ready` → `in_progress` → `in_review` → `done`.
+Every state transition and major milestone achievement is recorded in `BITACORA.md`.
+
+## Current Branch Snapshot
+The current branch state extends the original tuner MVP in several ways:
+
+*   Premium dark-mode tuner visuals have been restored and decomposed into reusable UI components.
+*   In-app navigation now separates **Tuner** and **Note Builder** as two different destinations.
+*   The Note Builder branch state includes responsive phone/tablet layouts, note-selection state, music-theory naming, playback wiring, and tablet-safe bounded scroll regions.
+*   The Android app version target has been raised to `2026.08.31.1446`.
+*   A standalone GitHub Actions workflow now exists for manually publishing downloadable APK builds to GitHub Releases.
+
+## YAML Project Schema
+The source of truth for machine-readable project metadata is located at `projects/magnetar_orpheus.project.yml`. It contains stakeholders, milestones, and the task registry.
+
+## Guidance for AI Collaborators
+AI agents MUST:
+*   Parse `projects/magnetar_orpheus.project.yml` before taking action.
+*   Use `PLAN.md` and `STATUS.md` to determine the current focus.
+*   Strictly respect `RULES.md` and `WIP_GUIDELINES.md`.
+*   Update `BITACORA.md` immediately after completing any work or changing a task state.
+
+## Applying This Template
+This project is already instantiated following the Magnetar canon. To extend it:
+1.  Update the project YAML for new milestones.
+2.  Reflect changes in `PLAN.md`.
+3.  Log the initialization in `BITACORA.md`.
+
+## Validating Canon Compliance
+- [ ] All 11+ required canonical files exist.
+- [ ] The project YAML matches the current state of `PLAN.md`.
+- [ ] `BITACORA.md` is updated chronologically (newest first).
+- [ ] Active branches follow the `RULES.md` naming conventions.
+
+## Build Requirements
+
+Use Android SDK 37 and JDK 21 for local builds. The Gradle configuration and CI workflows use Java 21 consistently.

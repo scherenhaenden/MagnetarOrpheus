@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import com.edwardflores.magnetar.orpheus.ui.NoteHistoryItem
 import com.edwardflores.magnetar.orpheus.ui.QuickPreset
 import com.edwardflores.magnetar.orpheus.ui.theme.OrpheusColors
+import java.util.Locale
 
 @Composable
 fun TabletSidePanel(
@@ -70,15 +71,8 @@ fun TabletSidePanel(
                         Box(
                             modifier = Modifier
                                 .size(30.dp)
-                                .background(
-                                    color = MaterialTheme.colorScheme.surfaceVariant,
-                                    shape = CircleShape
-                                )
-                                .border(
-                                    width = 1.dp,
-                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
-                                    shape = CircleShape
-                                ),
+                                .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.35f), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
@@ -94,7 +88,7 @@ fun TabletSidePanel(
                             modifier = Modifier.weight(0.7f)
                         )
                         Text(
-                            text = String.format("%.1f Hz", item.frequencyHz),
+                            text = String.format(Locale.US, "%.1f Hz", item.frequencyHz),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.weight(1f)
@@ -186,10 +180,7 @@ private fun PanelCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(
-                color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(24.dp)
-            )
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
             .border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
@@ -274,6 +265,7 @@ private fun MetadataRow(label: String, value: String) {
 private fun PitchStabilityChart(points: List<Float>) {
     val outlineColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
     val baselineColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
+
     Canvas(
         modifier = Modifier
             .fillMaxWidth()
@@ -312,7 +304,6 @@ private fun PitchStabilityChart(points: List<Float>) {
             color = OrpheusColors.PrimaryGreen,
             style = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Round)
         )
-
         drawLine(
             color = baselineColor,
             start = Offset(0f, horizontalCenter),

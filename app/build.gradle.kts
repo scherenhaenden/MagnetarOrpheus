@@ -6,14 +6,14 @@ plugins {
 
 android {
     namespace = "com.edwardflores.magnetar.orpheus"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.edwardflores.magnetar.orpheus"
         minSdk = 26
-        targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        targetSdk = 37
+        versionCode = 4
+        versionName = "2026.08.31.1447"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -32,12 +32,17 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
+}
+
+kotlin {
+    jvmToolchain(21)
 }
 
 tasks.withType<Test> {
@@ -57,16 +62,20 @@ val jacocoTestReport by tasks.registering(JacocoReport::class) {
     val fileFilter = listOf(
         "**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*",
         "**/*Test*.*", "android/**/*.*", "**/theme/*", "**/MainActivity*",
-        "**/AudioCaptureProvider*", "**/ComposableSingletons*"
+        "**/AudioCaptureProvider*", "**/ComposableSingletons*",
+        "**/ui/components/*", "**/ui/screen/*", "**/ui/notebuilder/NoteBuilderScreen*",
+        "**/ui/notebuilder/NoteBuilderPalette*", "**/notebuilder/audio/*"
     )
-    val debugTree = fileTree("${project.layout.buildDirectory.get()}/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes") {
+    val debugTree = files(
+        tasks.named("compileDebugKotlin", org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).flatMap { it.destinationDirectory }
+    ).asFileTree.matching {
         exclude(fileFilter)
     }
     val mainSrc = "${project.projectDir}/src/main/java"
 
     sourceDirectories.setFrom(files(mainSrc))
     classDirectories.setFrom(files(debugTree))
-    executionData.setFrom(fileTree(project.buildDir) {
+    executionData.setFrom(fileTree(project.layout.buildDirectory) {
         include("jacoco/testDebugUnitTest.exec", "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
     })
 }

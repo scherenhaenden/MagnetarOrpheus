@@ -2,16 +2,17 @@ package com.edwardflores.magnetar.orpheus.ui.components
 
 import android.graphics.Paint
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.sp
 import com.edwardflores.magnetar.orpheus.ui.theme.OrpheusColors
@@ -36,15 +37,15 @@ fun TuningGauge(
     }
     val labelTextSize = with(density) { 16.sp.toPx() }
 
-    Canvas(modifier = modifier.fillMaxSize()) {
+    Canvas(modifier = modifier) {
         val width = size.width
         val height = size.height
         val strokeWidth = width * 0.015f
         val tickLengthMinor = width * 0.025f
         val tickLengthMajor = width * 0.065f
-        val radius = width * 0.42f
+        val radius = minOf(width, height) * 0.42f
         val center = Offset(width / 2f, height * 0.88f)
-        val arcRect = androidx.compose.ui.geometry.Rect(
+        val arcRect = Rect(
             offset = Offset(center.x - radius, center.y - radius),
             size = Size(radius * 2f, radius * 2f)
         )
@@ -125,6 +126,7 @@ fun TuningGauge(
             y = center.y + sin(needleRadians).toFloat() * (radius - width * 0.08f)
         )
         val needleStart = Offset(center.x, center.y - height * 0.34f)
+
         drawLine(
             color = if (cents in -5..5) OrpheusColors.PrimaryGreen else Color.White.copy(alpha = 0.75f),
             start = needleStart,
@@ -168,10 +170,3 @@ private fun centsToAngle(cents: Float): Float {
     val normalized = (cents.coerceIn(-100f, 100f) + 100f) / 200f
     return gaugeStartAngle + normalized * gaugeSweepAngle
 }
-
-private fun Color.toArgb(): Int = android.graphics.Color.argb(
-    (alpha * 255).toInt(),
-    (red * 255).toInt(),
-    (green * 255).toInt(),
-    (blue * 255).toInt()
-)

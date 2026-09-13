@@ -1,13 +1,20 @@
 package com.edwardflores.magnetar.orpheus.ui
 
+import android.util.Log
+import com.edwardflores.magnetar.orpheus.R
 import com.edwardflores.magnetar.orpheus.audio.AudioCaptureProvider
 import com.edwardflores.magnetar.orpheus.audio.PitchDetector
+import com.edwardflores.magnetar.orpheus.audio.PitchResult
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -31,19 +38,40 @@ class TunerViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
+        mockkStatic(Log::class)
+        every { Log.w(any(), any<String>()) } returns 0
+        every { Log.d(any(), any<String>()) } returns 0
+        every { pitchDetector.reset() } returns Unit
         viewModel = TunerViewModel(audioCaptureProvider, pitchDetector)
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+        unmockkStatic(Log::class)
+    }
+
+    private fun mockPitchResult(
+        freq: Double?,
+        isValid: Boolean,
+        rms: Double = 0.5,
+        confidence: Double = 0.95
+    ): PitchResult {
+        return PitchResult(
+            candidateFrequencyHz = freq,
+            confidence = confidence,
+            rms = rms,
+            noiseFloor = 0.01,
+            signalToNoiseRatio = 50.0,
+            isPitchValid = isValid
+        )
     }
 
     @Test
-    fun `startTuning updates state and processes frequency`() = runTest {
+    fun `startTuning updates state and processes valid pitch result`() = runTest(testDispatcher) {
         val buffer = floatArrayOf(0f)
         every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
-        every { pitchDetector.estimatePitch(buffer) } returns 440.0
+        every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, true)
 
         viewModel.startTuning()
         advanceUntilIdle()
@@ -53,6 +81,35 @@ class TunerViewModelTest {
         assertEquals(440.0, state.frequency, 0.01)
         assertEquals("A4", state.noteName)
         assertTrue(state.isTuned)
+        verify { pitchDetector.reset() }
+    }
+
+    @Test
+    fun `invalid pitch due to low confidence does not update target note frequency`() = runTest(testDispatcher) {
+        val buffer = floatArrayOf(0f)
+        every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
+        every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, false, confidence = 0.3)
+
+        viewModel.startTuning()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertTrue(state.isActive)
+        assertEquals(0.0, state.frequency, 0.0) // initial frequency remains unchanged
+    }
+
+    @Test
+    fun `invalid pitch due to insufficient signal RMS does not update frequency`() = runTest(testDispatcher) {
+        val buffer = floatArrayOf(0f)
+        every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
+        every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, false, rms = 0.0001)
+
+        viewModel.startTuning()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertTrue(state.isActive)
+        assertEquals(0.0, state.frequency, 0.0)
     }
 
     @Test
@@ -62,26 +119,26 @@ class TunerViewModelTest {
     }
 
     @Test
-    fun `updateNamingSystem updates naming system and recalculates note`() = runTest {
+    fun `updateNamingSystem updates naming system and recalculates note`() = runTest(testDispatcher) {
         val buffer = floatArrayOf(0f)
         every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
-        every { pitchDetector.estimatePitch(buffer) } returns 440.0
+        every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, true)
 
         viewModel.startTuning()
         advanceUntilIdle()
 
         viewModel.updateNamingSystem(NoteNamingSystem.SYLLABIC)
-        assertEquals("La", viewModel.uiState.value.noteName)
+        assertEquals("La4", viewModel.uiState.value.noteName)
 
         viewModel.updateNamingSystem(NoteNamingSystem.GERMAN)
         assertEquals("A4", viewModel.uiState.value.noteName)
     }
 
     @Test
-    fun `processFrequency handle German system H note`() = runTest {
+    fun `processFrequency handle German system H note`() = runTest(testDispatcher) {
         val buffer = floatArrayOf(0f)
         every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
-        every { pitchDetector.estimatePitch(buffer) } returns 493.88 // B4/H4
+        every { pitchDetector.analyze(buffer) } returns mockPitchResult(493.88, true)
 
         viewModel.startTuning()
         viewModel.updateNamingSystem(NoteNamingSystem.GERMAN)
@@ -91,21 +148,29 @@ class TunerViewModelTest {
     }
 
     @Test
-    fun `startTuning does nothing if already active`() {
+    fun `startTuning does nothing if already active`() = runTest(testDispatcher) {
         val buffer = floatArrayOf(0f)
         every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
-        
+        every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, true)
+
         viewModel.startTuning()
         viewModel.startTuning() // Second call
-        
+        advanceUntilIdle()
+
         assertTrue(viewModel.uiState.value.isActive)
+        verify(exactly = 1) { audioCaptureProvider.startCapture() }
     }
 
     @Test
-    fun `stability filter averages frequencies`() = runTest {
+    fun `stability filter averages valid frequencies`() = runTest(testDispatcher) {
         val buffer = floatArrayOf(0f)
         every { audioCaptureProvider.startCapture() } returns flowOf(buffer, buffer, buffer, buffer)
-        every { pitchDetector.estimatePitch(buffer) } returnsMany listOf(440.0, 442.0, 444.0, 446.0)
+        every { pitchDetector.analyze(buffer) } returnsMany listOf(
+            mockPitchResult(440.0, true),
+            mockPitchResult(442.0, true),
+            mockPitchResult(444.0, true),
+            mockPitchResult(446.0, true)
+        )
 
         viewModel.startTuning()
         advanceUntilIdle()
@@ -115,21 +180,54 @@ class TunerViewModelTest {
     }
 
     @Test
-    fun `processFrequency with zero or negative frequency does nothing`() = runTest {
-        val buffer = floatArrayOf(0f)
-        every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
-        every { pitchDetector.estimatePitch(buffer) } returns 0.0
-
-        viewModel.startTuning()
-        advanceUntilIdle()
-
-        assertEquals(0.0, viewModel.uiState.value.frequency, 0.0)
-    }
-
-    @Test
     fun `updateCalibration without last frequency does not crash`() {
         viewModel.updateCalibration(432.0)
         assertEquals(432.0, viewModel.uiState.value.referenceA4, 0.0)
+    }
+
+    @Test
+    fun `updateCalibration recalculates an already detected note`() = runTest(testDispatcher) {
+        val buffer = floatArrayOf(0f)
+        every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
+        every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, true)
+
+        viewModel.startTuning()
+        advanceUntilIdle()
+        viewModel.updateCalibration(432.0)
+
+        assertEquals(432.0, viewModel.uiState.value.referenceA4, 0.0)
+        assertEquals(440.0, viewModel.uiState.value.frequency, 0.01)
+    }
+
+    @Test
+    fun `applyPreset updates reference pitch`() {
+        viewModel.applyPreset(442)
+        assertEquals(442.0, viewModel.uiState.value.referenceA4, 0.0)
+    }
+
+    @Test
+    fun `updateCalibration with invalid value surfaces validation error`() {
+        viewModel.updateCalibration(0.0)
+
+        assertEquals(440.0, viewModel.uiState.value.referenceA4, 0.0)
+        assertEquals(R.string.calibration_error_positive_hz, viewModel.uiState.value.calibrationErrorResId)
+    }
+
+    @Test
+    fun `updateCalibration rejects non finite values`() {
+        viewModel.updateCalibration(Double.NaN)
+
+        assertEquals(440.0, viewModel.uiState.value.referenceA4, 0.0)
+        assertEquals(R.string.calibration_error_positive_hz, viewModel.uiState.value.calibrationErrorResId)
+    }
+
+    @Test
+    fun `valid calibration clears previous validation error`() {
+        viewModel.updateCalibration(0.0)
+        viewModel.updateCalibration(441.0)
+
+        assertEquals(441.0, viewModel.uiState.value.referenceA4, 0.0)
+        assertEquals(null, viewModel.uiState.value.calibrationErrorResId)
     }
 
     @Test
@@ -141,21 +239,58 @@ class TunerViewModelTest {
         assertEquals(state.hashCode(), state.hashCode())
         assertTrue(state.toString().contains("TunerUiState"))
         assertEquals(0.0, state.component1(), 0.0)
-        assertEquals(10, state.cents) // Cover getter
+        assertEquals(10, state.cents)
     }
 
     @Test
-    fun `test all note naming systems`() = runTest {
+    fun `test all note naming systems`() = runTest(testDispatcher) {
         val buffer = floatArrayOf(0f)
         every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
-        every { pitchDetector.estimatePitch(buffer) } returns 440.0
+        every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, true)
 
         viewModel.startTuning()
         advanceUntilIdle()
 
-        NoteNamingSystem.values().forEach { system ->
+        NoteNamingSystem.entries.forEach { system ->
             viewModel.updateNamingSystem(system)
             assertTrue(viewModel.uiState.value.noteName.isNotEmpty())
         }
+    }
+
+    @Test
+    fun `startTuning updates waveform input level history and labels`() = runTest(testDispatcher) {
+        val buffer = floatArrayOf(0.5f, -0.5f, 0.5f, -0.5f, 0.25f, -0.25f)
+        every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
+        every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, true, rms = 0.5)
+
+        viewModel.startTuning()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertTrue(state.inputLevel > 0f)
+        assertTrue(state.waveformSamples.isNotEmpty())
+        assertEquals("A", state.noteLabel)
+        assertEquals("A", state.chromaticNote)
+        assertEquals("A4", state.noteHistory.first().note)
+        assertTrue(state.pitchStabilityPoints.isNotEmpty())
+        assertEquals("Guitar", state.selectedInstrument)
+    }
+
+    @Test
+    fun `tuner state handles empty input and keeps bounded history`() = runTest(testDispatcher) {
+        val buffer = floatArrayOf()
+        every { audioCaptureProvider.startCapture() } returns flow { repeat(25) { emit(buffer) } }
+        every { pitchDetector.analyze(buffer) } returnsMany List(25) { index ->
+            mockPitchResult(220.0 + index * 10.0, isValid = true, rms = 0.0)
+        }
+
+        viewModel.startTuning()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(48, state.waveformSamples.size)
+        assertEquals(0f, state.inputLevel)
+        assertTrue(state.noteHistory.size <= 5)
+        assertEquals(24, state.pitchStabilityPoints.size)
     }
 }

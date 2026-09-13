@@ -4,7 +4,6 @@ import androidx.compose.ui.graphics.Color
 
 object OrpheusColors {
     val Background = Color(0xFF05080A)
-    val BackgroundGlow = Color(0xFF091119)
     val Surface = Color(0xFF0B1115)
     val SurfaceElevated = Color(0xFF10171D)
     val Border = Color(0xFF1B2A31)

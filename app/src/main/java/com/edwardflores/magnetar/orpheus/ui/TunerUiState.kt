@@ -1,5 +1,6 @@
 package com.edwardflores.magnetar.orpheus.ui
 
+import androidx.annotation.StringRes
 import java.util.Locale
 
 enum class NoteNamingSystem(val displayName: String) {
@@ -32,6 +33,7 @@ data class TunerUiState(
     val isActive: Boolean = false,
     val referenceA4: Double = 440.0,
     val namingSystem: NoteNamingSystem = NoteNamingSystem.SCIENTIFIC,
+    @field:StringRes val calibrationErrorResId: Int? = null,
     val tunerMode: String = "Chromatic",
     val inputLevel: Float = 0f,
     val waveformSamples: List<Float> = defaultWaveformSamples(),
@@ -56,13 +58,13 @@ data class TunerUiState(
         }
 }
 
-fun defaultQuickPresets(): List<QuickPreset> = listOf(
+private fun defaultQuickPresets(): List<QuickPreset> = listOf(
     QuickPreset(name = "Standard", referenceHz = 440),
     QuickPreset(name = "Orchestral", referenceHz = 442),
     QuickPreset(name = "Baroque", referenceHz = 415)
 )
 
-fun defaultWaveformSamples(): List<Float> = listOf(
+private fun defaultWaveformSamples(): List<Float> = listOf(
     0.04f, 0.08f, 0.12f, 0.18f, 0.15f, 0.10f, 0.06f, 0.02f,
     -0.03f, -0.08f, -0.16f, -0.22f, -0.18f, -0.10f, -0.04f, 0.03f,
     0.10f, 0.18f, 0.26f, 0.30f, 0.24f, 0.12f, 0.06f, -0.02f,
@@ -70,7 +72,7 @@ fun defaultWaveformSamples(): List<Float> = listOf(
     0.08f, 0.15f, 0.22f, 0.18f, 0.10f, 0.04f, 0.00f, -0.03f
 )
 
-fun defaultNoteHistory(): List<NoteHistoryItem> = listOf(
+private fun defaultNoteHistory(): List<NoteHistoryItem> = listOf(
     NoteHistoryItem("A", "A4", 440.0, 2, "10:42:21"),
     NoteHistoryItem("E", "E4", 329.6, -1, "10:41:56"),
     NoteHistoryItem("G", "G4", 392.0, 3, "10:41:28"),
@@ -78,7 +80,7 @@ fun defaultNoteHistory(): List<NoteHistoryItem> = listOf(
     NoteHistoryItem("D", "D5", 587.3, -2, "10:40:21")
 )
 
-fun defaultPitchStabilityPoints(): List<Float> = listOf(
+private fun defaultPitchStabilityPoints(): List<Float> = listOf(
     1f, 2f, 0f, 3f, 1f, -1f, 0f, -3f,
     -1f, 2f, 1f, 0f, 3f, 2f, 1f, 0f,
     -1f, -2f, 0f, 1f, 2f, 1f, 0f, -1f

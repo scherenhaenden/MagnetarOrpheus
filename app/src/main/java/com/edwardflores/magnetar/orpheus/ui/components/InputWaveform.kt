@@ -37,10 +37,7 @@ fun InputWaveform(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(
-                color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(24.dp)
-            )
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
             .border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
@@ -57,20 +54,13 @@ fun InputWaveform(
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .background(
-                        color = OrpheusColors.PrimaryGreen.copy(alpha = 0.08f),
-                        shape = CircleShape
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = OrpheusColors.PrimaryGreen.copy(alpha = 0.6f),
-                        shape = CircleShape
-                    ),
+                    .background(OrpheusColors.PrimaryGreen.copy(alpha = 0.08f), CircleShape)
+                    .border(1.dp, OrpheusColors.PrimaryGreen.copy(alpha = 0.6f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Mic,
-                    contentDescription = "Microphone active",
+                    contentDescription = if (isActive) "Microphone active" else "Microphone idle",
                     tint = if (isActive) OrpheusColors.PrimaryGreen else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -87,8 +77,9 @@ fun InputWaveform(
                 .height(56.dp)
         ) {
             val centerY = size.height / 2f
-            val spacing = size.width / (waveformSamples.size.coerceAtLeast(1))
+            val spacing = size.width / waveformSamples.size.coerceAtLeast(1)
             val amplitudeBoost = 0.45f + inputLevel * 1.4f
+
             waveformSamples.forEachIndexed { index, sample ->
                 val x = index * spacing + spacing / 2f
                 val lineHeight = abs(sample).coerceAtLeast(0.03f) * size.height * amplitudeBoost

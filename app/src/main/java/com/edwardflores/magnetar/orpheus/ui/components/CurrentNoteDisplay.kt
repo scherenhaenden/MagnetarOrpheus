@@ -20,6 +20,7 @@ fun CurrentNoteDisplay(
     modifier: Modifier = Modifier
 ) {
     val showDetectedNote = uiState.noteLabel != "-" && uiState.frequency > 0
+
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -52,6 +53,7 @@ fun CurrentNoteDisplay(
             text = uiState.centsText,
             style = MaterialTheme.typography.headlineSmall,
             color = when {
+                !uiState.isActive -> MaterialTheme.colorScheme.onSurfaceVariant
                 uiState.cents in -5..5 -> OrpheusColors.PrimaryGreen
                 uiState.cents in -20..20 -> OrpheusColors.WarningAmber
                 else -> OrpheusColors.DangerRed

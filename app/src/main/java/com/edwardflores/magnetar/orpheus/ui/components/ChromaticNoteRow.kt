@@ -13,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.edwardflores.magnetar.orpheus.ui.theme.OrpheusColors
@@ -28,10 +27,7 @@ fun ChromaticNoteRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(
-                color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(24.dp)
-            )
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
             .border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
@@ -56,15 +52,6 @@ fun ChromaticNoteRow(
                         color = if (isSelected) OrpheusColors.PrimaryGreen.copy(alpha = 0.5f) else androidx.compose.ui.graphics.Color.Transparent,
                         shape = RoundedCornerShape(18.dp)
                     )
-                    .drawBehind {
-                        if (isSelected) {
-                            drawCircle(
-                                color = OrpheusColors.PrimaryGreen,
-                                radius = 4.dp.toPx(),
-                                center = center.copy(y = size.height + 8.dp.toPx())
-                            )
-                        }
-                    }
                     .padding(vertical = 14.dp),
                 contentAlignment = Alignment.Center
             ) {
