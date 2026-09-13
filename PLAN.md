@@ -23,8 +23,8 @@ This plan captures the milestones, tasks, and progress for the BlazaresOrpheus A
 | `task-004` | `ms-02` | Pitch Detection Algorithm | Gemini | 8 | `done` | Implementation of YIN or Autocorrelation. |
 | `task-005` | `ms-03` | Compose Tuner UI | Gemini | 5 | `done` | Visual indicator and note display. |
 | `task-006` | `ms-04` | Calibration & Stability | Gemini | 3 | `done` | A4 reference and temporal filtering. |
-| `task-007` | `ms-05` | Instrument Data Layer | TBD | 3 | `planned` | Define tuning frequencies for profiles. |
-| `task-008` | `ms-05` | Profile Selection UI | TBD | 4 | `planned` | Dropdown/Menu for switching instruments. |
+| `task-007` | `ms-05` | Instrument Data Layer | ChatGPT | 3 | `in_review` | Guitar, Bass, and Ukulele profiles already exist in the codebase; canonical state reconciled pending branch verification. |
+| `task-008` | `ms-05` | Profile Selection UI | ChatGPT | 4 | `in_progress` | Wire the existing instrument profiles into real tuner selection instead of the current hard-coded Guitar profile. |
 | `task-009` | `ms-06` | Waveform Canvas | TBD | 6 | `planned` | Real-time PCM data visualization. |
 | `task-010` | `ms-04` | PR 11 Review Remediation | Codex | 2 | `done` | Align Java baseline, close pending review threads, and validate stale comments. |
 | `task-011` | `ms-04` | Version Visibility and UI i18n Cleanup | Codex | 2 | `done` | Surface build version in-app and move validation messaging to resources. |
@@ -37,9 +37,9 @@ This plan captures the milestones, tasks, and progress for the BlazaresOrpheus A
 ## Effort Summary
 *   **Total effort:** 67 pts
 *   **Completed:** 29 pts
-*   **In progress:** 18 pts
-*   **In review:** 7 pts
-*   **Remaining:** 13 pts
+*   **In progress:** 22 pts
+*   **In review:** 10 pts
+*   **Remaining:** 6 pts
 
 ## State Definitions
 *   `planned`: Identified for future work.
