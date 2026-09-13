@@ -7,37 +7,62 @@ import org.junit.Test
 class InstrumentProfileTest {
 
     @Test
-    fun `GuitarStandard profile has correct notes`() {
+    fun `GuitarStandard profile has correct notes and labels`() {
         val profile = InstrumentProfiles.GuitarStandard
         assertEquals("Guitar (Standard)", profile.name)
+        assertEquals("Guitar", profile.instrumentName)
+        assertEquals("Standard", profile.tuningName)
+        assertEquals("EADGBE", profile.noteSequence)
+        assertEquals("Standard (EADGBE)", profile.tuningDisplayName)
         assertEquals(6, profile.notes.size)
         assertEquals("E2", profile.notes[0].name)
         assertEquals(82.41, profile.notes[0].frequency, 0.01)
     }
 
     @Test
-    fun `BassStandard profile has correct notes`() {
-        val profile = InstrumentProfiles.BassStandard
-        assertEquals("Bass (Standard)", profile.name)
-        assertEquals(4, profile.notes.size)
-        assertEquals("G2", profile.notes.last().name)
+    fun `alternate guitar profiles expose their actual note sequences`() {
+        assertEquals("Drop D (DADGBE)", InstrumentProfiles.GuitarDropD.tuningDisplayName)
+        assertEquals("D Standard (DGCFAD)", InstrumentProfiles.GuitarDStandard.tuningDisplayName)
     }
 
     @Test
-    fun `UkuleleStandard profile has correct notes`() {
-        val profile = InstrumentProfiles.UkuleleStandard
-        assertEquals("Ukulele (Soprano)", profile.name)
-        assertEquals(4, profile.notes.size)
-        assertEquals("A4", profile.notes.last().name)
+    fun `Bass profiles cover standard and drop D`() {
+        val standard = InstrumentProfiles.BassStandard
+        assertEquals("Bass", standard.instrumentName)
+        assertEquals("Standard (EADG)", standard.tuningDisplayName)
+        assertEquals("G2", standard.notes.last().name)
+
+        val dropD = InstrumentProfiles.BassDropD
+        assertEquals("Drop D (DADG)", dropD.tuningDisplayName)
+        assertEquals(36.71, dropD.notes.first().frequency, 0.01)
     }
 
     @Test
-    fun `All list contains all standard profiles`() {
+    fun `Ukulele profiles cover high and low G variants`() {
+        val standard = InstrumentProfiles.UkuleleStandard
+        assertEquals("Soprano (GCEA)", standard.tuningDisplayName)
+        assertEquals("A4", standard.notes.last().name)
+
+        val lowG = InstrumentProfiles.UkuleleLowG
+        assertEquals("Low G (GCEA)", lowG.tuningDisplayName)
+        assertEquals("G3", lowG.notes.first().name)
+    }
+
+    @Test
+    fun `All list contains unique valid production profiles`() {
         val all = InstrumentProfiles.All
+
+        assertEquals(7, all.size)
+        assertEquals(all.size, all.map { it.id }.distinct().size)
         assertTrue(all.contains(InstrumentProfiles.GuitarStandard))
+        assertTrue(all.contains(InstrumentProfiles.GuitarDropD))
+        assertTrue(all.contains(InstrumentProfiles.GuitarDStandard))
         assertTrue(all.contains(InstrumentProfiles.BassStandard))
+        assertTrue(all.contains(InstrumentProfiles.BassDropD))
         assertTrue(all.contains(InstrumentProfiles.UkuleleStandard))
-        assertEquals(3, all.size)
+        assertTrue(all.contains(InstrumentProfiles.UkuleleLowG))
+        assertTrue(all.all { profile -> profile.notes.isNotEmpty() })
+        assertTrue(all.flatMap { it.notes }.all { note -> note.frequency > 0.0 && note.stringNumber > 0 })
     }
 
     @Test
@@ -50,11 +75,11 @@ class InstrumentProfileTest {
         assertEquals("A4", note.component1())
         assertEquals(440.0, note.component2(), 0.0)
         assertEquals(1, note.component3())
-        assertEquals(1, note.stringNumber) // Explicitly cover getter
+        assertEquals(1, note.stringNumber)
     }
 
     @Test
-    fun `InstrumentProfile data class methods`() {
+    fun `InstrumentProfile data class methods and fallback labels are safe`() {
         val profile = InstrumentProfile("id", "name", emptyList())
         val profile2 = profile.copy()
         assertEquals(profile, profile2)
@@ -63,6 +88,10 @@ class InstrumentProfileTest {
         assertEquals("id", profile.component1())
         assertEquals("name", profile.component2())
         assertEquals(emptyList<TuningNote>(), profile.component3())
-        assertEquals("id", profile.id) // Explicitly cover getter
+        assertEquals("id", profile.id)
+        assertEquals("name", profile.instrumentName)
+        assertEquals("name", profile.tuningName)
+        assertEquals("", profile.noteSequence)
+        assertEquals("name ()", profile.tuningDisplayName)
     }
 }
