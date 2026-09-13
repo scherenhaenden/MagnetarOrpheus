@@ -5,7 +5,7 @@ The JVM test `PitchDetectorProcessingBenchmarkTest` provides a deterministic per
 Run it from the repository root with:
 
 ```text
-./gradlew :app:testDebugUnitTest --tests com.edwardflores.magnetar.orpheus.audio.PitchDetectorProcessingBenchmarkTest
+./gradlew :app:testDebugUnitTest --tests com.blazares.orpheus.audio.PitchDetectorProcessingBenchmarkTest
 ```
 
 The Gradle test output includes a line like:
