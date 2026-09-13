@@ -445,6 +445,7 @@ private fun NoteSystemSelector(
             Text(
                 text = system.displayName,
                 modifier = Modifier
+                    .clickable { onSystemSelected(system) }
                     .background(
                         color = if (isSelected) OrpheusColors.PrimaryGreen.copy(alpha = 0.14f) else MaterialTheme.colorScheme.surface,
                         shape = RoundedCornerShape(18.dp)
@@ -454,7 +455,6 @@ private fun NoteSystemSelector(
                         color = if (isSelected) OrpheusColors.PrimaryGreen.copy(alpha = 0.55f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                         shape = RoundedCornerShape(18.dp)
                     )
-                    .clickable { onSystemSelected(system) }
                     .padding(horizontal = 16.dp, vertical = 10.dp),
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
                 color = if (isSelected) OrpheusColors.PrimaryGreen else MaterialTheme.colorScheme.onSurfaceVariant

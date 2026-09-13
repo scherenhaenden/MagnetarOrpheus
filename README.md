@@ -67,3 +67,7 @@ This project is already instantiated following the Magnetar canon. To extend it:
 - [ ] The project YAML matches the current state of `PLAN.md`.
 - [ ] `BITACORA.md` is updated chronologically (newest first).
 - [ ] Active branches follow the `RULES.md` naming conventions.
+
+## Build Requirements
+
+Use Android SDK 37 and JDK 21 for local builds. The Gradle configuration and CI workflows use Java 21 consistently.

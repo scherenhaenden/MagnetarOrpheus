@@ -7,6 +7,7 @@ import com.edwardflores.magnetar.orpheus.R
 import com.edwardflores.magnetar.orpheus.BuildConfig
 import com.edwardflores.magnetar.orpheus.audio.AudioCaptureProvider
 import com.edwardflores.magnetar.orpheus.audio.PitchDetector
+import com.edwardflores.magnetar.orpheus.models.InstrumentProfiles
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +22,8 @@ import kotlin.math.roundToInt
 
 class TunerViewModel(
     private val audioCaptureProvider: AudioCaptureProvider = AudioCaptureProvider(),
-    private val pitchDetector: PitchDetector = PitchDetector()
+    private val pitchDetector: PitchDetector = PitchDetector(),
+    private val clock: java.time.Clock = java.time.Clock.systemDefaultZone()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TunerUiState())
@@ -31,7 +33,17 @@ class TunerViewModel(
     private val syllabicNotes = listOf("Do", "Do#", "Re", "Re#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si")
     private val germanNotes = listOf("C", "Cis", "D", "Dis", "E", "F", "Fis", "G", "Gis", "A", "Ais", "H")
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
-
+    private val selectedProfile = InstrumentProfiles.GuitarStandard
+    private val selectedInstrument: String
+        get() = selectedProfile.name.substringBefore(" (")
+    private val selectedTuning: String
+        get() {
+            val tuningName = selectedProfile.name.substringAfter(" (").removeSuffix(")")
+            val tuningNotes = selectedProfile.notes.joinToString("") { note ->
+                note.name.takeWhile { character -> character.isLetter() }
+            }
+            return "$tuningName ($tuningNotes)"
+        }
     private var lastFrequencies = mutableListOf<Double>()
     private var lastProcessedFrequency: Double? = null
 
@@ -44,11 +56,11 @@ class TunerViewModel(
         if (_uiState.value.isActive) return
 
         pitchDetector.reset()
-
         _uiState.value = _uiState.value.copy(
             isActive = true,
-            selectedInstrument = "Guitar",
-            selectedTuning = "Standard (EADGBE)"
+            selectedInstrument = selectedInstrument,
+            selectedTuning = selectedTuning,
+            calibrationErrorResId = null
         )
 
         viewModelScope.launch {
@@ -90,7 +102,10 @@ class TunerViewModel(
             referenceA4 = ref,
             calibrationErrorResId = null
         )
-        lastProcessedFrequency?.let { processFrequency(it) }
+        // Re-label the current note without adding stale audio to history or stability data.
+        lastProcessedFrequency?.let {
+            processFrequency(it, recordHistory = false, recordStability = false)
+        }
     }
 
     fun applyPreset(referenceHz: Int) {
@@ -99,7 +114,7 @@ class TunerViewModel(
 
     fun updateNamingSystem(system: NoteNamingSystem) {
         _uiState.value = _uiState.value.copy(namingSystem = system)
-        lastProcessedFrequency?.let { processFrequency(it) }
+        lastProcessedFrequency?.let { processFrequency(it, recordHistory = false, recordStability = false) }
     }
 
     private fun updateStabilityFilter(freq: Double): Double {
@@ -113,13 +128,14 @@ class TunerViewModel(
     private fun processFrequency(
         frequency: Double,
         inputLevel: Float = _uiState.value.inputLevel,
-        waveformSamples: List<Float> = _uiState.value.waveformSamples
+        waveformSamples: List<Float> = _uiState.value.waveformSamples,
+        recordHistory: Boolean = true,
+        recordStability: Boolean = true
     ) {
         if (frequency <= 0 || !frequency.isFinite()) {
             Log.w("TunerViewModel", "Invalid frequency ignored: $frequency")
             return
         }
-
         lastProcessedFrequency = frequency
         val refA4 = _uiState.value.referenceA4
         val n = 12 * log2(frequency / refA4) + 69
@@ -136,6 +152,7 @@ class TunerViewModel(
         val chromaticNote = scientificNotes[normalizedIndex]
         val octave = (noteIndex / 12) - 1
         val cents = ((n - noteIndex) * 100).toInt()
+        val scientificNoteName = "${scientificNotes[normalizedIndex]}$octave"
 
         _uiState.value = _uiState.value.copy(
             frequency = frequency,
@@ -147,12 +164,13 @@ class TunerViewModel(
             isTuned = cents in -5..5,
             inputLevel = inputLevel,
             waveformSamples = waveformSamples,
-            noteHistory = updateNoteHistory("${scientificNotes[normalizedIndex]}$octave", frequency, cents),
-            pitchStabilityPoints = updatePitchStability(cents),
+            noteHistory = if (recordHistory) updateNoteHistory(scientificNoteName, frequency, cents) else _uiState.value.noteHistory,
+            pitchStabilityPoints = if (recordStability) updatePitchStability(cents) else _uiState.value.pitchStabilityPoints,
+            selectedInstrument = selectedInstrument,
+            selectedTuning = selectedTuning,
             calibrationErrorResId = null
         )
     }
-
     private fun downSampleWaveform(buffer: FloatArray): List<Float> {
         if (buffer.isEmpty()) return List(waveformSampleCount) { 0f }
 
@@ -163,11 +181,11 @@ class TunerViewModel(
             if (start >= buffer.size || start == end) {
                 0f
             } else {
-                var sum = 0f
+                var maxAbs = 0f
                 for (sampleIndex in start until end) {
-                    sum += buffer[sampleIndex]
+                    maxAbs = max(maxAbs, abs(buffer[sampleIndex]))
                 }
-                (sum / (end - start)).coerceIn(-1f, 1f)
+                maxAbs.coerceIn(0f, 1f)
             }
         }
     }
@@ -179,7 +197,7 @@ class TunerViewModel(
             note = note,
             frequencyHz = frequency,
             cents = cents,
-            timeLabel = LocalTime.now().format(timeFormatter)
+            timeLabel = LocalTime.now(clock).format(timeFormatter)
         )
 
         if (currentHistory.isNotEmpty() &&

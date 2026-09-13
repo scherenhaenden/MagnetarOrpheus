@@ -36,7 +36,7 @@ Chronological record of all significant project events, decisions, and state cha
 ---
 **Timestamp:** 2026-05-12 21:55 UTC
 **Author:** GitHub Copilot CLI
-**Entry:** Finished wiring the premium tuner restore and the new Note Builder workspace into the app. Added in-app menu navigation between tuner and Note Builder, implemented real note playback for Note Builder with an `AudioTrack` synthesis engine, connected play/stop/clear/hold state through `NoteBuilderViewModel`, raised the app version to `1.1.0`, and restored Jacoco verification to passing by adding unit coverage for theory/state logic while excluding Compose-only UI shells from the bundle threshold.
+**Entry:** Finished wiring the premium tuner restore and the new Note Builder workspace into the app. Added in-app menu navigation between tuner and Note Builder, implemented real note playback for Note Builder with an `AudioTrack` synthesis engine, connected play/stop/clear/hold state through `NoteBuilderViewModel`, raised the app version to `1.1.0`, and restored JaCoCo verification to passing by adding unit coverage for theory/state logic while excluding Compose-only UI shells from the bundle threshold.
 
 ---
 **Timestamp:** 2026-05-12 20:40 UTC

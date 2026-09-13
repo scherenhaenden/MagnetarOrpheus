@@ -19,7 +19,7 @@
 *   **Architecture:** ✅ Defined
 *   **Documentation:** ✅ Synchronized to current branch state
 *   **CI/CD:** ✅ Configured
-*   **Test Coverage:** ✅ High logic/state coverage with Jacoco verification enabled
+*   **Test Coverage:** ✅ High logic/state coverage with JaCoCo verification enabled
 
 ## Current Branch Highlights
 *   Premium tuner visuals and componentized screen structure have been restored locally in this branch.
@@ -33,6 +33,7 @@
 *   Manual device validation is still recommended for navigation flow, responsive layout behavior, and note playback on real hardware/emulators, even after bounding tablet scroll regions in the tuner and Note Builder screens.
 
 ## Risks and Mitigations
+
 | Risk | Severity | Mitigation |
 | :--- | :--- | :--- |
 | Audio Latency | High | Use low-level `AudioRecord` and optimized Kotlin DSP code. |

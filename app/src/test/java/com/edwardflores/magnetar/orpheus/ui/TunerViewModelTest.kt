@@ -68,7 +68,7 @@ class TunerViewModelTest {
     }
 
     @Test
-    fun `startTuning updates state and processes valid pitch result`() = runTest {
+    fun `startTuning updates state and processes valid pitch result`() = runTest(testDispatcher) {
         val buffer = floatArrayOf(0f)
         every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
         every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, true)
@@ -85,7 +85,7 @@ class TunerViewModelTest {
     }
 
     @Test
-    fun `invalid pitch due to low confidence does not update target note frequency`() = runTest {
+    fun `invalid pitch due to low confidence does not update target note frequency`() = runTest(testDispatcher) {
         val buffer = floatArrayOf(0f)
         every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
         every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, false, confidence = 0.3)
@@ -99,7 +99,7 @@ class TunerViewModelTest {
     }
 
     @Test
-    fun `invalid pitch due to insufficient signal RMS does not update frequency`() = runTest {
+    fun `invalid pitch due to insufficient signal RMS does not update frequency`() = runTest(testDispatcher) {
         val buffer = floatArrayOf(0f)
         every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
         every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, false, rms = 0.0001)
@@ -119,7 +119,7 @@ class TunerViewModelTest {
     }
 
     @Test
-    fun `updateNamingSystem updates naming system and recalculates note`() = runTest {
+    fun `updateNamingSystem updates naming system and recalculates note`() = runTest(testDispatcher) {
         val buffer = floatArrayOf(0f)
         every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
         every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, true)
@@ -135,7 +135,7 @@ class TunerViewModelTest {
     }
 
     @Test
-    fun `processFrequency handle German system H note`() = runTest {
+    fun `processFrequency handle German system H note`() = runTest(testDispatcher) {
         val buffer = floatArrayOf(0f)
         every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
         every { pitchDetector.analyze(buffer) } returns mockPitchResult(493.88, true)
@@ -148,7 +148,7 @@ class TunerViewModelTest {
     }
 
     @Test
-    fun `startTuning does nothing if already active`() = runTest {
+    fun `startTuning does nothing if already active`() = runTest(testDispatcher) {
         val buffer = floatArrayOf(0f)
         every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
         every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, true)
@@ -162,7 +162,7 @@ class TunerViewModelTest {
     }
 
     @Test
-    fun `stability filter averages valid frequencies`() = runTest {
+    fun `stability filter averages valid frequencies`() = runTest(testDispatcher) {
         val buffer = floatArrayOf(0f)
         every { audioCaptureProvider.startCapture() } returns flowOf(buffer, buffer, buffer, buffer)
         every { pitchDetector.analyze(buffer) } returnsMany listOf(
@@ -243,7 +243,7 @@ class TunerViewModelTest {
     }
 
     @Test
-    fun `test all note naming systems`() = runTest {
+    fun `test all note naming systems`() = runTest(testDispatcher) {
         val buffer = floatArrayOf(0f)
         every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
         every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, true)
@@ -258,7 +258,7 @@ class TunerViewModelTest {
     }
 
     @Test
-    fun `startTuning updates waveform input level history and labels`() = runTest {
+    fun `startTuning updates waveform input level history and labels`() = runTest(testDispatcher) {
         val buffer = floatArrayOf(0.5f, -0.5f, 0.5f, -0.5f, 0.25f, -0.25f)
         every { audioCaptureProvider.startCapture() } returns flowOf(buffer)
         every { pitchDetector.analyze(buffer) } returns mockPitchResult(440.0, true, rms = 0.5)

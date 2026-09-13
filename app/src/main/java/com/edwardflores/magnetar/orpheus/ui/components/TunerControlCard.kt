@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.edwardflores.magnetar.orpheus.ui.theme.OrpheusColors
+import java.util.Locale
 
 @Composable
 fun TunerControlCard(
@@ -72,7 +73,7 @@ fun TunerControlCard(
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Text(
-                text = title.uppercase(),
+                text = title.uppercase(Locale.ROOT),
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
