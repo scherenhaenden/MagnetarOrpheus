@@ -27,6 +27,9 @@ jobs:
       - name: Run unit tests and check coverage
         run: ./gradlew :app:jacocoTestCoverageVerification
 
+      - name: Run Android Lint for release
+        run: ./gradlew :app:lintRelease
+
       - name: Verify minified release APK and AAB builds
         run: ./gradlew :app:assembleRelease :app:bundleRelease
 
