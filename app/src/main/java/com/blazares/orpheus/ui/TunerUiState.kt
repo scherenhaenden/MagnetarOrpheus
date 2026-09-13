@@ -43,6 +43,10 @@ data class TunerUiState(
     val selectedProfileId: String = "guitar_std",
     val selectedInstrument: String = "Guitar",
     val selectedTuning: String = "Standard (EADGBE)",
+    val profileTargetNote: String? = null,
+    val profileTargetStringNumber: Int? = null,
+    val profileTargetFrequencyHz: Double? = null,
+    val profileTargetCents: Int? = null,
     val quickPresets: List<QuickPreset> = defaultQuickPresets()
 ) {
     val frequencyText: String
@@ -57,6 +61,15 @@ data class TunerUiState(
             cents > 0 -> "+$cents cents"
             cents < 0 -> "$cents cents"
             else -> "0 cents"
+        }
+
+    val profileTargetText: String?
+        get() {
+            val note = profileTargetNote ?: return null
+            val stringNumber = profileTargetStringNumber ?: return null
+            val targetCents = profileTargetCents ?: return null
+            val signedCents = if (targetCents > 0) "+$targetCents" else targetCents.toString()
+            return "String $stringNumber · $note · $signedCents cents"
         }
 }
 
