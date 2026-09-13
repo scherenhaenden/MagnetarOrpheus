@@ -8,6 +8,7 @@ import com.blazares.orpheus.BuildConfig
 import com.blazares.orpheus.audio.AudioCaptureException
 import com.blazares.orpheus.audio.AudioCaptureProvider
 import com.blazares.orpheus.audio.PitchDetector
+import com.blazares.orpheus.audio.TemporalPitchTracker
 import com.blazares.orpheus.models.InstrumentProfiles
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +27,7 @@ import kotlin.math.roundToInt
 class TunerViewModel(
     private val audioCaptureProvider: AudioCaptureProvider = AudioCaptureProvider(),
     private val pitchDetector: PitchDetector = PitchDetector(),
+    private val temporalPitchTracker: TemporalPitchTracker = TemporalPitchTracker(),
     private val clock: java.time.Clock = java.time.Clock.systemDefaultZone()
 ) : ViewModel() {
 
@@ -47,11 +49,9 @@ class TunerViewModel(
             }
             return "$tuningName ($tuningNotes)"
         }
-    private var lastFrequencies = mutableListOf<Double>()
     private var lastProcessedFrequency: Double? = null
     private var tuningJob: Job? = null
 
-    private val windowSize = 3
     private val waveformSampleCount = 48
     private val historyLimit = 5
     private val stabilityLimit = 24
@@ -60,6 +60,7 @@ class TunerViewModel(
         if (_uiState.value.isActive) return
 
         pitchDetector.reset()
+        temporalPitchTracker.reset()
         _uiState.value = _uiState.value.copy(
             isActive = true,
             selectedInstrument = selectedInstrument,
@@ -88,8 +89,9 @@ class TunerViewModel(
                     )
 
                     if (result.isPitchValid && result.candidateFrequencyHz != null) {
-                        val stableFreq = updateStabilityFilter(result.candidateFrequencyHz)
-                        processFrequency(stableFreq, inputLevel, waveformSamples)
+                        temporalPitchTracker.update(result.candidateFrequencyHz)?.let { stableFrequency ->
+                            processFrequency(stableFrequency, inputLevel, waveformSamples)
+                        }
                     }
                 }
             } catch (exception: CancellationException) {
@@ -105,7 +107,7 @@ class TunerViewModel(
     }
 
     private fun markCaptureFailed() {
-        lastFrequencies.clear()
+        temporalPitchTracker.reset()
         _uiState.value = _uiState.value.copy(
             isActive = false,
             inputLevel = 0f,
@@ -117,7 +119,7 @@ class TunerViewModel(
     fun stopTuning() {
         tuningJob?.cancel()
         tuningJob = null
-        lastFrequencies.clear()
+        temporalPitchTracker.reset()
         _uiState.value = _uiState.value.copy(
             isActive = false,
             inputLevel = 0f,
@@ -151,14 +153,6 @@ class TunerViewModel(
     fun updateNamingSystem(system: NoteNamingSystem) {
         _uiState.value = _uiState.value.copy(namingSystem = system)
         lastProcessedFrequency?.let { processFrequency(it, recordHistory = false, recordStability = false) }
-    }
-
-    private fun updateStabilityFilter(freq: Double): Double {
-        lastFrequencies.add(freq)
-        if (lastFrequencies.size > windowSize) {
-            lastFrequencies.removeAt(0)
-        }
-        return lastFrequencies.average()
     }
 
     private fun processFrequency(
@@ -207,6 +201,7 @@ class TunerViewModel(
             calibrationErrorResId = null
         )
     }
+
     private fun downSampleWaveform(buffer: FloatArray): List<Float> {
         if (buffer.isEmpty()) return List(waveformSampleCount) { 0f }
 
