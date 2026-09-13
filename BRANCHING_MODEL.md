@@ -1,4 +1,4 @@
-# Branching Model of MagnetarOrpheus
+# Branching Model of BlazaresOrpheus
 
 ## Standard Model
 This project uses a simplified branching model optimized for focused development:

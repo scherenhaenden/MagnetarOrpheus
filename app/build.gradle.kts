@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.edwardflores.magnetar.orpheus"
+    namespace = "com.blazares.orpheus"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.edwardflores.magnetar.orpheus"
+        applicationId = "com.blazares.orpheus"
         minSdk = 26
         targetSdk = 37
         versionCode = 4

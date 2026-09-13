@@ -1,4 +1,4 @@
-# WIP Guidelines of MagnetarOrpheus
+# WIP Guidelines of BlazaresOrpheus
 
 ## Work-In-Progress (WIP) Policies
 *   **Limit:** No more than **2** tasks in `in_progress` per person/agent.
