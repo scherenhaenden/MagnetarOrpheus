@@ -1,11 +1,11 @@
-# Canonical Ruleset of MagnetarOrpheus
+# Canonical Ruleset of BlazaresOrpheus
 
 ## Introduction
-These rules codify the Magnetar standard for the MagnetarOrpheus project. Compliance is mandatory for all contributors, including AI agents. Any exception must be formally documented in `BITACORA.md`.
+These rules codify the Blazares standard for the BlazaresOrpheus project. Compliance is mandatory for all contributors, including AI agents. Any exception must be formally documented in `BITACORA.md`.
 
 ## Naming Conventions
-*   **Repositories:** `magnetar-android-orpheus` (for internal identifiers) / `MagnetarOrpheus` (GitHub).
-*   **Namespace / Package:** `com.edwardflores.magnetar.orpheus`.
+*   **Repositories:** `blazares-android-orpheus` (for internal identifiers) / `BlazaresOrpheus` (GitHub).
+*   **Namespace / Package:** `com.blazares.orpheus`.
 *   **Branches:** `<type>/<short-description>`.
     *   Types: `feature`, `fix`, `chore`, `experiment`, `hotfix`.
 *   **Tasks and Blockers:** `kebab-case` (e.g., `task-audio-capture`, `blocker-latency-issue`).
@@ -14,7 +14,7 @@ These rules codify the Magnetar standard for the MagnetarOrpheus project. Compli
 
 ## Required Files
 The following files MUST exist and be maintained:
-`README.md`, `PLAN.md`, `BITACORA.md`, `REQUIREMENTS.md`, `ARCHITECTURE.md`, `RULES.md`, `STATUS.md`, `TESTING.md`, `BLOCKERS.md`, `BRANCHING_MODEL.md`, `WIP_GUIDELINES.md`, `CONTRIBUTING.md`, and `projects/magnetar_orpheus.project.yml`.
+`README.md`, `PLAN.md`, `BITACORA.md`, `REQUIREMENTS.md`, `ARCHITECTURE.md`, `RULES.md`, `STATUS.md`, `TESTING.md`, `BLOCKERS.md`, `BRANCHING_MODEL.md`, `WIP_GUIDELINES.md`, `CONTRIBUTING.md`, and `projects/blazares_orpheus.project.yml`.
 
 ## Branching Conventions
 *   **`master`:** The immutable release line and default branch. Merges require passing tests and updated documentation.
@@ -45,6 +45,6 @@ The following files MUST exist and be maintained:
 *   **`PLAN.md`**: Source of truth for milestone progress.
 
 ## AI Agent Responsibilities
-*   Always read `projects/magnetar_orpheus.project.yml` first.
+*   Always read `projects/blazares_orpheus.project.yml` first.
 *   Do not modify code without an assigned task in `in_progress` state.
 *   Document all technical assumptions in `BITACORA.md`.

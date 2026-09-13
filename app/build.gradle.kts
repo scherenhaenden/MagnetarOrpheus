@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.edwardflores.magnetar.orpheus"
+    namespace = "com.blazares.orpheus"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.edwardflores.magnetar.orpheus"
+        applicationId = "com.blazares.orpheus"
         minSdk = 26
         targetSdk = 37
         versionCode = 4
@@ -105,6 +105,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)

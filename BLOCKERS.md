@@ -1,4 +1,4 @@
-# Blockers for MagnetarOrpheus
+# Blockers for BlazaresOrpheus
 
 ## Blockers Table
 | ID | Description | Creation Date | Owner | Status |

@@ -1,4 +1,4 @@
-MAGNETAR ORPHEUS — EXTREME UI DESIGN SPECIFICATION
+BLAZARES ORPHEUS — EXTREME UI DESIGN SPECIFICATION
 
 The application is a premium dark-mode chromatic instrument tuner for Android, designed for both phone and tablet. The visual identity must feel like a serious professional audio instrument: dark graphite surfaces, precise measurement geometry, neon green/cyan signal accents, restrained amber/red warning zones, clean typography, high contrast, and no playful or childish visuals. The app must look like a modern musician’s tool, closer to a premium oscilloscope/tuner dashboard than to a casual mobile app.
 
@@ -10,7 +10,7 @@ The phone layout is portrait-first. The screen is vertically divided into five m
 
 HEADER DESIGN
 
-The top header sits below the Android status bar. It has a height around 88 dp on phones and 72 dp on tablets. The header background is the same as the main background, with a very subtle bottom separator line in #1B2A31 at 40 percent opacity. On the left there is a hamburger menu icon in muted white, size 28 dp, with a touch target of 48 dp. In the center there is the Magnetar Orpheus brand. The logo consists of a small vertical waveform mark made of 4 to 6 thin vertical bars in neon green/cyan, followed by the word MAGNETAR in uppercase, letter-spaced, white, modern sans-serif, medium weight. Below MAGNETAR, centered and smaller, the word ORPHEUS appears in neon green with wide letter spacing. On the right there is a settings gear icon, muted white, size 26 dp, with a 48 dp touch target. The header must feel calm and premium, not crowded.
+The top header sits below the Android status bar. It has a height around 88 dp on phones and 72 dp on tablets. The header background is the same as the main background, with a very subtle bottom separator line in #1B2A31 at 40 percent opacity. On the left there is a hamburger menu icon in muted white, size 28 dp, with a touch target of 48 dp. In the center there is the Blazares Orpheus brand. The logo consists of a small vertical waveform mark made of 4 to 6 thin vertical bars in neon green/cyan, followed by the word BLAZARES in uppercase, letter-spaced, white, modern sans-serif, medium weight. Below BLAZARES, centered and smaller, the word ORPHEUS appears in neon green with wide letter spacing. On the right there is a settings gear icon, muted white, size 26 dp, with a 48 dp touch target. The header must feel calm and premium, not crowded.
 
 CHROMATIC NOTE ROW
 
@@ -76,4 +76,4 @@ Do not use bright white backgrounds. Do not use cartoonish icons. Do not use ske
 
 FINAL VISUAL TARGET
 
-The final result should look like a premium dark Android tuner app named Magnetar Orpheus. The phone version should feel focused, immediate, and performance-oriented: a huge semicircular tuning gauge, a massive A4 note display, exact Hz, cents deviation, mic waveform, and two bottom control cards. The tablet version should feel like the professional expanded cockpit of the same app: main tuner on the left, note history and pitch stability on the right, with the same dark graphite surfaces and neon green/cyan precision language. The design must communicate: professional, musical, precise, calm, technical, fast, and trustworthy.
+The final result should look like a premium dark Android tuner app named Blazares Orpheus. The phone version should feel focused, immediate, and performance-oriented: a huge semicircular tuning gauge, a massive A4 note display, exact Hz, cents deviation, mic waveform, and two bottom control cards. The tablet version should feel like the professional expanded cockpit of the same app: main tuner on the left, note history and pitch stability on the right, with the same dark graphite surfaces and neon green/cyan precision language. The design must communicate: professional, musical, precise, calm, technical, fast, and trustworthy.

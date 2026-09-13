@@ -1,4 +1,4 @@
-# Status of MagnetarOrpheus
+# Status of BlazaresOrpheus
 
 ## Progress Summary
 **Phase 1 (Tuner MVP): 100%**

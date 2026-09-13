@@ -1,4 +1,4 @@
-# Testing Strategy for MagnetarOrpheus
+# Testing Strategy for BlazaresOrpheus
 
 ## Types of Tests
 1.  **Unit Tests (JUnit 5 + MockK):** Test DSP algorithms with synthetic audio buffers.

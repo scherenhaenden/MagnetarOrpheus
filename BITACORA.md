@@ -1,7 +1,12 @@
-# Logbook of MagnetarOrpheus
+# Logbook of BlazaresOrpheus
 
 ## Introduction
-Chronological record of all significant project events, decisions, and state changes for MagnetarOrpheus.
+Chronological record of all significant project events, decisions, and state changes for BlazaresOrpheus.
+
+---
+**Timestamp:** 2026-09-13 00:00 UTC
+**Author:** Codex
+**Entry:** Started and completed the local Blazares Orpheus rebrand. Migrated the Android namespace and application ID to `com.blazares.orpheus`, updated shipped and repository-facing branding, renamed the local project metadata, refreshed launcher and design screenshot assets, and intentionally left the external Git remote unchanged pending explicit authorization.
 
 ---
 **Timestamp:** 2026-05-12 23:10 UTC
@@ -31,7 +36,7 @@ Chronological record of all significant project events, decisions, and state cha
 ---
 **Timestamp:** 2026-05-12 22:10 UTC
 **Author:** Codex
-**Entry:** Documentation-only sync for branch `feature/note-builder-extreme-ui`. Updated `README.md`, `STATUS.md`, `TESTING.md`, `PLAN.md`, `ARCHITECTURE.md`, `REQUIREMENTS.md`, `NOTE_BUILDER_EXTREME_UI.md`, and `projects/magnetar_orpheus.project.yml` to reflect the actual branch state: restored premium tuner surface, separate `Tuner` / `Note Builder` destinations, local Note Builder playback/theory wiring, version `1.1.0`, and the fact that `task-012` is now best treated as `in_review` pending manual validation rather than still `in_progress`.
+**Entry:** Documentation-only sync for branch `feature/note-builder-extreme-ui`. Updated `README.md`, `STATUS.md`, `TESTING.md`, `PLAN.md`, `ARCHITECTURE.md`, `REQUIREMENTS.md`, `NOTE_BUILDER_EXTREME_UI.md`, and `projects/blazares_orpheus.project.yml` to reflect the actual branch state: restored premium tuner surface, separate `Tuner` / `Note Builder` destinations, local Note Builder playback/theory wiring, version `1.1.0`, and the fact that `task-012` is now best treated as `in_review` pending manual validation rather than still `in_progress`.
 
 ---
 **Timestamp:** 2026-05-12 21:55 UTC
@@ -91,19 +96,19 @@ Chronological record of all significant project events, decisions, and state cha
 ---
 **Timestamp:** 2026-05-12 17:00 UTC
 **Author:** Gemini CLI
-**Entry:** Refactored project namespace from `com.eflores` to `com.edwardflores.magnetar.orpheus` to align with technical requirements. Added `RECORD_AUDIO` permission to `AndroidManifest.xml`.
+**Entry:** Refactored project namespace from `com.eflores` to `com.blazares.orpheus` to align with technical requirements. Added `RECORD_AUDIO` permission to `AndroidManifest.xml`.
 
 ---
 **Timestamp:** 2026-05-12 16:30 UTC
 **Author:** Gemini CLI
-**Entry:** `task-001` completed. Initialized Magnetar Canonical Project Model documentation (README, RULES, PLAN, REQUIREMENTS, ARCHITECTURE, STATUS, TESTING, BLOCKERS, etc.).
+**Entry:** `task-001` completed. Initialized Blazares Canonical Project Model documentation (README, RULES, PLAN, REQUIREMENTS, ARCHITECTURE, STATUS, TESTING, BLOCKERS, etc.).
 
 ---
 **Timestamp:** 2026-05-12 16:15 UTC
 **Author:** Gemini CLI
-**Entry:** Decision: Initializing project with `master` as the default branch per user requirement. Repository created on GitHub: `scherenhaenden/MagnetarOrpheus`.
+**Entry:** Decision: Initializing the project with `master` as the default branch per user requirement. The external GitHub repository was created at that time; its remote name remains outside this local rebrand scope.
 
 ---
 **Timestamp:** 2026-05-12 16:00 UTC
 **Author:** Gemini CLI
-**Entry:** Project Initialization: MagnetarOrpheus defined as a Native Android Application (`com.edwardflores.magnetar.orpheus`) using Kotlin and Jetpack Compose.
+**Entry:** Project Initialization: BlazaresOrpheus defined as a Native Android Application (`com.blazares.orpheus`) using Kotlin and Jetpack Compose.

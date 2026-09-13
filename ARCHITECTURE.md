@@ -1,7 +1,7 @@
-# Architecture of MagnetarOrpheus
+# Architecture of BlazaresOrpheus
 
 ## System Overview
-MagnetarOrpheus follows a Clean Architecture pattern, separating audio acquisition, signal processing, and reactive UI state. The product targets sub-cent tuning precision and is designed for sub-20ms audio latency on Android API 26+; these are design targets, not measured benchmarks.
+BlazaresOrpheus follows a Clean Architecture pattern, separating audio acquisition, signal processing, and reactive UI state. The product targets sub-cent tuning precision and is designed for sub-20ms audio latency on Android API 26+; these are design targets, not measured benchmarks.
 
 The product now has two UI feature surfaces with shared branding but different interaction goals:
 
