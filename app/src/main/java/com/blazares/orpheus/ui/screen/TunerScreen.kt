@@ -56,7 +56,6 @@ import com.blazares.orpheus.ui.NoteNamingSystem
 import com.blazares.orpheus.ui.TunerUiState
 import com.blazares.orpheus.ui.components.AppHeader
 import com.blazares.orpheus.ui.components.ChromaticNoteRow
-import com.blazares.orpheus.ui.components.ControlCardTrailingMode
 import com.blazares.orpheus.ui.components.CurrentNoteDisplay
 import com.blazares.orpheus.ui.components.InputWaveform
 import com.blazares.orpheus.ui.components.TabletSidePanel
@@ -78,6 +77,7 @@ fun TunerScreen(
     onCalibrationChange: (Double) -> Unit,
     onNamingSystemChange: (NoteNamingSystem) -> Unit,
     onPresetSelected: (Int) -> Unit,
+    onInstrumentProfileSelected: (String) -> Unit,
     onStartTuning: () -> Unit,
     onStopTuning: () -> Unit,
     modifier: Modifier = Modifier
@@ -153,6 +153,7 @@ fun TunerScreen(
                         onCalibrationChange = onCalibrationChange,
                         onNamingSystemChange = onNamingSystemChange,
                         onPresetSelected = onPresetSelected,
+                        onInstrumentProfileSelected = onInstrumentProfileSelected,
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)
@@ -182,7 +183,8 @@ fun TunerScreen(
                         uiState = uiState,
                         versionName = versionName,
                         onCalibrationChange = onCalibrationChange,
-                        onNamingSystemChange = onNamingSystemChange
+                        onNamingSystemChange = onNamingSystemChange,
+                        onInstrumentProfileSelected = onInstrumentProfileSelected
                     )
                 }
             }
@@ -195,7 +197,8 @@ private fun PhoneLayout(
     uiState: TunerUiState,
     versionName: String,
     onCalibrationChange: (Double) -> Unit,
-    onNamingSystemChange: (NoteNamingSystem) -> Unit
+    onNamingSystemChange: (NoteNamingSystem) -> Unit,
+    onInstrumentProfileSelected: (String) -> Unit
 ) {
     var showPitchDialog by remember { mutableStateOf(false) }
     var showModeDialog by remember { mutableStateOf(false) }
@@ -203,9 +206,9 @@ private fun PhoneLayout(
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             TunerControlCard(
-                title = "Tuner Mode",
-                value = uiState.tunerMode,
-                subtitle = uiState.selectedInstrument,
+                title = "Instrument Profile",
+                value = uiState.selectedInstrument,
+                subtitle = uiState.selectedTuning,
                 leadingIcon = Icons.Outlined.GraphicEq,
                 modifier = Modifier.weight(1f),
                 onClick = { showModeDialog = true }
@@ -213,7 +216,7 @@ private fun PhoneLayout(
             TunerControlCard(
                 title = "Reference Pitch",
                 value = "A4 = ${uiState.referenceA4.toInt()} Hz",
-                subtitle = uiState.selectedTuning,
+                subtitle = "Calibration",
                 leadingIcon = Icons.Outlined.Tune,
                 modifier = Modifier.weight(1f),
                 onClick = { showPitchDialog = true }
@@ -247,9 +250,9 @@ private fun PhoneLayout(
     }
 
     if (showModeDialog) {
-        TunerModeDialog(
-            currentMode = uiState.tunerMode,
+        InstrumentProfileDialog(
             currentInstrument = uiState.selectedInstrument,
+            onProfileSelected = onInstrumentProfileSelected,
             onDismiss = { showModeDialog = false }
         )
     }
@@ -274,6 +277,7 @@ private fun TabletLayout(
     onCalibrationChange: (Double) -> Unit,
     onNamingSystemChange: (NoteNamingSystem) -> Unit,
     onPresetSelected: (Int) -> Unit,
+    onInstrumentProfileSelected: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showPitchDialog by remember { mutableStateOf(false) }
@@ -294,9 +298,9 @@ private fun TabletLayout(
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 TunerControlCard(
-                    title = "Tuner Mode",
-                    value = uiState.tunerMode,
-                    subtitle = uiState.selectedInstrument,
+                    title = "Instrument Profile",
+                    value = uiState.selectedInstrument,
+                    subtitle = uiState.selectedTuning,
                     leadingIcon = Icons.Outlined.GraphicEq,
                     modifier = Modifier.weight(1f),
                     onClick = { showModeDialog = true }
@@ -304,7 +308,7 @@ private fun TabletLayout(
                 TunerControlCard(
                     title = "Reference Pitch",
                     value = "A4 = ${uiState.referenceA4.toInt()} Hz",
-                    subtitle = uiState.selectedTuning,
+                    subtitle = "Calibration",
                     leadingIcon = Icons.Outlined.Tune,
                     modifier = Modifier.weight(1f),
                     onClick = { showPitchDialog = true }
@@ -359,25 +363,37 @@ private fun TabletLayout(
     }
 
     if (showModeDialog) {
-        TunerModeDialog(
-            currentMode = uiState.tunerMode,
+        InstrumentProfileDialog(
             currentInstrument = uiState.selectedInstrument,
+            onProfileSelected = onInstrumentProfileSelected,
             onDismiss = { showModeDialog = false }
         )
     }
 }
 
+private data class ProfileOption(
+    val label: String,
+    val profileId: String,
+    val tuningLabel: String
+)
+
 @Composable
-private fun TunerModeDialog(
-    currentMode: String,
+private fun InstrumentProfileDialog(
     currentInstrument: String,
+    onProfileSelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val profiles = listOf(
+        ProfileOption("Guitar", "guitar_std", "Standard (EADGBE)"),
+        ProfileOption("Bass", "bass_std", "Standard (EADG)"),
+        ProfileOption("Ukulele", "ukulele_std", "Soprano (GCEA)")
+    )
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Tuner Mode",
+                text = "Instrument Profile",
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -387,10 +403,13 @@ private fun TunerModeDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                listOf("Chromatic", "Guitar", "Bass", "Violin", "Ukulele").forEach { mode ->
-                    val isSelected = mode == currentMode || mode == currentInstrument
+                profiles.forEach { profile ->
+                    val isSelected = profile.label == currentInstrument
                     Surface(
-                        onClick = onDismiss,
+                        onClick = {
+                            onProfileSelected(profile.profileId)
+                            onDismiss()
+                        },
                         shape = RoundedCornerShape(16.dp),
                         color = if (isSelected) OrpheusColors.PrimaryGreen.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surface,
                         border = BorderStroke(
@@ -399,15 +418,19 @@ private fun TunerModeDialog(
                         ),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Row(
+                        Column(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
                             Text(
-                                text = mode,
+                                text = profile.label,
                                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
                                 color = if (isSelected) OrpheusColors.PrimaryGreen else MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = profile.tuningLabel,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -641,12 +664,12 @@ private fun PermissionState(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = "Microphone access is required",
+                text = stringResource(R.string.microphone_permission_title),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "Grant RECORD_AUDIO permission to activate the tuner and waveform panels.",
+                text = stringResource(R.string.microphone_permission_body),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
