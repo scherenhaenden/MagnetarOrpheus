@@ -8,5 +8,6 @@
     <string name="microphone_permission_title">Microphone access is required</string>
     <string name="microphone_permission_body">Allow microphone access to activate the tuner and waveform panels. Audio is processed locally on this device.</string>
     <string name="microphone_permission_action">Allow microphone access</string>
+    <string name="microphone_permission_open_settings">Open app settings</string>
     <string name="version_label">Version %1$s</string>
 </resources>
