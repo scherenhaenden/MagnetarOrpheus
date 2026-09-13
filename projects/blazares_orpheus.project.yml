@@ -113,6 +113,11 @@ tasks:
     title: Blazares Orpheus Rebrand
     owner: Codex
     state: done
+  task-016:
+    milestone: ms-04
+    title: Orpheus Loading Splash
+    owner: Codex
+    state: done
 
 risks:
   - id: R1

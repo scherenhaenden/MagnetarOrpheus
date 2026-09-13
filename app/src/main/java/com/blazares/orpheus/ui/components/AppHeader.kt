@@ -36,9 +36,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.blazares.orpheus.R
 import com.blazares.orpheus.ui.AppLanguage
 import com.blazares.orpheus.ui.AppDestination
 import com.blazares.orpheus.ui.NoteLanguage
@@ -94,7 +96,7 @@ fun AppHeader(
             BrandMark()
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "BLAZARES",
+                    text = stringResource(R.string.brand_primary),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.SemiBold,
                         letterSpacing = 6.sp
@@ -102,7 +104,7 @@ fun AppHeader(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "ORPHEUS",
+                    text = stringResource(R.string.brand_secondary),
                     style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 4.sp),
                     color = OrpheusColors.PrimaryGreen
                 )

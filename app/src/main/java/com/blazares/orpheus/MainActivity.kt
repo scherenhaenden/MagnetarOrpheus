@@ -22,6 +22,7 @@ import androidx.core.content.ContextCompat
 import com.blazares.orpheus.ui.AppLanguage
 import com.blazares.orpheus.ui.AppDestination
 import com.blazares.orpheus.ui.NoteLanguage
+import com.blazares.orpheus.ui.OrpheusSplashScreen
 import com.blazares.orpheus.ui.TunerViewModel
 import com.blazares.orpheus.ui.toNamingSystem
 import com.blazares.orpheus.ui.notebuilder.NoteBuilderScreen
@@ -52,30 +53,35 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BlazaresOrpheusTheme {
-                val uiState by viewModel.uiState.collectAsState()
-                val noteBuilderUiState by noteBuilderViewModel.uiState.collectAsState()
-                var currentDestination by rememberSaveable { mutableStateOf(AppDestination.TUNER) }
-                var appLanguageCode by rememberSaveable { mutableStateOf(AppLanguage.ENGLISH.code) }
-                val appLanguage = AppLanguage.entries.firstOrNull { it.code == appLanguageCode } ?: AppLanguage.ENGLISH
-                var noteLanguageCode by rememberSaveable { mutableStateOf(NoteLanguage.ENGLISH.code) }
-                val noteLanguage = NoteLanguage.entries.firstOrNull { it.code == noteLanguageCode } ?: NoteLanguage.ENGLISH
+                var showSplash by rememberSaveable { mutableStateOf(true) }
 
-                LaunchedEffect(noteLanguage) {
-                    viewModel.updateNamingSystem(noteLanguage.toNamingSystem())
-                    noteBuilderViewModel.updateNoteLanguage(noteLanguage)
-                }
+                if (showSplash) {
+                    OrpheusSplashScreen(onFinished = { showSplash = false })
+                } else {
+                    val uiState by viewModel.uiState.collectAsState()
+                    val noteBuilderUiState by noteBuilderViewModel.uiState.collectAsState()
+                    var currentDestination by rememberSaveable { mutableStateOf(AppDestination.TUNER) }
+                    var appLanguageCode by rememberSaveable { mutableStateOf(AppLanguage.ENGLISH.code) }
+                    val appLanguage = AppLanguage.entries.firstOrNull { it.code == appLanguageCode } ?: AppLanguage.ENGLISH
+                    var noteLanguageCode by rememberSaveable { mutableStateOf(NoteLanguage.ENGLISH.code) }
+                    val noteLanguage = NoteLanguage.entries.firstOrNull { it.code == noteLanguageCode } ?: NoteLanguage.ENGLISH
 
-                fun navigateTo(destination: AppDestination) {
-                    if (currentDestination == AppDestination.NOTE_BUILDER &&
-                        destination != AppDestination.NOTE_BUILDER
-                    ) {
-                        noteBuilderViewModel.stopPlayback()
+                    LaunchedEffect(noteLanguage) {
+                        viewModel.updateNamingSystem(noteLanguage.toNamingSystem())
+                        noteBuilderViewModel.updateNoteLanguage(noteLanguage)
                     }
-                    currentDestination = destination
-                }
 
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    when (currentDestination) {
+                    fun navigateTo(destination: AppDestination) {
+                        if (currentDestination == AppDestination.NOTE_BUILDER &&
+                            destination != AppDestination.NOTE_BUILDER
+                        ) {
+                            noteBuilderViewModel.stopPlayback()
+                        }
+                        currentDestination = destination
+                    }
+
+                    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                        when (currentDestination) {
                         AppDestination.TUNER -> TunerScreen(
                             uiState = uiState,
                             hasPermission = hasAudioPermission,
@@ -116,6 +122,7 @@ class MainActivity : ComponentActivity() {
                             },
                             modifier = Modifier.padding(innerPadding)
                         )
+                        }
                     }
                 }
             }

@@ -9,6 +9,11 @@ Chronological record of all significant project events, decisions, and state cha
 **Entry:** Started and completed the local Blazares Orpheus rebrand. Migrated the Android namespace and application ID to `com.blazares.orpheus`, updated shipped and repository-facing branding, renamed the local project metadata, refreshed launcher and design screenshot assets, and intentionally left the external Git remote unchanged pending explicit authorization.
 
 ---
+**Timestamp:** 2026-09-13 00:20 UTC
+**Author:** Codex
+**Entry:** Added the Orpheus loading splash: a short Compose transition with an animated green/cyan waveform ring, a transparent Orpheus-playing-lyre illustration, and resource-backed BLAZARES / ORPHEUS branding. The existing tuner and Note Builder content remain unchanged behind the splash.
+
+---
 **Timestamp:** 2026-05-12 23:10 UTC
 **Author:** Codex
 **Entry:** Started `task-014` (`in_progress`) to add a safe settings surface for `app language` and `note language`. Immediate focus is on shared settings UI in the existing header, app-language options (`en`, `es`, `de`, `it`, `pt`, `nl`, `fi`), and second-feature note-language support without destabilizing the tuner workflow.
