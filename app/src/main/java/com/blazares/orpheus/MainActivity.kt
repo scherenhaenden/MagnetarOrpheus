@@ -29,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.blazares.orpheus.permissions.MicrophonePermissionAction
+import com.blazares.orpheus.permissions.MicrophonePermissionPolicy
 import com.blazares.orpheus.ui.AppLanguage
 import com.blazares.orpheus.ui.AppDestination
 import com.blazares.orpheus.ui.NoteLanguage
@@ -55,8 +57,8 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         hasAudioPermission = isGranted
-        shouldOpenAudioSettings = !isGranted && hasRequestedAudioPermissionBefore() &&
-            !shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)
+        shouldOpenAudioSettings = resolveAudioPermissionAction(isGranted) ==
+            MicrophonePermissionAction.OPEN_APP_SETTINGS
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,14 +90,16 @@ class MainActivity : ComponentActivity() {
                                 ?: AppLanguage.ENGLISH.code
                         )
                     }
-                    val appLanguage = AppLanguage.entries.firstOrNull { it.code == appLanguageCode } ?: AppLanguage.ENGLISH
+                    val appLanguage = AppLanguage.entries.firstOrNull { it.code == appLanguageCode }
+                        ?: AppLanguage.ENGLISH
                     var noteLanguageCode by rememberSaveable {
                         mutableStateOf(
                             preferences.getString(NOTE_LANGUAGE_KEY, NoteLanguage.ENGLISH.code)
                                 ?: NoteLanguage.ENGLISH.code
                         )
                     }
-                    val noteLanguage = NoteLanguage.entries.firstOrNull { it.code == noteLanguageCode } ?: NoteLanguage.ENGLISH
+                    val noteLanguage = NoteLanguage.entries.firstOrNull { it.code == noteLanguageCode }
+                        ?: NoteLanguage.ENGLISH
 
                     fun setAppLanguage(language: AppLanguage) {
                         appLanguageCode = language.code
@@ -143,65 +147,65 @@ class MainActivity : ComponentActivity() {
 
                     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                         when (currentDestination) {
-                        AppDestination.TUNER -> Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(innerPadding)
-                        ) {
-                            TunerScreen(
-                                uiState = uiState,
-                                hasPermission = hasAudioPermission,
-                                versionName = BuildConfig.VERSION_NAME,
+                            AppDestination.TUNER -> Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            ) {
+                                TunerScreen(
+                                    uiState = uiState,
+                                    hasPermission = hasAudioPermission,
+                                    versionName = BuildConfig.VERSION_NAME,
+                                    appLanguage = appLanguage,
+                                    noteLanguage = noteLanguage,
+                                    currentDestination = currentDestination,
+                                    onNavigate = ::navigateTo,
+                                    onAppLanguageChange = ::setAppLanguage,
+                                    onNoteLanguageChange = ::setNoteLanguage,
+                                    onCalibrationChange = ::setReferencePitch,
+                                    onNamingSystemChange = { viewModel.updateNamingSystem(it) },
+                                    onPresetSelected = { setReferencePitch(it.toDouble()) },
+                                    onInstrumentProfileSelected = ::setInstrumentProfile,
+                                    onStartTuning = viewModel::startTuning,
+                                    onStopTuning = viewModel::stopTuning,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                                if (!hasAudioPermission) {
+                                    Button(
+                                        onClick = ::requestAudioPermission,
+                                        modifier = Modifier
+                                            .align(Alignment.BottomCenter)
+                                            .padding(bottom = 48.dp)
+                                    ) {
+                                        Text(
+                                            stringResource(
+                                                if (shouldOpenAudioSettings) {
+                                                    R.string.microphone_permission_open_settings
+                                                } else {
+                                                    R.string.microphone_permission_action
+                                                }
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+
+                            AppDestination.NOTE_BUILDER -> NoteBuilderScreen(
+                                state = noteBuilderUiState,
+                                onInputModeChange = noteBuilderViewModel::updateInputMode,
+                                onToggleHold = noteBuilderViewModel::toggleHold,
+                                onToggleNote = noteBuilderViewModel::toggleNote,
+                                onPlaySelection = noteBuilderViewModel::playSelection,
+                                onStopPlayback = noteBuilderViewModel::stopPlayback,
+                                onClearSelection = noteBuilderViewModel::clearSelection,
                                 appLanguage = appLanguage,
                                 noteLanguage = noteLanguage,
                                 currentDestination = currentDestination,
                                 onNavigate = ::navigateTo,
                                 onAppLanguageChange = ::setAppLanguage,
                                 onNoteLanguageChange = ::setNoteLanguage,
-                                onCalibrationChange = ::setReferencePitch,
-                                onNamingSystemChange = { viewModel.updateNamingSystem(it) },
-                                onPresetSelected = { setReferencePitch(it.toDouble()) },
-                                onInstrumentProfileSelected = ::setInstrumentProfile,
-                                onStartTuning = viewModel::startTuning,
-                                onStopTuning = viewModel::stopTuning,
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier.padding(innerPadding)
                             )
-                            if (!hasAudioPermission) {
-                                Button(
-                                    onClick = ::requestAudioPermission,
-                                    modifier = Modifier
-                                        .align(Alignment.BottomCenter)
-                                        .padding(bottom = 48.dp)
-                                ) {
-                                    Text(
-                                        stringResource(
-                                            if (shouldOpenAudioSettings) {
-                                                R.string.microphone_permission_open_settings
-                                            } else {
-                                                R.string.microphone_permission_action
-                                            }
-                                        )
-                                    )
-                                }
-                            }
-                        }
-
-                        AppDestination.NOTE_BUILDER -> NoteBuilderScreen(
-                            state = noteBuilderUiState,
-                            onInputModeChange = noteBuilderViewModel::updateInputMode,
-                            onToggleHold = noteBuilderViewModel::toggleHold,
-                            onToggleNote = noteBuilderViewModel::toggleNote,
-                            onPlaySelection = noteBuilderViewModel::playSelection,
-                            onStopPlayback = noteBuilderViewModel::stopPlayback,
-                            onClearSelection = noteBuilderViewModel::clearSelection,
-                            appLanguage = appLanguage,
-                            noteLanguage = noteLanguage,
-                            currentDestination = currentDestination,
-                            onNavigate = ::navigateTo,
-                            onAppLanguageChange = ::setAppLanguage,
-                            onNoteLanguageChange = ::setNoteLanguage,
-                            modifier = Modifier.padding(innerPadding)
-                        )
                         }
                     }
                 }
@@ -238,39 +242,45 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun refreshAudioPermissionState() {
-        hasAudioPermission = ContextCompat.checkSelfPermission(
+        val action = resolveAudioPermissionAction()
+        hasAudioPermission = action == MicrophonePermissionAction.AVAILABLE
+        shouldOpenAudioSettings = action == MicrophonePermissionAction.OPEN_APP_SETTINGS
+    }
+
+    private fun resolveAudioPermissionAction(
+        isGranted: Boolean = ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.RECORD_AUDIO
         ) == PackageManager.PERMISSION_GRANTED
-        shouldOpenAudioSettings = !hasAudioPermission && hasRequestedAudioPermissionBefore() &&
-            !shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)
-    }
+    ): MicrophonePermissionAction = MicrophonePermissionPolicy.resolve(
+        isGranted = isGranted,
+        requestedBefore = hasRequestedAudioPermissionBefore(),
+        shouldShowRationale = shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)
+    )
 
     private fun hasRequestedAudioPermissionBefore(): Boolean =
         preferences.getBoolean(AUDIO_PERMISSION_REQUESTED_KEY, false)
 
     private fun requestAudioPermission() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.RECORD_AUDIO
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            hasAudioPermission = true
-            shouldOpenAudioSettings = false
-            return
-        }
+        when (resolveAudioPermissionAction()) {
+            MicrophonePermissionAction.AVAILABLE -> {
+                hasAudioPermission = true
+                shouldOpenAudioSettings = false
+            }
 
-        if (shouldOpenAudioSettings) {
-            startActivity(
-                Intent(
-                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                    Uri.parse("package:$packageName")
+            MicrophonePermissionAction.OPEN_APP_SETTINGS -> {
+                startActivity(
+                    Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.parse("package:$packageName")
+                    )
                 )
-            )
-            return
-        }
+            }
 
-        preferences.edit().putBoolean(AUDIO_PERMISSION_REQUESTED_KEY, true).apply()
-        requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            MicrophonePermissionAction.REQUEST_PERMISSION -> {
+                preferences.edit().putBoolean(AUDIO_PERMISSION_REQUESTED_KEY, true).apply()
+                requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            }
+        }
     }
 }
