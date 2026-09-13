@@ -33,9 +33,9 @@ android {
         create("release") {
             if (releaseSigningConfigured) {
                 storeFile = file(requireNotNull(releaseKeystorePath))
-                storePassword = releaseKeystorePassword
-                keyAlias = releaseKeyAlias
-                keyPassword = releaseKeyPassword
+                storePassword = requireNotNull(releaseKeystorePassword)
+                keyAlias = requireNotNull(releaseKeyAlias)
+                keyPassword = requireNotNull(releaseKeyPassword)
             }
         }
     }
