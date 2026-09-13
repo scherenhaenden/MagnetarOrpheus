@@ -1,7 +1,7 @@
-# Magnetar Orpheus Note Builder Extreme UI
+# Blazares Orpheus Note Builder Extreme UI
 
 ## Purpose
-This document defines the secondary **Note Builder** feature for Magnetar Orpheus. It extends the same product family as the tuner and must preserve the same premium dark graphite visual language, restrained neon active states, and musician-tool tone.
+This document defines the secondary **Note Builder** feature for Blazares Orpheus. It extends the same product family as the tuner and must preserve the same premium dark graphite visual language, restrained neon active states, and musician-tool tone.
 
 This feature does **not** replace the existing tuner screens. It adds a separate workspace for selecting, auditioning, and inspecting notes, intervals, and chords.
 

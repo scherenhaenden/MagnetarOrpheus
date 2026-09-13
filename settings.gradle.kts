@@ -22,6 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "MagnetarOrpheus"
+rootProject.name = "BlazaresOrpheus"
 include(":app")
  

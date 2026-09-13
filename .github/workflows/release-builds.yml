@@ -35,8 +35,8 @@ jobs:
             exit 1
           fi
           TAG_NAME="build-v${VERSION_NAME}-${GITHUB_RUN_NUMBER}"
-          RELEASE_NAME="MagnetarOrpheus ${VERSION_NAME} (builds)"
-          PACKAGE_BASENAME="MagnetarOrpheus-${VERSION_NAME}"
+          RELEASE_NAME="BlazaresOrpheus ${VERSION_NAME} (builds)"
+          PACKAGE_BASENAME="BlazaresOrpheus-${VERSION_NAME}"
           echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
           echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
           echo "release_name=$RELEASE_NAME" >> "$GITHUB_OUTPUT"
@@ -69,7 +69,7 @@ jobs:
           generate_release_notes: true
           prerelease: true
           body: |
-            Automated MagnetarOrpheus build publication.
+            Automated BlazaresOrpheus build publication.
 
             - Version: `${{ steps.metadata.outputs.version_name }}`
             - Channel: `builds`

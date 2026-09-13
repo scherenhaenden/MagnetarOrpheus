@@ -1,4 +1,4 @@
-# Requirements for MagnetarOrpheus
+# Requirements for BlazaresOrpheus
 
 ## Functional Requirements
 *   **Capture Audio (Must-Have):** Capture real-time microphone input using `AudioRecord` API.

@@ -1,12 +1,12 @@
-# Canonical Plan of MagnetarOrpheus
+# Canonical Plan of BlazaresOrpheus
 
 ## Introduction
-This plan captures the milestones, tasks, and progress for the MagnetarOrpheus Android application.
+This plan captures the milestones, tasks, and progress for the BlazaresOrpheus Android application.
 
 ## Milestones Overview Table
 | Milestone ID | Name | Target Date | Description | Completion Criteria |
 | :--- | :--- | :--- | :--- | :--- |
-| `ms-01` | Project Setup & Canon | 2026-05-12 | Establish the Magnetar Canonical Model and project structure. | `done` |
+| `ms-01` | Project Setup & Canon | 2026-05-12 | Establish the Blazares Canonical Model and project structure. | `done` |
 | `ms-02` | Audio Foundation | 2026-05-20 | Implement low-level audio capture and basic DSP pipeline. | `done` |
 | `ms-03` | Core Tuner UI | 2026-05-30 | Build the Jetpack Compose interface for visual feedback. | `done` |
 | `ms-04` | MVP Release | 2026-06-15 | Stable chromatic guitar tuner with calibration settings. | `done` |

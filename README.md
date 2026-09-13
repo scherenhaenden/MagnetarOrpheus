@@ -1,21 +1,21 @@
-# Canonical Project Model of MagnetarOrpheus
+# Canonical Project Model of BlazaresOrpheus
 
 ## Purpose
-MagnetarOrpheus is a professionally engineered native Android application focused on real-time musician tooling. It currently contains two distinct feature surfaces inside the same product:
+BlazaresOrpheus is a professionally engineered native Android application focused on real-time musician tooling. It currently contains two distinct feature surfaces inside the same product:
 
 1.  A **chromatic tuner** for live pitch detection, calibration, and tuning feedback.
 2.  A **Note Builder workspace** for selecting, auditioning, and inspecting notes, intervals, and chords.
 
-The tuner remains the primary real-time analysis surface. The Note Builder is a secondary workspace that shares the same Magnetar design language but does not replace the tuner.
+The tuner remains the primary real-time analysis surface. The Note Builder is a secondary workspace that shares the same Blazares design language but does not replace the tuner.
 
-This project strictly follows the **Magnetar Canonical Project Model** for documentation, planning, and governance to ensure high maintainability, architectural integrity, and professional engineering standards.
+This project strictly follows the **Blazares Canonical Project Model** for documentation, planning, and governance to ensure high maintainability, architectural integrity, and professional engineering standards.
 
 ## How to Use This Repository
-1.  **Understand the Standard:** This repository follows the Magnetar standard for project management.
+1.  **Understand the Standard:** This repository follows the Blazares standard for project management.
 2.  **Consult the Documentation:** All project decisions, tasks, and status are tracked in the root markdown files.
 3.  **Follow the Rules:** Replicate the required documentation set for any major sub-modules.
 4.  **Governance:** Follow the WIP (Work-In-Progress), branching (using `master` as default), and blocker escalation rules.
-5.  **AI Collaboration:** If you are an AI collaborator, parse the `projects/magnetar_orpheus.project.yml` file first.
+5.  **AI Collaboration:** If you are an AI collaborator, parse the `projects/blazares_orpheus.project.yml` file first.
 
 ## Project Contents
 | File | Purpose |
@@ -47,17 +47,17 @@ The current branch state extends the original tuner MVP in several ways:
 *   A standalone GitHub Actions workflow now exists for manually publishing downloadable APK builds to GitHub Releases.
 
 ## YAML Project Schema
-The source of truth for machine-readable project metadata is located at `projects/magnetar_orpheus.project.yml`. It contains stakeholders, milestones, and the task registry.
+The source of truth for machine-readable project metadata is located at `projects/blazares_orpheus.project.yml`. It contains stakeholders, milestones, and the task registry.
 
 ## Guidance for AI Collaborators
 AI agents MUST:
-*   Parse `projects/magnetar_orpheus.project.yml` before taking action.
+*   Parse `projects/blazares_orpheus.project.yml` before taking action.
 *   Use `PLAN.md` and `STATUS.md` to determine the current focus.
 *   Strictly respect `RULES.md` and `WIP_GUIDELINES.md`.
 *   Update `BITACORA.md` immediately after completing any work or changing a task state.
 
 ## Applying This Template
-This project is already instantiated following the Magnetar canon. To extend it:
+This project is already instantiated following the Blazares canon. To extend it:
 1.  Update the project YAML for new milestones.
 2.  Reflect changes in `PLAN.md`.
 3.  Log the initialization in `BITACORA.md`.
