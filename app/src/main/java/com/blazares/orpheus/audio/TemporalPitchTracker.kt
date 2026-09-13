@@ -20,8 +20,8 @@ class TemporalPitchTracker(
     private val octaveJumpCents: Double = 900.0,
     private val octaveSwitchConfirmationFrames: Int = 3
 ) {
-    private val stableWindow = ArrayDeque<Double>()
-    private val pendingSwitch = ArrayDeque<Double>()
+    private val stableWindow = mutableListOf<Double>()
+    private val pendingSwitch = mutableListOf<Double>()
     private var lockedFrequencyHz: Double? = null
 
     init {
@@ -41,7 +41,7 @@ class TemporalPitchTracker(
 
         val locked = lockedFrequencyHz
         if (locked == null) {
-            stableWindow.addLast(candidateFrequencyHz)
+            stableWindow.add(candidateFrequencyHz)
             lockedFrequencyHz = candidateFrequencyHz
             return candidateFrequencyHz
         }
@@ -55,10 +55,10 @@ class TemporalPitchTracker(
 
         val pendingCenter = pendingSwitch.takeIf { it.isNotEmpty() }?.let(::median)
         if (pendingCenter == null || centsDistance(candidateFrequencyHz, pendingCenter) <= switchClusterCents) {
-            pendingSwitch.addLast(candidateFrequencyHz)
+            pendingSwitch.add(candidateFrequencyHz)
         } else {
             pendingSwitch.clear()
-            pendingSwitch.addLast(candidateFrequencyHz)
+            pendingSwitch.add(candidateFrequencyHz)
         }
 
         val requiredFrames = if (distanceFromLock >= octaveJumpCents) {
@@ -70,7 +70,7 @@ class TemporalPitchTracker(
         if (pendingSwitch.size >= requiredFrames) {
             val newLock = median(pendingSwitch)
             stableWindow.clear()
-            pendingSwitch.takeLast(medianWindowSize).forEach(stableWindow::addLast)
+            stableWindow.addAll(pendingSwitch.takeLast(medianWindowSize))
             pendingSwitch.clear()
             lockedFrequencyHz = newLock
             return newLock
@@ -88,10 +88,10 @@ class TemporalPitchTracker(
     private fun centsDistance(a: Double, b: Double): Double =
         abs(1200.0 * log2(a / b))
 
-    private fun addBounded(window: ArrayDeque<Double>, value: Double, limit: Int) {
-        window.addLast(value)
+    private fun addBounded(window: MutableList<Double>, value: Double, limit: Int) {
+        window.add(value)
         while (window.size > limit) {
-            window.removeFirst()
+            window.removeAt(0)
         }
     }
 
