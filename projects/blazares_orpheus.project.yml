@@ -75,13 +75,13 @@ tasks:
   task-007:
     milestone: ms-05
     title: Instrument Data Layer
-    owner: TBD
-    state: planned
+    owner: ChatGPT
+    state: in_review
   task-008:
     milestone: ms-05
     title: Profile Selection UI
-    owner: TBD
-    state: planned
+    owner: ChatGPT
+    state: in_progress
   task-009:
     milestone: ms-06
     title: Waveform Canvas
