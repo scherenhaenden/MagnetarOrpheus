@@ -36,6 +36,10 @@ milestones:
     name: Visual Analysis
     target_date: "2026-07-15"
     state: planned
+  ms-07:
+    name: Production Hardening
+    target_date: "2026-09-13"
+    state: in_progress
 
 tasks:
   task-001:
@@ -123,6 +127,11 @@ tasks:
     title: PR 32 Splash and Package Migration Remediation
     owner: Codex
     state: done
+  task-018:
+    milestone: ms-07
+    title: Production Hardening and Release Readiness
+    owner: ChatGPT
+    state: in_progress
 
 risks:
   - id: R1
@@ -131,3 +140,9 @@ risks:
   - id: R2
     description: Pitch instability in noisy environments.
     mitigation: Implement DSP filters and noise gates.
+  - id: R3
+    description: Tuner capture can remain active when the app leaves the foreground.
+    mitigation: Stop tuning from lifecycle callbacks and cover the transition with instrumentation tests.
+  - id: R4
+    description: Distribution pipeline does not yet prove a signed, minified production artifact.
+    mitigation: Build release AAB/APK artifacts, enable R8, and support CI signing through repository secrets.
