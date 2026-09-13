@@ -4,6 +4,17 @@ plugins {
     jacoco
 }
 
+val releaseKeystorePath = System.getenv("ORPHEUS_RELEASE_KEYSTORE_PATH")
+val releaseKeystorePassword = System.getenv("ORPHEUS_RELEASE_KEYSTORE_PASSWORD")
+val releaseKeyAlias = System.getenv("ORPHEUS_RELEASE_KEY_ALIAS")
+val releaseKeyPassword = System.getenv("ORPHEUS_RELEASE_KEY_PASSWORD")
+val releaseSigningConfigured = listOf(
+    releaseKeystorePath,
+    releaseKeystorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword
+).all { !it.isNullOrBlank() }
+
 android {
     namespace = "com.blazares.orpheus"
     compileSdk = 37
@@ -18,17 +29,32 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            if (releaseSigningConfigured) {
+                storeFile = file(requireNotNull(releaseKeystorePath))
+                storePassword = requireNotNull(releaseKeystorePassword)
+                keyAlias = requireNotNull(releaseKeyAlias)
+                keyPassword = requireNotNull(releaseKeyPassword)
+            }
+        }
+    }
+
     buildTypes {
         debug {
             enableUnitTestCoverage = true
             enableAndroidTestCoverage = true
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            if (releaseSigningConfigured) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
     compileOptions {
@@ -52,7 +78,7 @@ tasks.withType<Test> {
     }
 }
 
-val jacocoTestReport by tasks.registering(JacocoReport::class) {
+val jacocoTestReport = tasks.register<JacocoReport>("jacocoTestReport") {
     dependsOn(tasks.named("testDebugUnitTest"))
     reports {
         xml.required.set(true)
@@ -81,11 +107,11 @@ val jacocoTestReport by tasks.registering(JacocoReport::class) {
     })
 }
 
-val jacocoTestCoverageVerification by tasks.registering(JacocoCoverageVerification::class) {
+val jacocoTestCoverageVerification = tasks.register<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
     dependsOn(jacocoTestReport)
-    sourceDirectories.setFrom(jacocoTestReport.get().sourceDirectories)
-    classDirectories.setFrom(jacocoTestReport.get().classDirectories)
-    executionData.setFrom(jacocoTestReport.get().executionData)
+    sourceDirectories.setFrom(jacocoTestReport.map { it.sourceDirectories })
+    classDirectories.setFrom(jacocoTestReport.map { it.classDirectories })
+    executionData.setFrom(jacocoTestReport.map { it.executionData })
     violationRules {
         rule {
             limit {

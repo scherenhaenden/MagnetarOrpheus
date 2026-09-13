@@ -12,6 +12,7 @@ This plan captures the milestones, tasks, and progress for the BlazaresOrpheus A
 | `ms-04` | MVP Release | 2026-06-15 | Stable chromatic guitar tuner with calibration settings. | `done` |
 | `ms-05` | Instrument Profiles | 2026-06-30 | Preset tunings for Guitar, Bass, and Ukulele. | `in_progress` |
 | `ms-06` | Visual Analysis | 2026-07-15 | Real-time waveform display and pitch history. | `planned` |
+| `ms-07` | Production Hardening | 2026-09-13 | Close lifecycle, release-engineering, security/privacy, and validation gaps before store-quality distribution. | `in_progress` |
 
 ## Task Backlog Table
 | Task ID | Milestone | Title | Owner | Effort (pts) | State | Notes |
@@ -22,8 +23,8 @@ This plan captures the milestones, tasks, and progress for the BlazaresOrpheus A
 | `task-004` | `ms-02` | Pitch Detection Algorithm | Gemini | 8 | `done` | Implementation of YIN or Autocorrelation. |
 | `task-005` | `ms-03` | Compose Tuner UI | Gemini | 5 | `done` | Visual indicator and note display. |
 | `task-006` | `ms-04` | Calibration & Stability | Gemini | 3 | `done` | A4 reference and temporal filtering. |
-| `task-007` | `ms-05` | Instrument Data Layer | TBD | 3 | `planned` | Define tuning frequencies for profiles. |
-| `task-008` | `ms-05` | Profile Selection UI | TBD | 4 | `planned` | Dropdown/Menu for switching instruments. |
+| `task-007` | `ms-05` | Instrument Data Layer | ChatGPT | 3 | `in_review` | Guitar, Bass, and Ukulele profiles already exist in the codebase; canonical state reconciled pending branch verification. |
+| `task-008` | `ms-05` | Profile Selection UI | ChatGPT | 4 | `in_progress` | Wire the existing instrument profiles into real tuner selection instead of the current hard-coded Guitar profile. |
 | `task-009` | `ms-06` | Waveform Canvas | TBD | 6 | `planned` | Real-time PCM data visualization. |
 | `task-010` | `ms-04` | PR 11 Review Remediation | Codex | 2 | `done` | Align Java baseline, close pending review threads, and validate stale comments. |
 | `task-011` | `ms-04` | Version Visibility and UI i18n Cleanup | Codex | 2 | `done` | Surface build version in-app and move validation messaging to resources. |
@@ -31,13 +32,15 @@ This plan captures the milestones, tasks, and progress for the BlazaresOrpheus A
 | `task-013` | `ms-04` | GitHub Release Build Pipeline | Codex | 2 | `in_review` | Add a standalone workflow that builds on merges to `builds`, packages the APK into a versioned zip, and publishes it to GitHub Releases for later download. |
 | `task-014` | `ms-05` | App and Note Language Settings | Codex | 5 | `in_progress` | Add a settings surface for app language and note language, extend second-feature note naming beyond English defaults, and keep the rest of the app stable. |
 | `task-017` | `ms-04` | PR 32 Splash and Package Migration Remediation | Codex | 2 | `done` | Use the Android 12 platform splash without a duplicate Compose frame, make the illustration responsive, and document the new package identity migration strategy. |
+| `task-018` | `ms-07` | Production Hardening and Release Readiness | ChatGPT | 13 | `in_progress` | Stop tuner capture on background, improve permission UX, enable R8, produce release AAB/APK with optional CI signing, replace security template, document privacy/data-safety posture, and add regression coverage where feasible. |
+| `task-019` | `ms-07` | Replace Mock-Based Tests with Real and Manual Test Seams | ChatGPT | 5 | `planned` | Migrate legacy MockK tests incrementally; prefer real implementations, deterministic signals, hand-written seams only at unavoidable Android/device boundaries, and instrumentation for hardware behavior. |
 
 ## Effort Summary
-*   **Total effort:** 54 pts
+*   **Total effort:** 72 pts
 *   **Completed:** 29 pts
-*   **In progress:** 5 pts
-*   **In review:** 7 pts
-*   **Remaining:** 13 pts
+*   **In progress:** 22 pts
+*   **In review:** 10 pts
+*   **Remaining:** 11 pts
 
 ## State Definitions
 *   `planned`: Identified for future work.

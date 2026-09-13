@@ -8,6 +8,7 @@ import com.blazares.orpheus.BuildConfig
 import com.blazares.orpheus.audio.AudioCaptureException
 import com.blazares.orpheus.audio.AudioCaptureProvider
 import com.blazares.orpheus.audio.PitchDetector
+import com.blazares.orpheus.audio.TemporalPitchTracker
 import com.blazares.orpheus.models.InstrumentProfiles
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +27,7 @@ import kotlin.math.roundToInt
 class TunerViewModel(
     private val audioCaptureProvider: AudioCaptureProvider = AudioCaptureProvider(),
     private val pitchDetector: PitchDetector = PitchDetector(),
+    private val temporalPitchTracker: TemporalPitchTracker = TemporalPitchTracker(),
     private val clock: java.time.Clock = java.time.Clock.systemDefaultZone()
 ) : ViewModel() {
 
@@ -36,22 +38,14 @@ class TunerViewModel(
     private val syllabicNotes = listOf("Do", "Do#", "Re", "Re#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si")
     private val germanNotes = listOf("C", "Cis", "D", "Dis", "E", "F", "Fis", "G", "Gis", "A", "Ais", "H")
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
-    private val selectedProfile = InstrumentProfiles.GuitarStandard
+    private var selectedProfile = InstrumentProfiles.GuitarStandard
     private val selectedInstrument: String
-        get() = selectedProfile.name.substringBefore(" (")
+        get() = selectedProfile.instrumentName
     private val selectedTuning: String
-        get() {
-            val tuningName = selectedProfile.name.substringAfter(" (").removeSuffix(")")
-            val tuningNotes = selectedProfile.notes.joinToString("") { note ->
-                note.name.takeWhile { character -> character.isLetter() }
-            }
-            return "$tuningName ($tuningNotes)"
-        }
-    private var lastFrequencies = mutableListOf<Double>()
+        get() = selectedProfile.tuningDisplayName
     private var lastProcessedFrequency: Double? = null
     private var tuningJob: Job? = null
 
-    private val windowSize = 3
     private val waveformSampleCount = 48
     private val historyLimit = 5
     private val stabilityLimit = 24
@@ -60,8 +54,10 @@ class TunerViewModel(
         if (_uiState.value.isActive) return
 
         pitchDetector.reset()
+        temporalPitchTracker.reset()
         _uiState.value = _uiState.value.copy(
             isActive = true,
+            selectedProfileId = selectedProfile.id,
             selectedInstrument = selectedInstrument,
             selectedTuning = selectedTuning,
             calibrationErrorResId = null,
@@ -88,8 +84,9 @@ class TunerViewModel(
                     )
 
                     if (result.isPitchValid && result.candidateFrequencyHz != null) {
-                        val stableFreq = updateStabilityFilter(result.candidateFrequencyHz)
-                        processFrequency(stableFreq, inputLevel, waveformSamples)
+                        temporalPitchTracker.update(result.candidateFrequencyHz)?.let { stableFrequency ->
+                            processFrequency(stableFrequency, inputLevel, waveformSamples)
+                        }
                     }
                 }
             } catch (exception: CancellationException) {
@@ -105,7 +102,7 @@ class TunerViewModel(
     }
 
     private fun markCaptureFailed() {
-        lastFrequencies.clear()
+        temporalPitchTracker.reset()
         _uiState.value = _uiState.value.copy(
             isActive = false,
             inputLevel = 0f,
@@ -117,7 +114,7 @@ class TunerViewModel(
     fun stopTuning() {
         tuningJob?.cancel()
         tuningJob = null
-        lastFrequencies.clear()
+        temporalPitchTracker.reset()
         _uiState.value = _uiState.value.copy(
             isActive = false,
             inputLevel = 0f,
@@ -138,7 +135,7 @@ class TunerViewModel(
             referenceA4 = ref,
             calibrationErrorResId = null
         )
-        // Re-label the current note without adding stale audio to history or stability data.
+        // Re-label both the chromatic note and the nearest profile target for the new calibration.
         lastProcessedFrequency?.let {
             processFrequency(it, recordHistory = false, recordStability = false)
         }
@@ -148,17 +145,26 @@ class TunerViewModel(
         updateCalibration(referenceHz.toDouble())
     }
 
+    fun selectInstrumentProfile(profileId: String): Boolean {
+        val profile = InstrumentProfiles.All.firstOrNull { it.id == profileId } ?: return false
+        if (profile == selectedProfile) return true
+
+        selectedProfile = profile
+        temporalPitchTracker.reset()
+        _uiState.value = _uiState.value.copy(
+            selectedProfileId = selectedProfile.id,
+            selectedInstrument = selectedInstrument,
+            selectedTuning = selectedTuning
+        )
+        lastProcessedFrequency?.let {
+            processFrequency(it, recordHistory = false, recordStability = false)
+        }
+        return true
+    }
+
     fun updateNamingSystem(system: NoteNamingSystem) {
         _uiState.value = _uiState.value.copy(namingSystem = system)
         lastProcessedFrequency?.let { processFrequency(it, recordHistory = false, recordStability = false) }
-    }
-
-    private fun updateStabilityFilter(freq: Double): Double {
-        lastFrequencies.add(freq)
-        if (lastFrequencies.size > windowSize) {
-            lastFrequencies.removeAt(0)
-        }
-        return lastFrequencies.average()
     }
 
     private fun processFrequency(
@@ -189,6 +195,7 @@ class TunerViewModel(
         val octave = (noteIndex / 12) - 1
         val cents = ((n - noteIndex) * 100).toInt()
         val scientificNoteName = "${scientificNotes[normalizedIndex]}$octave"
+        val profileTarget = selectedProfile.nearestTarget(frequency, refA4)
 
         _uiState.value = _uiState.value.copy(
             frequency = frequency,
@@ -202,11 +209,17 @@ class TunerViewModel(
             waveformSamples = waveformSamples,
             noteHistory = if (recordHistory) updateNoteHistory(scientificNoteName, frequency, cents) else _uiState.value.noteHistory,
             pitchStabilityPoints = if (recordStability) updatePitchStability(cents) else _uiState.value.pitchStabilityPoints,
+            selectedProfileId = selectedProfile.id,
             selectedInstrument = selectedInstrument,
             selectedTuning = selectedTuning,
+            profileTargetNote = profileTarget?.note?.name,
+            profileTargetStringNumber = profileTarget?.note?.stringNumber,
+            profileTargetFrequencyHz = profileTarget?.calibratedFrequencyHz,
+            profileTargetCents = profileTarget?.centsFromTarget,
             calibrationErrorResId = null
         )
     }
+
     private fun downSampleWaveform(buffer: FloatArray): List<Float> {
         if (buffer.isEmpty()) return List(waveformSampleCount) { 0f }
 

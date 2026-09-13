@@ -26,7 +26,9 @@ class MainActivityTest {
         Intent(
             InstrumentationRegistry.getInstrumentation().targetContext,
             MainActivity::class.java
-        ).putExtra(MainActivity.EXTRA_SKIP_AUDIO_PERMISSION_REQUEST, true)
+        )
+            .putExtra(MainActivity.EXTRA_SKIP_AUDIO_PERMISSION_REQUEST, true)
+            .putExtra(MainActivity.EXTRA_SKIP_SPLASH, true)
     )
 
     private val composeRule = createEmptyComposeRule()
@@ -49,11 +51,12 @@ class MainActivityTest {
     }
 
     @Test
-    fun launchWithoutAudioPermission_showsPermissionGate() {
+    fun launchWithoutAudioPermission_showsPermissionGateAndExplicitAction() {
         composeRule.onNodeWithText("Microphone access is required").assertIsDisplayed()
         composeRule.onNodeWithText(
-            "Grant RECORD_AUDIO permission to activate the tuner and waveform panels."
+            "Allow microphone access to activate the tuner and waveform panels. Audio is processed locally on this device."
         ).assertIsDisplayed()
+        composeRule.onNodeWithText("Allow microphone access").assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Menu").assertIsDisplayed()
     }
 
@@ -83,6 +86,20 @@ class MainActivityTest {
         composeRule.onNodeWithText("Ajustes").assertIsDisplayed()
         composeRule.onNodeWithText("Idioma de la app").assertIsDisplayed()
         composeRule.onNodeWithText("Cerrar").performClick()
+
+        composeRule.onNodeWithContentDescription("Menu").performClick()
+        composeRule.onNodeWithText("Afinador").assertIsDisplayed()
+        composeRule.onNodeWithText("Constructor de notas").assertIsDisplayed()
+    }
+
+    @Test
+    fun appLanguagePreference_survivesActivityRecreation() {
+        composeRule.onNodeWithContentDescription("Settings").performClick()
+        composeRule.onNodeWithText("Español").performClick()
+        composeRule.onNodeWithText("Cerrar").performClick()
+
+        activityRule.scenario.recreate()
+        composeRule.waitForIdle()
 
         composeRule.onNodeWithContentDescription("Menu").performClick()
         composeRule.onNodeWithText("Afinador").assertIsDisplayed()
