@@ -45,7 +45,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        checkAudioPermission()
+        if (!BuildConfig.DEBUG || !intent.getBooleanExtra(EXTRA_SKIP_AUDIO_PERMISSION_REQUEST, false)) {
+            checkAudioPermission()
+        }
 
         enableEdgeToEdge()
         setContent {
@@ -135,7 +137,13 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private companion object {
+    companion object {
+        /**
+         * Keeps instrumentation tests in the permission-gated UI without starting audio capture.
+         * The normal launch path still requests RECORD_AUDIO as before.
+         */
+        const val EXTRA_SKIP_AUDIO_PERMISSION_REQUEST =
+            "com.blazares.orpheus.extra.SKIP_AUDIO_PERMISSION_REQUEST"
         const val PREFERENCES_NAME = "orpheus_preferences"
         const val APP_LANGUAGE_KEY = "app_language"
         const val NOTE_LANGUAGE_KEY = "note_language"
