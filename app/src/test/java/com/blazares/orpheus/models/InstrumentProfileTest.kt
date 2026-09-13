@@ -1,6 +1,7 @@
 package com.blazares.orpheus.models
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -46,6 +47,51 @@ class InstrumentProfileTest {
         val lowG = InstrumentProfiles.UkuleleLowG
         assertEquals("Low G (GCEA)", lowG.tuningDisplayName)
         assertEquals("G3", lowG.notes.first().name)
+    }
+
+    @Test
+    fun `nearest target identifies the closest profile string`() {
+        val target = requireNotNull(InstrumentProfiles.GuitarDropD.nearestTarget(73.42))
+
+        assertEquals("D2", target.note.name)
+        assertEquals(6, target.note.stringNumber)
+        assertEquals(73.42, target.calibratedFrequencyHz, 0.001)
+        assertEquals(0, target.centsFromTarget)
+    }
+
+    @Test
+    fun `nearest target follows user A4 calibration`() {
+        val calibratedA4 = 442.0
+        val expectedScaledA2 = 110.0 * calibratedA4 / 440.0
+        val target = requireNotNull(
+            InstrumentProfiles.GuitarStandard.nearestTarget(
+                frequencyHz = expectedScaledA2,
+                referenceA4Hz = calibratedA4
+            )
+        )
+
+        assertEquals("A2", target.note.name)
+        assertEquals(expectedScaledA2, target.calibratedFrequencyHz, 0.0001)
+        assertEquals(0, target.centsFromTarget)
+    }
+
+    @Test
+    fun `nearest target reports signed cents from selected string`() {
+        val target = requireNotNull(InstrumentProfiles.GuitarStandard.nearestTarget(110.64))
+
+        assertEquals("A2", target.note.name)
+        assertTrue(target.centsFromTarget > 0)
+        assertTrue(target.centsFromTarget in 9..11)
+    }
+
+    @Test
+    fun `nearest target rejects invalid input and empty profiles`() {
+        val empty = InstrumentProfile("empty", "Empty (None)", emptyList())
+
+        assertNull(InstrumentProfiles.GuitarStandard.nearestTarget(0.0))
+        assertNull(InstrumentProfiles.GuitarStandard.nearestTarget(Double.NaN))
+        assertNull(InstrumentProfiles.GuitarStandard.nearestTarget(110.0, 0.0))
+        assertNull(empty.nearestTarget(440.0))
     }
 
     @Test
