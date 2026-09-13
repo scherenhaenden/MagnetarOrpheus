@@ -1,4 +1,4 @@
-name: Unit Tests & Coverage
+name: Tests & Release Verification
 
 on:
   push:
@@ -7,11 +7,11 @@ on:
     branches: [ master, tests ]
 
 jobs:
-  test:
+  unit-and-release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: set up JDK 21
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
@@ -21,5 +21,30 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Run Tests and Check Coverage
+      - name: Run unit tests and check coverage
         run: ./gradlew :app:jacocoTestCoverageVerification
+
+      - name: Verify minified release APK and AAB builds
+        run: ./gradlew :app:assembleRelease :app:bundleRelease
+
+  instrumentation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run Android instrumentation tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          disable-animations: true
+          script: ./gradlew connectedDebugAndroidTest
