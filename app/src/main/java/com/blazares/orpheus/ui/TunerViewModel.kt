@@ -135,7 +135,7 @@ class TunerViewModel(
             referenceA4 = ref,
             calibrationErrorResId = null
         )
-        // Re-label the current note without adding stale audio to history or stability data.
+        // Re-label both the chromatic note and the nearest profile target for the new calibration.
         lastProcessedFrequency?.let {
             processFrequency(it, recordHistory = false, recordStability = false)
         }
@@ -156,6 +156,9 @@ class TunerViewModel(
             selectedInstrument = selectedInstrument,
             selectedTuning = selectedTuning
         )
+        lastProcessedFrequency?.let {
+            processFrequency(it, recordHistory = false, recordStability = false)
+        }
         return true
     }
 
@@ -192,6 +195,7 @@ class TunerViewModel(
         val octave = (noteIndex / 12) - 1
         val cents = ((n - noteIndex) * 100).toInt()
         val scientificNoteName = "${scientificNotes[normalizedIndex]}$octave"
+        val profileTarget = selectedProfile.nearestTarget(frequency, refA4)
 
         _uiState.value = _uiState.value.copy(
             frequency = frequency,
@@ -208,6 +212,10 @@ class TunerViewModel(
             selectedProfileId = selectedProfile.id,
             selectedInstrument = selectedInstrument,
             selectedTuning = selectedTuning,
+            profileTargetNote = profileTarget?.note?.name,
+            profileTargetStringNumber = profileTarget?.note?.stringNumber,
+            profileTargetFrequencyHz = profileTarget?.calibratedFrequencyHz,
+            profileTargetCents = profileTarget?.centsFromTarget,
             calibrationErrorResId = null
         )
     }
