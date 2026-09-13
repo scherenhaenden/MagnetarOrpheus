@@ -29,6 +29,10 @@ jobs:
 
   instrumentation:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        api-level: [26, 35]
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 21
@@ -41,10 +45,10 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Run Android instrumentation tests
+      - name: Run Android instrumentation tests on API ${{ matrix.api-level }}
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 35
+          api-level: ${{ matrix.api-level }}
           arch: x86_64
           disable-animations: true
           script: ./gradlew connectedDebugAndroidTest
