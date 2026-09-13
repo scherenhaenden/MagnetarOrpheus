@@ -89,4 +89,18 @@ class MainActivityTest {
         composeRule.onNodeWithText("Afinador").assertIsDisplayed()
         composeRule.onNodeWithText("Constructor de notas").assertIsDisplayed()
     }
+
+    @Test
+    fun appLanguagePreference_survivesActivityRecreation() {
+        composeRule.onNodeWithContentDescription("Settings").performClick()
+        composeRule.onNodeWithText("Español").performClick()
+        composeRule.onNodeWithText("Cerrar").performClick()
+
+        activityRule.scenario.recreate()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithContentDescription("Menu").performClick()
+        composeRule.onNodeWithText("Afinador").assertIsDisplayed()
+        composeRule.onNodeWithText("Constructor de notas").assertIsDisplayed()
+    }
 }
