@@ -40,6 +40,7 @@ data class TunerUiState(
     val waveformSamples: List<Float> = List(48) { 0f },
     val noteHistory: List<NoteHistoryItem> = emptyList(),
     val pitchStabilityPoints: List<Float> = emptyList(),
+    val selectedProfileId: String = "guitar_std",
     val selectedInstrument: String = "Guitar",
     val selectedTuning: String = "Standard (EADGBE)",
     val quickPresets: List<QuickPreset> = defaultQuickPresets()
