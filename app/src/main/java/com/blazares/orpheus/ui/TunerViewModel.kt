@@ -38,7 +38,7 @@ class TunerViewModel(
     private val syllabicNotes = listOf("Do", "Do#", "Re", "Re#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si")
     private val germanNotes = listOf("C", "Cis", "D", "Dis", "E", "F", "Fis", "G", "Gis", "A", "Ais", "H")
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
-    private val selectedProfile = InstrumentProfiles.GuitarStandard
+    private var selectedProfile = InstrumentProfiles.GuitarStandard
     private val selectedInstrument: String
         get() = selectedProfile.name.substringBefore(" (")
     private val selectedTuning: String
@@ -148,6 +148,19 @@ class TunerViewModel(
 
     fun applyPreset(referenceHz: Int) {
         updateCalibration(referenceHz.toDouble())
+    }
+
+    fun selectInstrumentProfile(profileId: String): Boolean {
+        val profile = InstrumentProfiles.All.firstOrNull { it.id == profileId } ?: return false
+        if (profile == selectedProfile) return true
+
+        selectedProfile = profile
+        temporalPitchTracker.reset()
+        _uiState.value = _uiState.value.copy(
+            selectedInstrument = selectedInstrument,
+            selectedTuning = selectedTuning
+        )
+        return true
     }
 
     fun updateNamingSystem(system: NoteNamingSystem) {
